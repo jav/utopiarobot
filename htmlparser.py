@@ -3,6 +3,12 @@ import sgmllib
 
 log = logging.getLogger(__name__)
 
+PAGE_NONE=0
+PAGE_LOGIN=1
+PAGE_CHOOSE_WORLD=2
+PAGE_CHOOSE_ACCOUNT=3
+PATE_THRONE=4
+
 class Parser(sgmllib.SGMLParser):
     "A simple parser class."
 
@@ -10,6 +16,8 @@ class Parser(sgmllib.SGMLParser):
     parserState['form_depth'] = 0
 
     login_info = {}
+
+    currentPage = PAGE_NONE
 
     def __init__(self, verbose=0):
         "Initialise an object, passing 'verbose' to the superclass."

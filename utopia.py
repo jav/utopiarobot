@@ -16,11 +16,6 @@ log = logging.getLogger(__name__)
 URL_BASE = "http://utopia-game.com"
 URL_LOGIN = "%s/shared" % URL_BASE
 
-PAGE_LOGIN=1
-PAGE_CHOOSE_WORLD=2
-PAGE_CHOOSE_ACCOUNT=3
-PATE_THRONE=4
-
 class uplayer(object):
 
     password = ""
