@@ -59,7 +59,7 @@ class uplayer(object):
 #                log.debug("%d: %s" % (index, cookie))
 #        self.cj.save(self.cookie_file)
 
-        myparser = htmlparser.UtopiaParser()
+        myparser = htmlparser.LoginParser()
         myparser.parse(result)
         assert( myparser.last_page == "PAGE_INIT")
 
@@ -98,7 +98,7 @@ class uplayer(object):
         result = res.read()
 
         #pick server
-        myparser = htmlparser.UtopiaParser()
+        myparser = htmlparser.LobbyParser()
         myparser.parse(result)
         assert( myparser.last_page == "PAGE_LOBBY")
 
