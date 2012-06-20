@@ -112,6 +112,20 @@ class uplayer(object):
 
         log.debug(result)
 
+        myparser = htmlparser.ProvSelectParser()
+        myparser.parse(result)
+        assert( myparser.last_page == "PAGE_PROV")
+
+        prov_fields = myparser.get_choose_province_fields()
+        URL_TAKE_PROV_CHOICE = "%s%s" % (URL_BASE, prov_fields['chooser_link'])
+        data = None
+        log.debug("accessing %s POST:%s" % (URL_TAKE_PROV_CHOICE, data) )
+        req = urllib2.Request(URL_TAKE_PROV_CHOICE, data, headers)
+        res = urllib2.urlopen(req)
+        result = res.read()
+
+        log.debug(result)
+
 
 if __name__ == "__main__":
 
