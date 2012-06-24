@@ -38,7 +38,7 @@ class uplayer(object):
     def cache_page(self, page, res):
         if self.page_cache:
             fh = open(self.page_cache + "/"+ str(zlib.crc32(page)) + ".html", 'w+')
-            fh.write(res.read())
+            fh.write(res)
             fh.close()
 
     def do_login(self):
@@ -62,6 +62,7 @@ class uplayer(object):
         myparser = htmlparser.LoginParser()
         myparser.parse(result)
         assert( myparser.last_page == "PAGE_INIT")
+        self.cache_page("PAGE_INIT", result)
 
         login_fields = myparser.get_login_fields()
 
@@ -101,6 +102,7 @@ class uplayer(object):
         myparser = htmlparser.LobbyParser()
         myparser.parse(result)
         assert( myparser.last_page == "PAGE_LOBBY")
+        self.cache_page("PAGE_LOBBY", result)
 
         lobby_fields = myparser.get_lobby_fields()
         URL_TAKE_WORLD_CHOICE = "%s%s" % (URL_BASE, lobby_fields['chooser_link'])
@@ -115,6 +117,7 @@ class uplayer(object):
         myparser = htmlparser.ProvSelectParser()
         myparser.parse(result)
         assert( myparser.last_page == "PAGE_PROV")
+        self.cache_page("PAGE_PROV", result)
 
         prov_fields = myparser.get_choose_province_fields()
         URL_TAKE_PROV_CHOICE = "%s%s" % (URL_BASE, prov_fields['chooser_link'])
@@ -126,6 +129,7 @@ class uplayer(object):
 
         log.debug(result)
 
+        self.cache_page("PAGE_THRONE", result)
 
 if __name__ == "__main__":
 
