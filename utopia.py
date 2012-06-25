@@ -26,6 +26,7 @@ class uplayer(object):
     cookie_file = "cookie_file.txt"
     cj = False
     page_cache = False
+    headers = { 'User-Agent' : self.user_agent }
 
     def __init__(self):
         self.cj = cookielib.LWPCookieJar()
@@ -41,17 +42,20 @@ class uplayer(object):
             fh.write(res)
             fh.close()
 
+    def _goto_throne(self):
+        pass
+
     def do_login(self):
         log.debug("do_login")
-        headers = { 'User-Agent' : self.user_agent }
+
 
         # TODO: Before we proceed, lets try the throne-page and see if we can use our cookies
         #       to login or if we have to jump through all the hoops or not.
-
+        
         values= {}
         data = urllib.urlencode(values)
         log.debug("Loading page: %s" % URL_LOGIN)
-        req = urllib2.Request(URL_LOGIN, data, headers)
+        req = urllib2.Request(URL_LOGIN, data, self.headers)
         res = urllib2.urlopen(req)
         result = res.read()
         log.debug("Downloaded %d bytes" % len(result))
@@ -98,7 +102,7 @@ class uplayer(object):
 
         URL_TAKE_LOGIN = "%s%s" % (URL_BASE, login_fields['form']['action'])
         log.debug("accessing %s POST:%s" % (URL_TAKE_LOGIN, data) )
-        req = urllib2.Request(URL_TAKE_LOGIN, data, headers)
+        req = urllib2.Request(URL_TAKE_LOGIN, data, self.headers)
         res = urllib2.urlopen(req)
         result = res.read()
 
@@ -112,7 +116,7 @@ class uplayer(object):
         URL_TAKE_WORLD_CHOICE = "%s%s" % (URL_BASE, lobby_fields['chooser_link'])
         data = None
         log.debug("accessing %s POST:%s" % (URL_TAKE_WORLD_CHOICE, data) )
-        req = urllib2.Request(URL_TAKE_WORLD_CHOICE, data, headers)
+        req = urllib2.Request(URL_TAKE_WORLD_CHOICE, data, self.headers)
         res = urllib2.urlopen(req)
         result = res.read()
 
@@ -127,7 +131,7 @@ class uplayer(object):
         URL_TAKE_PROV_CHOICE = "%s%s" % (URL_BASE, prov_fields['chooser_link'])
         data = None
         log.debug("accessing %s POST:%s" % (URL_TAKE_PROV_CHOICE, data) )
-        req = urllib2.Request(URL_TAKE_PROV_CHOICE, data, headers)
+        req = urllib2.Request(URL_TAKE_PROV_CHOICE, data, self.headers)
         res = urllib2.urlopen(req)
         result = res.read()
 
