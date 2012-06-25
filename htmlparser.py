@@ -17,12 +17,13 @@ log = logging.getLogger(__name__)
 
 class UtopiaParser(sgmllib.SGMLParser, object):
     parser_state = {}
+    tick_ongoing = False
 
     def __init__(self, verbose=0):
         "Initialise an object, passing 'verbose' to the superclass."
         sgmllib.SGMLParser.__init__(self, verbose)
         self.hyperlinks = []
-        self.last_page="PAGE_NONE"
+        self.current_page="PAGE_NONE"
 
     def start_head(self, attributes):
         self.parser_state['head'] = True
@@ -36,14 +37,32 @@ class UtopiaParser(sgmllib.SGMLParser, object):
     def end_title(self):
         self.parser_state['title'] = False
 
+    def start_h2(self, attributes):
+        """TODO: Allow nesting, (which should be broken anyway) """
+        self.parser_state['h2'] = True
+
+    def end_h2(self):
+        self.parser_state['h2'] = False
+
     def handle_data(self, data):
         if 'head' in self.parser_state and self.parser_state['head']:
             if 'title' in self.parser_state and self.parser_state['title']:
                 self.title = data
-                log.debug("parsing page (title): %s"%self.title)
+                log.debug("(%s) : parsing page (title): %s"% (__name__, self.title))
 
                 if( "Home" in self.title ):
                     self.current_page = "PAGE_INIT"
+                if( "Lobby" in self.title ):
+                    self.current_page="PAGE_LOBBY"
+                if( "Age" in self.title ):
+                    self.current_page="PAGE_PROV"
+                if( "Throne Page" in self.title ):
+                    self.current_page="PAGE_THRONE"
+
+        if 'h2' in self.parser_state and self.parser_state['h2']:
+            if 'The game is currently ticking. Please wait a few moments' in  data:
+                self.tick_ongoing = True
+
 
 
 class LoginParser(UtopiaParser):
@@ -54,8 +73,7 @@ class LoginParser(UtopiaParser):
         self.parser_state['login_form'] = ""
 
     def parse(self, s):
-        "Parse the given string 's'."
-        log.debug("parse()")
+        log.debug("%s : parse() - parser_state: %s" % (__name__, self.parser_state))
         self.feed(s)
         self.close()
 
@@ -96,59 +114,32 @@ class LoginParser(UtopiaParser):
 
     def handle_data(self, data):
         super(LoginParser, self).handle_data(data)
-        # if "FORM" == self.parser_state['login_form']:
-        #     if self.current_input is not None:
-        #         self.current_input['value'] = data
-        #         log.debug("%s: value: %s" % (self.current_input['name']  , self.current_input['value']   ))
 
     def get_login_info(self):
         log.debug("get_login_info() - fields: %s" % self.login_info)
         return self.login_info
 
 class LobbyParser(UtopiaParser):
-    parser_state = {}
-    parser_state['form_depth'] = 0
-
-    login_info = {}
-
     def __init__(self, verbose=0):
-        "Initialise an object, passing 'verbose' to the superclass."
-
+        super(LobbyParser, self).__init__(self)
         sgmllib.SGMLParser.__init__(self, verbose)
         self.hyperlinks = []
-        self.last_page="PAGE_NONE"
 
     def parse(self, s):
-        "Parse the given string 's'."
-        log.debug("parse()")
+        log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
         self.feed(s)
         self.close()
 
-    def start_title(self, attributes):
-         log.debug("handle_starttag()")
-         self.parser_state['title'] = True
-
-    def end_title(self):
-        log.debug("handle_endtag()")
-        self.parser_state['title'] = False
-
     def handle_data(self, data):
-        if 'title' in self.parser_state and self.parser_state['title']:
-            self.title = data
-            log.debug("parsing page: %s"%self.title)
-            #if the following breaks, you've used the wrong parser (or the page has changed format)
-            assert("Lobby" in self.title)
-            self.last_page="PAGE_LOBBY"
-
+        super(LobbyParser, self).handle_data(data)
         if 'h2' in self.parser_state and self.parser_state['h2']:
             if 'The game is currently ticking. Please wait a few moments' in  data:
                 self.tick_ongoing = True
 
-        if 'lobby' in self.parser_state and isinstance( self.parser_state['lobby'], dict):
-            if 'a' in self.parser_state['lobby']:
-                if'World of Legends' in data:
-                    self.parser_state['lobby']['chooser_link'] = self.parser_state['lobby']['a']['href']
-                    log.debug("self.parser_state['lobby']['chooser_link'] = %s" % self.parser_state['lobby']['chooser_link'])
+        if 'a' in self.parser_state:
+            if'World of Legends' in data:
+                self.parser_state['chooser_link'] = self.parser_state['a']['href']
+                log.debug("self.parser_state['chooser_link'] = %s" % self.parser_state['chooser_link'])
 
     def start_h2(self, attributes):
          self.parser_state['h2'] = True
@@ -157,37 +148,28 @@ class LobbyParser(UtopiaParser):
         self.parser_state['h2'] = False
 
     def start_a(self, attributes):
-        if "PAGE_LOBBY" == self.last_page:
+        if "PAGE_LOBBY" == self.current_page:
             for (a,b) in attributes:
                 if "href" == a:
-                    if 'lobby' not in self.parser_state or not isinstance(self.parser_state['lobby'], dict):
-                        self.parser_state['lobby'] = {}
-                    self.parser_state['lobby']['a'] = {'href': b}
-                    log.debug("self.parser_state['lobby']['a']['href'] = %s" % self.parser_state['lobby']['a']['href'] )
+                    self.parser_state['a'] = {'href': b}
+                    log.debug("self.parser_state['a']['href'] = %s" % self.parser_state['a']['href'] )
 
     def end_a(self):
         pass
 
     def get_lobby_fields(self):
-        log.debug("get_lobby_fields() - fields: %d" % len( self.parser_state['lobby']))
-        return self.parser_state['lobby']
+        log.debug("get_lobby_fields() - fields: %d" % len( self.parser_state))
+        return self.parser_state
 
 class ProvSelectParser(UtopiaParser):
-    parser_state = {}
-    parser_state['form_depth'] = 0
-
-    login_info = {}
-
     def __init__(self, verbose=0):
-        "Initialise an object, passing 'verbose' to the superclass."
-
+        super(ProvSelectParser, self).__init__()
         sgmllib.SGMLParser.__init__(self, verbose)
         self.hyperlinks = []
         self.last_page="PAGE_NONE"
 
     def parse(self, s):
-        "Parse the given string 's'."
-        log.debug("parse()")
+        log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
         self.feed(s)
         self.close()
 
@@ -200,92 +182,34 @@ class ProvSelectParser(UtopiaParser):
         self.parser_state['title'] = False
 
     def handle_data(self, data):
-        if 'title' in self.parser_state and self.parser_state['title']:
-            self.title = data
-            log.debug("parsing page: %s"%self.title)
-            #if the following breaks, you've used the wrong parser (or the page has changed format)
-            assert("Age" in self.title)
-            self.last_page="PAGE_PROV"
-
-        if 'h2' in self.parser_state and self.parser_state['h2']:
-            if 'The game is currently ticking. Please wait a few moments' in  data:
-                self.tick_ongoing = True
-
-    def start_h2(self, attributes):
-         self.parser_state['h2'] = True
-
-    def end_h2(self):
-        self.parser_state['h2'] = False
+        super(ProvSelectParser, self).handle_data(data)
 
     def start_a(self, attributes):
-        if "PAGE_PROV" == self.last_page:
-            for (a,b) in attributes:
-                if "href" == a:
-                    if 'choose_prov' not in self.parser_state or not isinstance(self.parser_state['choose_prov'], dict):
-                        self.parser_state['choose_prov'] = {}
-                    if b.endswith('throne'):
-                        self.parser_state['choose_prov']['chooser_link'] = b
-                        log.debug("self.parser_state['prov_chooser']['chooser_link']= %s" % self.parser_state['choose_prov']['chooser_link'] )
+        #super(ProvSelectParser, self).start_a(attributes)
+        for (a,b) in attributes:
+            if "href" == a:
+                if b.endswith('throne'):
+                    self.parser_state['chooser_link'] = b
+                    log.debug("self.parser_state['prov_chooser']['chooser_link']= %s" % self.parser_state['chooser_link'] )
 
     def end_a(self):
+        #super(ProvSelectParser, self).end_a()
         pass
 
     def get_choose_province_fields(self):
-        log.debug("get_choose_provincefields() - fields: %d" % len( self.parser_state['choose_prov']))
-        return self.parser_state['choose_prov']
+        log.debug("get_choose_provincefields() - fields: %d" % len( self.parser_state))
+        return self.parser_state
 
-class ThroneParserParser(UtopiaParser):
+class ThroneParser(UtopiaParser):
     parser_state = {}
 
     def __init__(self, verbose=0):
+        super(ThroneParser, self).__init__()
         sgmllib.SGMLParser.__init__(self, verbose)
         self.last_page="PAGE_NONE"
 
     def parse(self, s):
-        "Parse the given string 's'."
-        log.debug("parse()")
+        log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
         self.feed(s)
         self.close()
 
-    def start_title(self, attributes):
-         log.debug("handle_starttag()")
-         self.parser_state['title'] = True
-
-    def end_title(self):
-        log.debug("handle_endtag()")
-        self.parser_state['title'] = False
-
-    def handle_data(self, data):
-        if 'title' in self.parser_state and self.parser_state['title']:
-            self.title = data
-            log.debug("parsing page: %s"%self.title)
-            #if the following breaks, you've used the wrong parser (or the page has changed format)
-            assert("Age" in self.title)
-            self.last_page="PAGE_PROV"
-
-        if 'h2' in self.parser_state and self.parser_state['h2']:
-            if 'The game is currently ticking. Please wait a few moments' in  data:
-                self.tick_ongoing = True
-
-    def start_h2(self, attributes):
-         self.parser_state['h2'] = True
-
-    def end_h2(self):
-        self.parser_state['h2'] = False
-
-    def start_a(self, attributes):
-        if "PAGE_PROV" == self.last_page:
-            for (a,b) in attributes:
-                if "href" == a:
-                    if 'choose_prov' not in self.parser_state or not isinstance(self.parser_state['choose_prov'], dict):
-                        self.parser_state['choose_prov'] = {}
-                    if b.endswith('throne'):
-                        self.parser_state['choose_prov']['chooser_link'] = b
-                        log.debug("self.parser_state['prov_chooser']['chooser_link']= %s" % self.parser_state['choose_prov']['chooser_link'] )
-
-    def end_a(self):
-        pass
-
-    def get_choose_province_fields(self):
-        log.debug("get_choose_provincefields() - fields: %d" % len( self.parser_state['choose_prov']))
-        return self.parser_state['choose_prov']
