@@ -18,12 +18,42 @@ log = logging.getLogger(__name__)
 class UtopiaParser(sgmllib.SGMLParser, object):
     parser_state = {}
     tick_ongoing = False
+    nav_links = { 'Throne': '',
+                  'Kingdom': '',
+                  'News': '',
+                  'Explore': '',
+                  'Explore': '',
+                  'Growth': '',
+                  'Sciences': '',
+                  'Military': '',
+                  'Wizards': '',
+                  'Mystics':   '',
+                  'Thievery':  '',
+                  'War Room':  '',
+                  'Aid':       '',
+                  'Mail'    :  '',
+                  'Forum'   :  '',
+                  'Politics':  '',
+                  'Rankings':  '',
+                  'Preferences': '',
+                  'Taunts': ''
+
+                 }
+    resource_list = [ 'Money','Peasants','Food', 'Runes', 'Net Worth', 'Land', 'Net Worth/Acre']
+    resources = {}
 
     def __init__(self, verbose=0):
         "Initialise an object, passing 'verbose' to the superclass."
         sgmllib.SGMLParser.__init__(self, verbose)
         self.hyperlinks = []
         self.current_page="PAGE_NONE"
+
+        self.parser_state['a'] = False
+        self.parser_state['a_text_buffer'] = []
+        self.parser_state['div'] = 0
+        self.parser_state['div_navigation'] = 0
+        self.parser_state['resource-bar'] = False
+        self.resource_val = 0
 
     def start_head(self, attributes):
         self.parser_state['head'] = True
@@ -43,6 +73,64 @@ class UtopiaParser(sgmllib.SGMLParser, object):
 
     def end_h2(self):
         self.parser_state['h2'] = False
+
+    def start_a(self, attributes):
+        attr = dict(attributes)
+        self.parser_state['a'] = attr
+        self.parser_state['a_text_buffer'] = []
+
+    def end_a(self):
+        ## Collect what we harvested
+        if 'div_navigation' in self.parser_state and self.parser_state['div_navigation']:
+            # Navigation links
+            label = " ".join(self.parser_state['a_text_buffer'])
+
+            if self.parser_state['a']:
+                if label in self.nav_links:
+                    self.nav_links[label] = self.parser_state['a']['href']
+                else:
+                    log.debug("%s was not in self.nav_links" % label)
+
+
+        self.parser_state['a'] = False
+
+    def start_div(self, attributes):
+        self.parser_state['div'] += 1
+        attr = dict(attributes)
+        if 'class' in attr and 'navigation' == attr['class']:
+            self.parser_state['div_navigation'] = self.parser_state['div']
+
+    def end_div(self):
+        self.parser_state['div'] -= 1
+        if self.parser_state['div'] < self.parser_state['div_navigation']:
+            self.parser_state['div_navigation'] = False
+
+    def start_table(self, attributes):
+        attr = dict(attributes)
+        if 'id' in attr and 'resource-bar' == attr['id']:
+            self.parser_state['resource-bar'] = 0
+
+    def end_table(self):
+        if self.parser_state['resource-bar']:
+            self.parser_state['resource-bar'] = False
+
+    def start_th(self, attributes):
+        pass
+
+    def end_th(self):
+        if self.parser_state['resource-bar'] is not False:
+            resource_name = self.resource_list[self.parser_state['resource-bar']]
+            val = self.resource_val.replace(",","")
+            log.debug("val: %s", val)
+            try:
+                if "Net Worth/Acre" == resource_name:
+                    self.resources[resource_name] = float(val)
+                else:
+                    self.resources[resource_name] = int(val)
+            except ValueError as ex:
+                pass
+            self.parser_state['resource-bar'] += 1
+            self.parser_state['resource-bar'] %= len(self.resource_list)
 
     def handle_data(self, data):
         if 'head' in self.parser_state and self.parser_state['head']:
@@ -64,6 +152,17 @@ class UtopiaParser(sgmllib.SGMLParser, object):
                 self.tick_ongoing = True
 
 
+        if self.parser_state['a']:
+            self.parser_state['a_text_buffer'].append(data)
+
+        if self.parser_state['resource-bar'] is not False:
+            self.resource_val = data
+
+    def get_nav_links(self):
+        return self.nav_links
+
+    def get_resources(self):
+        return self.resources
 
 class LoginParser(UtopiaParser):
     def __init__(self):
@@ -172,14 +271,6 @@ class ProvSelectParser(UtopiaParser):
         log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
         self.feed(s)
         self.close()
-
-    def start_title(self, attributes):
-         log.debug("handle_starttag()")
-         self.parser_state['title'] = True
-
-    def end_title(self):
-        log.debug("handle_endtag()")
-        self.parser_state['title'] = False
 
     def handle_data(self, data):
         super(ProvSelectParser, self).handle_data(data)

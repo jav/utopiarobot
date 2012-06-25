@@ -44,6 +44,10 @@ class uplayer(object):
     def do_login(self):
         log.debug("do_login")
         headers = { 'User-Agent' : self.user_agent }
+
+        # TODO: Before we proceed, lets try the throne-page and see if we can use our cookies
+        #       to login or if we have to jump through all the hoops or not.
+
         values= {}
         data = urllib.urlencode(values)
         log.debug("Loading page: %s" % URL_LOGIN)

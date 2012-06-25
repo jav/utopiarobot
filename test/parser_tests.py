@@ -72,24 +72,44 @@ class throne_parser_tests(object):
                 print("self.parser.current_page: %s" % self.parser.current_page)
                 assert("PAGE_THRONE" == self.parser.current_page)
 
-
 	def test_navigation(self):
-                links = self.parser.get_links()
+                nav_links = self.parser.get_nav_links()
 
-                links = [ ('Throne'  ,  'throne'),
-                          ('Kingdom' ,  'kingdom_details'),
-                          ('News'    ,  'province_news'),
-                          ('Explore' ,  'explore'),
-                          ('Growth'  ,  'build'),
-                          ('Sciences',  'science'),
-                          ('Military',  'train_army'),
-                          ('Wizards' ,  'wizards'),
-                          ('Mystics' ,  'enchantment'),
-                          ('Thievery',  'thievery'),
-                          ('War Room',  'send_armies'),
-                          ('Aid'     ,  'aid')
+                links = { 'Throne'  :  '/wol/game/throne',
+                          'Kingdom' :  '/wol/game/kingdom_details',
+                          'News'    :  '/wol/game/province_news',
+                          'Explore' :  '/wol/game/explore',
+                          'Growth'  :  '/wol/game/build',
+                          'Sciences':  '/wol/game/science',
+                          'Military':  '/wol/game/train_army',
+                          'Wizards' :  '/wol/game/wizards',
+                          'Mystics' :  '/wol/game/enchantment',
+                          'Thievery':  '/wol/game/thievery',
+                          'War Room':  '/wol/game/send_armies',
+                          'Aid'     :  '/wol/game/aid',
+                          'Mail'    :  '/wol/mail/inbox/',
+                          'Forum'   :  '/wol/kingdom_forum/topics/',
+                          'Politics':  '/wol/game/vote',
+                          'Rankings':  '/wol/game/ranking',
+                          'Preferences': '/wol/game/preferences/',
+                          'Taunts': '/wol/game/taunts'
 
-                        ]
+                        }
 
-                for (title, link) in links:
-                        assert( '/wol/game/'+ link == links[title])
+                for (title, link) in links.items():
+                        print "%s == nav_links[%s] (%s)" % (link, title, nav_links[title])
+                        assert(link == nav_links[title])
+
+
+
+        def test_resources(self):
+                resources = self.parser.get_resources()
+
+                print resources
+                assert(618838 == resources['Money'])
+                assert(12071  == resources['Peasants'])
+                assert(47066  == resources['Food'])
+                assert(25190  == resources['Runes'])
+                assert(220057 == resources['Net Worth'])
+                assert(1438   == resources['Land'])
+                assert(153.03   == resources['Net Worth/Acre'])
