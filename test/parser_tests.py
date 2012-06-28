@@ -1,4 +1,6 @@
 import htmlparser
+import mock
+import urllib2
 
 class login_parser_tests(object):
         def setup(self):
@@ -113,3 +115,39 @@ class throne_parser_tests(object):
                 assert(213924 == resources['Net Worth'])
                 assert(1398   == resources['Land'])
                 assert(153.021   == resources['Net Worth/Acre'])
+
+
+class mystics_parser_tests(object):
+        def setup(self):
+                self.parser = htmlparser.MysticParser()
+                in_file = "test/mystic_page.html"
+                try:
+                        with open(in_file) as page:
+                                self.parser.parse(page.read())
+                except IOError as e:
+                        print "For this test to work, you need to link %s to a copy of the expected page (typically found in the page_cache dir). In the future, I'll provide some (correclty formatted) premade template." % in_file
+
+        def test_page_enum(self):
+                assert("PAGE_MYSTIC" == self.parser.current_page)
+
+        def test_form_inputs(self):
+                print self.parser.mystic_form
+                assert('48d2f5a8ed943a16e37423a1c320f1dd' == self.parser.mystic_form['inputs']['csrfmiddlewaretoken']['value'])
+
+        @mock.patch('htmlparser.MysticParser')
+        def test_available_spells(self):
+                available_spells = self.parser.get_available_spells()
+                print "available_spells:", available_spells
+                assert('Fertile Lands' in available_spells)
+                assert(('FERTILE_LANDS',815) == available_spells['Fertile Lands'])
+
+        def test_get_mana(self):
+                #assert(68 == self.parser.get_mana())
+                pass
+
+        @mock.patch('htmlparser.MysticParser')
+        @mock.patch('urllib2.Request')
+        def test_cast_paradise(self, mock_request, mock_mysticparser):
+                mock_mysticparser.test_handle("FOOBAR")
+                pass
+

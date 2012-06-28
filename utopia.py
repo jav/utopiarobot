@@ -198,6 +198,16 @@ class uplayer(object):
             self._get_throne()
         return self.parser.get_resources()
 
+    def get_available_spells(self):
+        log.debug("get_available_spells()")
+        log.debug("self.parser: %s" % self.parser)
+        log.debug("self.parser.current_page: %s" % self.parser.current_page)
+        if self.parser is None or self.parser.current_page != 'PAGE_MYSTICS':
+            log.debug("self.parser.current_page: %s" % self.parser.current_page)
+            self._get_mystics()
+        assert('PAGE_MYSTICS' == self.parser.current_page)
+        self.parser.get_available_spells()
+
 if __name__ == "__main__":
 
         parser = OptionParser()
@@ -235,3 +245,6 @@ if __name__ == "__main__":
 
         print player.get_resources()
         print player.get_resources()
+
+        print player.get_available_spells()
+        print player.get_active_spells()
