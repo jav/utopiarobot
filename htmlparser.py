@@ -121,7 +121,6 @@ class UtopiaParser(sgmllib.SGMLParser, object):
         if self.parser_state['resource-bar'] is not False:
             resource_name = self.resource_list[self.parser_state['resource-bar']]
             val = self.resource_val.replace(",","")
-            log.debug("val: %s", val)
             try:
                 if "Net Worth/Acre" == resource_name:
                     self.resources[resource_name] = float(val)
@@ -265,15 +264,12 @@ class ProvSelectParser(UtopiaParser):
         super(ProvSelectParser, self).__init__()
         sgmllib.SGMLParser.__init__(self, verbose)
         self.hyperlinks = []
-        self.last_page="PAGE_NONE"
+        self.current_page="PAGE_NONE"
 
     def parse(self, s):
         log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
         self.feed(s)
         self.close()
-
-    def handle_data(self, data):
-        super(ProvSelectParser, self).handle_data(data)
 
     def start_a(self, attributes):
         #super(ProvSelectParser, self).start_a(attributes)
@@ -292,8 +288,6 @@ class ProvSelectParser(UtopiaParser):
         return self.parser_state
 
 class ThroneParser(UtopiaParser):
-    parser_state = {}
-
     def __init__(self, verbose=0):
         super(ThroneParser, self).__init__()
         sgmllib.SGMLParser.__init__(self, verbose)

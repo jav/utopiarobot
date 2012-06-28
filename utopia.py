@@ -26,7 +26,16 @@ class uplayer(object):
     cookie_file = "cookie_file.txt"
     cj = False
     page_cache = False
-    headers = { 'User-Agent' : self.user_agent }
+    headers = { 'User-Agent' : user_agent }
+
+    parser = None
+    page = "PAGE_NONE"
+
+    #Bootstrap throne-url
+    nav_links = {'Throne': '/wol/game/throne'}
+
+    #properties
+    resources = None
 
     def __init__(self):
         self.cj = cookielib.LWPCookieJar()
@@ -38,106 +47,156 @@ class uplayer(object):
 
     def cache_page(self, page, res):
         if self.page_cache:
-            fh = open(self.page_cache + "/"+ str(zlib.crc32(page)) + ".html", 'w+')
+            file_name = str(zlib.crc32(page))
+            fh = open(self.page_cache + "/"+ file_name + ".html", 'w+')
+            log.debug("Saving page to: %s" % file_name )
             fh.write(res)
             fh.close()
 
-    def _goto_throne(self):
-        pass
-
-    def do_login(self):
+    def _do_login(self, parser):
         log.debug("do_login")
 
+        # OK! Assert that we're on the login page!
+        assert('PAGE_INIT' == self.parser.current_page)
 
-        # TODO: Before we proceed, lets try the throne-page and see if we can use our cookies
-        #       to login or if we have to jump through all the hoops or not.
-        
-        values= {}
-        data = urllib.urlencode(values)
-        log.debug("Loading page: %s" % URL_LOGIN)
-        req = urllib2.Request(URL_LOGIN, data, self.headers)
-        res = urllib2.urlopen(req)
-        result = res.read()
-        log.debug("Downloaded %d bytes" % len(result))
-        #self.cache_page(URL_LOGIN, res)
+        def _login(self):
+            if 'PAGE_INIT' != self.parser.current_page:
+                values= {}
+                data = urllib.urlencode(values)
+                log.debug("Loading page: %s" % URL_LOGIN)
+                req = urllib2.Request(URL_LOGIN, data, self.headers)
+                res = urllib2.urlopen(req)
+                self.result = res.read()
 
-#        if log.level <= 10 and self.cj:
-#            log.debug("Cookies")
-#            for index, cookie in enumerate(self.cj):
-#                log.debug("%d: %s" % (index, cookie))
-#        self.cj.save(self.cookie_file)
+            assert( self.parser.current_page == "PAGE_INIT")
 
-        myparser = htmlparser.LoginParser()
-        myparser.parse(result)
-        assert( myparser.last_page == "PAGE_INIT")
-        self.cache_page("PAGE_INIT", result)
+            self.parser = htmlparser.LoginParser()
+            self.parser.parse(self.result)
+            self.cache_page("PAGE_INIT", self.result)
 
-        login_fields = myparser.get_login_fields()
+            login_info = self.parser.get_login_info()
+            log.debug( "login_info %s" % login_info )
 
-        post = {}
-        for k,v in login_fields.items():
-            if 'other' == k:
-                pass
-            elif 'name' in v.keys():
-                print "TYPE", v['type']
-                if 'password' == v['name']:
-                    v['value'] = self.password
-                    login_fields[k]['value'] = v['value']
-                if 'username' == v['name']:
-                    v['value'] = self.username
-                    login_fields[k]['value'] = v['value']
-            post[k] = v
+            post = {}
+            for k,v in login_info['inputs'].items():
+                if 'name' in v:
+                    if 'password' == v['name']:
+                        v['value'] = self.password
+                        login_info['inputs'][k]['value'] = v['value']
+                    if 'username' == v['name']:
+                        v['value'] = self.username
+                        login_info['inputs'][k]['value'] = v['value']
+                post[k] = v
 
-        log.debug( "login_fields %s" % login_fields )
 
-        values = {}
-        for k,v in login_fields.items():
-            log.debug("k: %s, v: %s" %( k,v))
-            if isinstance(v, dict) and 'name' in v.keys():
-                values[v['name']] = v['value']
+            values = {}
+            for k,v in login_info['inputs'].items():
+                if isinstance(v, dict) and 'name' in v:
+                    values[v['name']] = v['value']
 
-        log.debug( "values %s", values )
+            log.debug( "values %s", values )
 
-        data = urllib.urlencode(values)
+            data = urllib.urlencode(values)
 
-        URL_TAKE_LOGIN = "%s%s" % (URL_BASE, login_fields['form']['action'])
-        log.debug("accessing %s POST:%s" % (URL_TAKE_LOGIN, data) )
-        req = urllib2.Request(URL_TAKE_LOGIN, data, self.headers)
-        res = urllib2.urlopen(req)
-        result = res.read()
+            URL_TAKE_LOGIN = "%s%s" % (URL_BASE, login_info['form']['action'])
+            log.debug("accessing %s POST:%s" % (URL_TAKE_LOGIN, data) )
+            req = urllib2.Request(URL_TAKE_LOGIN, data, self.headers)
+            res = urllib2.urlopen(req)
+            self.result = res.read()
+            self.cache_page(self.parser.current_page, self.result)
 
-        #pick server
-        myparser = htmlparser.LobbyParser()
-        myparser.parse(result)
-        assert( myparser.last_page == "PAGE_LOBBY")
-        self.cache_page("PAGE_LOBBY", result)
+        def _lobby(self):
+            #pick server
+            self.parser = htmlparser.LobbyParser()
+            self.parser.parse(self.result)
+            assert( self.parser.current_page == "PAGE_LOBBY")
+            self.cache_page("PAGE_LOBBY", self.result)
 
-        lobby_fields = myparser.get_lobby_fields()
-        URL_TAKE_WORLD_CHOICE = "%s%s" % (URL_BASE, lobby_fields['chooser_link'])
+            lobby_fields = self.parser.get_lobby_fields()
+            URL_TAKE_WORLD_CHOICE = "%s%s" % (URL_BASE, lobby_fields['chooser_link'])
+            data = None
+            log.debug("accessing %s POST:%s" % (URL_TAKE_WORLD_CHOICE, data) )
+            req = urllib2.Request(URL_TAKE_WORLD_CHOICE, data, self.headers)
+            res = urllib2.urlopen(req)
+            self.result = res.read()
+            log.debug(self.result)
+            self.cache_page(self.parser.current_page, self.result)
+
+        def _pick_prov(self):
+            self.parser = htmlparser.ProvSelectParser()
+            self.parser.parse(self.result)
+            assert( self.parser.current_page == "PAGE_PROV")
+            self.cache_page("PAGE_PROV", self.result)
+
+            prov_fields = self.parser.get_choose_province_fields()
+            URL_TAKE_PROV_CHOICE = "%s%s" % (URL_BASE, prov_fields['chooser_link'])
+            data = None
+            log.debug("accessing %s POST:%s" % (URL_TAKE_PROV_CHOICE, data) )
+            req = urllib2.Request(URL_TAKE_PROV_CHOICE, data, self.headers)
+            res = urllib2.urlopen(req)
+            self.result = res.read()
+            log.debug(self.result)
+            self.cache_page(self.parser.current_page, self.result)
+
+        _login(self)
+        if 'PAGE_NONE' != self.parser.current_page and 'PAGE_LOBBY' != self.parser.current_page:
+            return True
+        _lobby(self)
+        _pick_prov(self)
+
+
+    def _get_throne(self):
+        log.debug("_get_throne()")
         data = None
-        log.debug("accessing %s POST:%s" % (URL_TAKE_WORLD_CHOICE, data) )
-        req = urllib2.Request(URL_TAKE_WORLD_CHOICE, data, self.headers)
+        req = urllib2.Request(URL_BASE + self.nav_links['Throne'], data, self.headers)
         res = urllib2.urlopen(req)
-        result = res.read()
+        self.result = res.read()
 
-        log.debug(result)
+        self.parser = htmlparser.ThroneParser()
+        self.parser.parse(self.result)
+        self.cache_page(self.parser.current_page, self.result)
 
-        myparser = htmlparser.ProvSelectParser()
-        myparser.parse(result)
-        assert( myparser.last_page == "PAGE_PROV")
-        self.cache_page("PAGE_PROV", result)
+        if 'PAGE_INIT' == self.parser.current_page:
+            log.info("Not logged in, -> do_login()")
+            self._do_login(self)
+            self.parser = htmlparser.ThroneParser()
+            self.parser.parse(self.result)
 
-        prov_fields = myparser.get_choose_province_fields()
-        URL_TAKE_PROV_CHOICE = "%s%s" % (URL_BASE, prov_fields['chooser_link'])
+        assert('PAGE_THRONE' == self.parser.current_page)
+        if self.parser.get_nav_links():
+            self.nav_links = self.parser.get_nav_links()
+
+    def _get_mystics(self):
+        log.debug("_get_mystics()")
+        assert(0 < len(self.nav_links['Mystics']))
         data = None
-        log.debug("accessing %s POST:%s" % (URL_TAKE_PROV_CHOICE, data) )
-        req = urllib2.Request(URL_TAKE_PROV_CHOICE, data, self.headers)
+        req = urllib2.Request(URL_BASE + self.nav_links['Mystics'], data, self.headers)
         res = urllib2.urlopen(req)
-        result = res.read()
+        self.result = res.read()
+        self.cache_page(self.parser.current_page, self.result)
+        self.parser = htmlparser.MysticsParser()
+        self.parser.parse(self.result)
+        self.cache_page(self.parser.current_page, self.result)
+        log.debug("Page loaded, self.parser.current_page: %s" % self.parser.current_page)
+        if 'PAGE_INIT' == self.parser.current_page:
+            log.info("Not logged in, -> do_login()")
+            self._do_login(self)
+            self.parser = htmlparser.MysticsParser()
+            self.parser.parse(self.result)
 
-        log.debug(result)
+        assert('PAGE_MYSTICS' == self.parser.current_page)
+        if self.parser.get_nav_links():
+            self.nav_links = self.parser.get_nav_links()
 
-        self.cache_page("PAGE_THRONE", result)
+    def _check_login(self):
+        log.debug("_check_login()")
+        return self.is_loggedin
+
+    def get_resources(self):
+        log.debug("get_resources()")
+        if self.parser is None or self.parser.get_resources() is None:
+            self._get_throne()
+        return self.parser.get_resources()
 
 if __name__ == "__main__":
 
@@ -173,5 +232,6 @@ if __name__ == "__main__":
         log.debug("set password = %s (masked)" % "".join(["*" for c in player.password]))
 
         log.info("Log in player (%s)...", player.username)
-        player.do_login()
 
+        print player.get_resources()
+        print player.get_resources()

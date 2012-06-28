@@ -17,8 +17,8 @@ class login_parser_tests(object):
                 login_info = self.parser.get_login_info()
                 assert("/shared/login/" == login_info['form']['action'])
                 assert('48d2f5a8ed943a16e37423a1c320f1dd' == login_info['inputs']['csrfmiddlewaretoken']['value'])
-                assert('password' in login_info['inputs'].keys())
-                assert('username' in login_info['inputs'].keys())
+                assert('password' in login_info['inputs'])
+                assert('username' in login_info['inputs'])
 
 
 class lobby_parser_tests(object):
@@ -106,10 +106,10 @@ class throne_parser_tests(object):
                 resources = self.parser.get_resources()
 
                 print resources
-                assert(618838 == resources['Money'])
-                assert(12071  == resources['Peasants'])
-                assert(47066  == resources['Food'])
-                assert(25190  == resources['Runes'])
-                assert(220057 == resources['Net Worth'])
-                assert(1438   == resources['Land'])
-                assert(153.03   == resources['Net Worth/Acre'])
+                assert(480594 == resources['Money'])
+                assert(10065  == resources['Peasants'])
+                assert(78481  == resources['Food'])
+                assert(13244  == resources['Runes'])
+                assert(213924 == resources['Net Worth'])
+                assert(1398   == resources['Land'])
+                assert(153.021   == resources['Net Worth/Acre'])
