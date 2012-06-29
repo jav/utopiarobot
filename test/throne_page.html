@@ -7,7 +7,7 @@
         <title>
             Utopia
             -
-            The Mystic Circle
+            Throne Page
         </title>
         <link rel="shortcut icon" href="/media/v4727/common/images/fav_icon.png" />
         <!-- STYLE SHEETS -->
@@ -190,9 +190,12 @@
         </script>
         
     
+    
         
     <script type="text/javascript" src="/media/v4727/common/js/jquery.selectbox-0.5.js"></script>
     <script type="text/javascript" src="/media/v4727/common/js/bookmark_options.js"></script>
+
+    <script src="/media/v4727/external/flash_charts/embed.js" type="text/javascript"></script>
 
     </head>
 
@@ -411,8 +414,13 @@
     
 	
     
-	<h1>Self&nbsp;Spells</h1>
-	<a href="/wol/game/sorcery"><h1>Combat&nbsp;Spells</h1></a>
+	<h1>Throne</h1>
+	<a href="/wol/game/council_state"><h1>State</h1></a>
+	<a href="/wol/game/council_military"><h1>Military</h1></a>
+	<a href="/wol/game/council_internal"><h1>Buildings</h1></a>
+	<a href="/wol/game/council_learn"><h1>Science</h1></a>
+	<a href="/wol/game/council_spells"><h1>Mystics</h1></a>
+	<a href="/wol/game/council_history"><h1>History</h1></a>
 
     </div>
 
@@ -420,72 +428,128 @@
     
 	
     
-
-	<p>
-		You enter the Mystic Circle, the secret locale from which your wizards cast their spells.</p><p>From here, you may order your magical minions to cast their magic on the lands of your province and to use their powers against your enemies.</p><p>Some of these spells will take effect instantly, some will remain in place until triggered, then evaporate, and yet others will remain cast for a period of time, merely fading day by day.</p><p>Wizards have an amazing array of spells at their disposal, but can only cast so many at any time.  Runes will be needed for your wizards to effectively do their magic.</p><p>You can learn more about these spells in the  <a href="http://wiki.utopia-game.com/index.php/Special:Search?search=mystics">guide</a> and visit the <a href="/wol/game/council_spells">Mystics Council</a> page for a report on what spells are currently cast upon your lands. To train wizards you must visit the <a href="/wol/game/wizards">Wizard Academy</a>.
-	</p>
 	
 	
 	
-	<table class="two-column-stats">
-		<tbody>
-			<tr>
-				<th>Wizards</th>
-				<td>1,324 (0.95 Wizards Per Acre)</td>
-				
-				<th>Runes</th>
-				<td>13,244</td>
-			</tr>
-			<tr>
-				<th>Guilds</th>
-				<td>173 (12.37% of all buildings)</td>
-				
-				
-				<th>Mana</th>
-				<td>68%</td>
-			</tr>
-			
-			<tr>
-                <th colspan="2"></th>
+		<div>
+	 
+		<div id="throne-game-message">
+			<h2>Game Update</h2>
+			<p>Addons that request you enter your Utopia username/password or that automate ingame actions are a violation of the games rules. The use of such an addon can/will result in deletion of your account and possibly further action.</p>
+		</div>
+	
+	
+	 
+		<div id="throne-monarch-message">
+			<h2>Royal commands</h2>
+            
+                <p>Grow Safe</p>
+            
+            
+		</div>
+	
+    
+	
+	
+<h2>The Province of TestProvince (<a href="/wol/game/kingdom_details/1/1">1:1</a>)<br />June 1 of YR6 (next tick: 9 minutes)</h2>
+<table class="two-column-stats">
+    <tbody>
+        <tr>
+            <th>Race</th>
+            <td>Human</td>
+            <th>Soldiers</th>
+            <td>0</td>
+        </tr>
+        <tr>
+            <th>Ruler</th>
+            <td>The Wealthy Lord SirBristool</td>
+            <th>Swordsmen</th>
+            <td>0</td>
+        </tr>
+        <tr>
+            <th>Land</th>
+            <td>1,398</td>
+            <th>Archers</th>
+            <td>1,051</td>
+        </tr>
+        <tr>
+            <th>Peasants</th>
+            <td>10,065</td>
+            <th>Knights</th>
+            <td>21,576</td>
+        </tr>
+        <tr>
+            <th>Building Eff.</th>
+            <td>83%</td>
+            <th>Thieves</th>
+            <td>
                 
-                <th colspan="2"><a href="/wol/game/council_spells">More....</a></th>
-            </tr>
-		</tbody>
-	</table>
+                    2,995 (100%)
+                
+            </td>
+        </tr>
+        <tr>
+            <th>Money</th>
+            <td>480,594</td>
+            <th>Wizards</th>
+            <td>
+                
+                    1,324 (68%)
+                
+            </td>
+        </tr>
+        <tr>
+            <th>Food</th>
+            <td>78,481</td>
+            <th>War Horses</th>
+            <td>0</td>
+        </tr>
+        <tr>
+            <th>Runes</th>
+            <td>13,244</td>
+            <th>Prisoners</th>
+            <td>0</td>
+        </tr>
+        <tr>
+            <th>Trade Balance</th>
+            <td>-48,464</td>
+            <th>Off. Points</th>
+            <td>133,311</td>
+        </tr>
+        <tr>
+            <th>Networth</th>
+            <td>213,924 gold coins</td>
+            <th>Def. Points</th>
+            <td>139,348</td>
+        </tr>
+    </tbody>
+</table>
 
-    
-        
-        <form method="POST" action="">
-            <div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='48d2f5a8ed943a16e37423a1c320f1dd' /></div>
-            <table>
-               <tr><th><label for="id_spell">Select a spell:</label></th><td><select name="spell" id="id_spell">
-<option value="" selected="selected">---------------------------------------</option>
-<optgroup label="Single-Use Spells">
-<option value="ANONYMITY">Anonymity (2,119 runes)</option>
-<option value="SHADOW_LIGHT">Shadow Light (3,098 runes)</option>
-</optgroup>
-<optgroup label="Instant Spells">
-<option value="TREE_OF_GOLD">Tree of Gold (1,304 runes)</option>
-<option value="PARADISE">Paradise (4,891 runes)</option>
-</optgroup>
-<optgroup label="Fading Spells">
-<option value="MINOR_PROTECTION">Minor Protection (570 runes)</option>
-<option value="MAGIC_SHIELD">Magic Shield (815 runes)</option>
-<option value="FERTILE_LANDS">Fertile Lands (815 runes)</option>
-<option value="NATURES_BLESSING">Nature's Blessing (978 runes)</option>
-<option value="LOVE_AND_PEACE">Love and Peace (1,141 runes)</option>
-<option value="BUILDERS_BOON">Builders Boon (1,630 runes)</option>
-<option value="INSPIRE_ARMY">Inspire Army (1,793 runes)</option>
-<option value="WAR_SPOILS">War Spoils (2,364 runes)</option>
-<option value="FOUNTAIN_OF_KNOWLEDGE">Fountain of Knowledge (2,527 runes)</option>
-<option value="PATRIOTISM">Patriotism (3,261 runes)</option>
-</optgroup>
-</select><br />Mystic Aura, Quick Feet, Animate Dead, Bloodlust, Greater Protection, Fog, Invisibility, Clear Sight, Mage&#39;s Fury, Fanaticism, Town Watch, Aggression and Reflect Magic are not known to our culture.</td></tr>
-            </table>
-			<input class="button" type="submit" value="Cast Spell" />
-        </form>
-        
-    
+
+
+	
+	
+	
+	<h2>Recent News</h2>
+	
+		<p>
+			No new happenings
+		</p>
+	
+
+	<p><a href="/wol/game/province_news">See all news</a></p>
+</div>
+	
+	
+	
+	
+	
+	
+	
+
+	<form>
+	<div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='48d2f5a8ed943a16e37423a1c320f1dd' /></div>
+	</form>	
 
     </div>
     
