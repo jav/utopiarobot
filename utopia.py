@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 URL_BASE = "http://utopia-game.com"
 URL_LOGIN = "%s/shared" % URL_BASE
 
-class uplayer(object):
+class UPlayer(object):
 
     password = ""
     username = ""
@@ -32,7 +32,10 @@ class uplayer(object):
     page = "PAGE_NONE"
 
     #Bootstrap throne-url
-    nav_links = {'Throne': '/wol/game/throne'}
+    nav_links = {
+        'Throne': '/wol/game/throne',
+        'Mystics': '/wol/game/enchantment',
+        }
 
     #properties
     resources = None
@@ -173,8 +176,7 @@ class uplayer(object):
         req = urllib2.Request(URL_BASE + self.nav_links['Mystics'], data, self.headers)
         res = urllib2.urlopen(req)
         self.result = res.read()
-        self.cache_page(self.parser.current_page, self.result)
-        self.parser = htmlparser.MysticsParser()
+        self.parser = htmlparser.MysticParser()
         self.parser.parse(self.result)
         self.cache_page(self.parser.current_page, self.result)
         log.debug("Page loaded, self.parser.current_page: %s" % self.parser.current_page)
@@ -184,7 +186,7 @@ class uplayer(object):
             self.parser = htmlparser.MysticsParser()
             self.parser.parse(self.result)
 
-        assert('PAGE_MYSTICS' == self.parser.current_page)
+        assert('PAGE_MYSTIC' == self.parser.current_page)
         if self.parser.get_nav_links():
             self.nav_links = self.parser.get_nav_links()
 
@@ -200,13 +202,30 @@ class uplayer(object):
 
     def get_available_spells(self):
         log.debug("get_available_spells()")
-        log.debug("self.parser: %s" % self.parser)
-        log.debug("self.parser.current_page: %s" % self.parser.current_page)
-        if self.parser is None or self.parser.current_page != 'PAGE_MYSTICS':
-            log.debug("self.parser.current_page: %s" % self.parser.current_page)
+        if self.parser is None or self.parser.current_page != 'PAGE_MYSTIC':
             self._get_mystics()
-        assert('PAGE_MYSTICS' == self.parser.current_page)
+        assert('PAGE_MYSTIC' == self.parser.current_page)
         self.parser.get_available_spells()
+
+    def cast_spell(self, spell):
+        log.debug("cast_spell()")
+        #Ensure we are on the mystics page
+        if self.parser is None or self.parser.current_page != 'PAGE_MYSTIC':
+            self._get_mystics()
+        assert('PAGE_MYSTIC' == self.parser.current_page)
+        mystic_form = self.parser.get_mystic_form()
+        #Cast the spell (send POST)
+        data = urllib.urlencode( mystic_form['inputs'] )
+        req = urllib2.Request(URL_BASE + self.nav_links['Mystics'] + mystic_form['form']['action'])
+        res = urllib2.urlopen(req)
+        self.result = res.read()
+        #Check the result
+        self.parser = htmlparser.MysticParser()
+        self.parser.parse(self.result)
+        self.cache_page(self.parser.current_page, self.result)
+        #Return the result
+        return self.parser.get_spell_result()
+
 
 if __name__ == "__main__":
 
@@ -230,7 +249,7 @@ if __name__ == "__main__":
 
         #Actual logic
         log.debug("Instanciating player")
-        player = uplayer()
+        player = UPlayer()
 
         if(options.page_cache):
             player.page_cache = options.page_cache

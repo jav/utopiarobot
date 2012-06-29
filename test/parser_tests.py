@@ -2,6 +2,8 @@ import htmlparser
 import mock
 import urllib2
 
+import utopia
+
 class login_parser_tests(object):
         def setup(self):
                 self.parser = htmlparser.LoginParser()
@@ -134,7 +136,6 @@ class mystics_parser_tests(object):
                 print self.parser.mystic_form
                 assert('48d2f5a8ed943a16e37423a1c320f1dd' == self.parser.mystic_form['inputs']['csrfmiddlewaretoken']['value'])
 
-        @mock.patch('htmlparser.MysticParser')
         def test_available_spells(self):
                 available_spells = self.parser.get_available_spells()
                 print "available_spells:", available_spells
@@ -145,9 +146,16 @@ class mystics_parser_tests(object):
                 #assert(68 == self.parser.get_mana())
                 pass
 
-        @mock.patch('htmlparser.MysticParser')
+        @mock.patch('urllib2.urlopen')
         @mock.patch('urllib2.Request')
-        def test_cast_paradise(self, mock_request, mock_mysticparser):
-                mock_mysticparser.test_handle("FOOBAR")
-                pass
+        @mock.patch.object(htmlparser.MysticParser, 'get_nav_links')
+        @mock.patch.object(utopia.UPlayer,'cache_page')
+        def test_cast_paradise_success(self, mock_cache_page, mock_mysticparser_nav, mock_request, mock_urlopen):
+                mock_urlopen.return_value = mock_request
+                mock_request.read.return_value = open('test/spell_paradise.html').read()
+                mock_mysticparser_nav.return_value = {'Mystics': '/wol/game/enchantment'}
+                mock_cache_page.return_value = True
 
+                player = utopia.UPlayer()
+                print ("assert()")
+                assert(5 == player.cast_spell('Paradise'))

@@ -1,4 +1,4 @@
-import logging
+import  logging
 import sgmllib
 import string
 
@@ -308,11 +308,13 @@ class MysticParser(UtopiaParser):
         sgmllib.SGMLParser.__init__(self, verbose)
         self.last_page="PAGE_NONE"
         self.available_spells = {}
-
+        self.spell_result = [None, None]
         self.parser_state['mystic_form'] = False
         self.parser_state['select_spell'] = False
         self.parser_state['available_spells'] = []
         self.parser_state['current_spell'] = None
+        self.parser_state['spell_success'] = False
+        self.parser_state['spell_fail'] = False
 
     def parse(self, s):
         log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
@@ -324,6 +326,7 @@ class MysticParser(UtopiaParser):
         if "" == attr['action'] and "POST" == attr['method'] and 'name' not in attr:
             self.parser_state['mystic_form'] = True
             self.mystic_form = {}
+            self.mystic_form['form'] = attr
             self.mystic_form['inputs'] = {}
             self.mystic_form['other_inputs'] = []
 
@@ -339,7 +342,7 @@ class MysticParser(UtopiaParser):
                 spell_code = spell[1].replace(",","")
                 if '----' in spell_name:
                     continue
-                log.debug(" available_spells[ %s ] = ( %s, %s)" % (spell_name, spell[1], cost))
+                #log.debug(" available_spells[ %s ] = ( %s, %s)" % (spell_name, spell[1], cost))
                 self.available_spells[ spell_name ] = (spell_code, int(cost))
             self.parser_state['mystic_form'] = False
 
@@ -367,10 +370,40 @@ class MysticParser(UtopiaParser):
                 self.parser_state['available_spells'].append(self.parser_state['current_spell'] )
             self.parser_state['current_spell'] = ( [], attr['value'])
 
+
+    def start_div(self, attributes):
+        attr = dict(attributes)
+        if 'class' in attr and 'good message' == attr['class']:
+            self.parser_state['spell_success'] = True
+
+    def end_div(self):
+        if self.parser_state['spell_success']:
+            log.debug("end_div(): spell_success-collect")
+            #collect string
+            vals = []
+            for word in self.parser_state['spell_success'].split(" "):
+                #If it's a number, runes or result
+                word = word.replace(",","")
+                log.debug("for word: %s", word)
+                try:
+                    val = int(word)
+                    vals.append(val)
+                except:
+                    pass
+            self.spell_result = vals[1]
+            log.debug("self.spell_result: %s" % self.spell_result)
+            self.parser_state['spell_success'] = False
+
+
     def handle_data(self, data):
         super(MysticParser, self).handle_data(data)
         if self.parser_state['select_spell'] and self.parser_state['current_spell'] is not None:
             self.parser_state['current_spell'][0].append(data)
+        if self.parser_state['spell_success'] is not False:
+            self.parser_state['spell_success'] = data
+
+    def get_mystic_form(self):
+        return self.mystic_form
 
     def get_available_spells(self):
         log.debug("get_available_spells()")
@@ -379,5 +412,6 @@ class MysticParser(UtopiaParser):
     def get_mana(self):
         return self.mana
 
-    def cast_spell(self, spell_name):
-        pass
+    def get_spell_result(self):
+        log.debug("get_spell_result: %s" % self.spell_result)
+        return self.spell_result
