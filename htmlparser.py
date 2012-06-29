@@ -384,7 +384,6 @@ class MysticParser(UtopiaParser):
             for word in self.parser_state['spell_success'].split(" "):
                 #If it's a number, runes or result
                 word = word.replace(",","")
-                log.debug("for word: %s", word)
                 try:
                     val = int(word)
                     vals.append(val)

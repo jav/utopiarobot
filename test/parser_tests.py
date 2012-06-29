@@ -159,3 +159,9 @@ class mystics_parser_tests(object):
                 player = utopia.UPlayer()
                 print ("assert()")
                 assert(5 == player.cast_spell('Paradise'))
+                mystic_form = player.parser.get_mystic_form()
+                print mystic_form
+                assert('88e2dabb2a8b615561e743d05668d47d' == mystic_form['inputs']['csrfmiddlewaretoken']['value'])
+
+        def test_get_active_spells(self):
+                pass
