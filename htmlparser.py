@@ -1,4 +1,4 @@
-import logging
+import  logging
 import sgmllib
 import string
 
@@ -89,7 +89,8 @@ class UtopiaParser(sgmllib.SGMLParser, object):
                 if label in self.nav_links:
                     self.nav_links[label] = self.parser_state['a']['href']
                 else:
-                    log.debug("%s was not in self.nav_links" % label)
+                    #log.debug("%s was not in self.nav_links" % label)
+                    pass
 
 
         self.parser_state['a'] = False
@@ -145,6 +146,8 @@ class UtopiaParser(sgmllib.SGMLParser, object):
                     self.current_page="PAGE_PROV"
                 if( "Throne Page" in self.title ):
                     self.current_page="PAGE_THRONE"
+                if( "Mystic Circle" in self.title ):
+                    self.current_page="PAGE_MYSTIC"
 
         if 'h2' in self.parser_state and self.parser_state['h2']:
             if 'The game is currently ticking. Please wait a few moments' in  data:
@@ -298,3 +301,117 @@ class ThroneParser(UtopiaParser):
         self.feed(s)
         self.close()
 
+
+class MysticParser(UtopiaParser):
+    def __init__(self, verbose=0):
+        super(MysticParser, self).__init__()
+        sgmllib.SGMLParser.__init__(self, verbose)
+        self.last_page="PAGE_NONE"
+        self.available_spells = {}
+        self.spell_result = [None, None]
+        self.parser_state['mystic_form'] = False
+        self.parser_state['select_spell'] = False
+        self.parser_state['available_spells'] = []
+        self.parser_state['current_spell'] = None
+        self.parser_state['spell_success'] = False
+        self.parser_state['spell_fail'] = False
+
+    def parse(self, s):
+        log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
+        self.feed(s)
+        self.close()
+
+    def start_form(self, attributes):
+        attr = dict(attributes)
+        if "" == attr['action'] and "POST" == attr['method'] and 'name' not in attr:
+            self.parser_state['mystic_form'] = True
+            self.mystic_form = {}
+            self.mystic_form['form'] = attr
+            self.mystic_form['inputs'] = {}
+            self.mystic_form['other_inputs'] = []
+
+    def end_form(self):
+        # collect all the info in the form
+        if self.parser_state['mystic_form']:
+            for spell in self.parser_state['available_spells']:
+                spell_str = " ".join(spell[0])
+                (spell_name, _, cost) = spell_str.partition("(")
+                (cost, _, _) = cost.partition(")")
+                cost = cost.strip().replace(",","").replace("runes","")
+                spell_name = spell_name.strip()
+                spell_code = spell[1].replace(",","")
+                if '----' in spell_name:
+                    continue
+                #log.debug(" available_spells[ %s ] = ( %s, %s)" % (spell_name, spell[1], cost))
+                self.available_spells[ spell_name ] = (spell_code, int(cost))
+            self.parser_state['mystic_form'] = False
+
+    def start_input(self, attributes):
+        attr = dict(attributes)
+        if self.parser_state['mystic_form']:
+            if 'name' not in attr:
+                self.mystic_form['other_inputs'].append(attr)
+            else:
+                self.mystic_form['inputs'][attr['name']] = attr
+
+    def start_select(self, attributes):
+        attr = dict(attributes)
+        if 'name' in attr and 'spell' == attr['name']:
+            self.parser_state['select_spell'] = True
+
+    def end_select(self):
+        if self.parser_state['select_spell']:
+            self.parser_state['select_spell'] = False
+
+    def start_option(self, attributes):
+        attr = dict(attributes)
+        if self.parser_state['select_spell']:
+            if self.parser_state['current_spell'] is not None:
+                self.parser_state['available_spells'].append(self.parser_state['current_spell'] )
+            self.parser_state['current_spell'] = ( [], attr['value'])
+
+
+    def start_div(self, attributes):
+        attr = dict(attributes)
+        if 'class' in attr and 'good message' == attr['class']:
+            self.parser_state['spell_success'] = True
+
+    def end_div(self):
+        if self.parser_state['spell_success']:
+            log.debug("end_div(): spell_success-collect")
+            #collect string
+            vals = []
+            for word in self.parser_state['spell_success'].split(" "):
+                #If it's a number, runes or result
+                word = word.replace(",","")
+                log.debug("for word: %s", word)
+                try:
+                    val = int(word)
+                    vals.append(val)
+                except:
+                    pass
+            self.spell_result = vals[1]
+            log.debug("self.spell_result: %s" % self.spell_result)
+            self.parser_state['spell_success'] = False
+
+
+    def handle_data(self, data):
+        super(MysticParser, self).handle_data(data)
+        if self.parser_state['select_spell'] and self.parser_state['current_spell'] is not None:
+            self.parser_state['current_spell'][0].append(data)
+        if self.parser_state['spell_success'] is not False:
+            self.parser_state['spell_success'] = data
+
+    def get_mystic_form(self):
+        return self.mystic_form
+
+    def get_available_spells(self):
+        log.debug("get_available_spells()")
+        return self.available_spells
+
+    def get_mana(self):
+        return self.mana
+
+    def get_spell_result(self):
+        log.debug("get_spell_result: %s" % self.spell_result)
+        return self.spell_result
