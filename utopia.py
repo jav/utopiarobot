@@ -266,4 +266,4 @@ if __name__ == "__main__":
         print player.get_resources()
 
         print player.get_available_spells()
-        print player.get_active_spells()
+        print player.cast_spell("Paradise")
