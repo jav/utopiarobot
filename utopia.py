@@ -215,8 +215,19 @@ class UPlayer(object):
         assert('PAGE_MYSTIC' == self.parser.current_page)
         mystic_form = self.parser.get_mystic_form()
         #Cast the spell (send POST)
-        data = urllib.urlencode( mystic_form['inputs'] )
-        req = urllib2.Request(URL_BASE + self.nav_links['Mystics'] + mystic_form['form']['action'])
+        log.debug("mystic_form['inputs']: %s" % mystic_form['inputs'])
+
+        data = {}
+        for k,v in mystic_form['inputs'].items():
+            data[k] = v['value']
+        log.debug("self.parser.get_available_spells(): %s" % self.parser.get_available_spells())
+        data['spell'] = self.parser.get_available_spells()[spell][0]
+        data = urllib.urlencode(data)
+        log.debug("cast_spell form data: %s" % data)
+
+        url = URL_BASE + self.nav_links['Mystics'] + mystic_form['form']['action']
+        log.debug("url: %s" % url)
+        req = urllib2.Request(url, data, self.headers)
         res = urllib2.urlopen(req)
         self.result = res.read()
         #Check the result

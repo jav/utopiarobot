@@ -139,8 +139,11 @@ class mystics_parser_tests(object):
         def test_available_spells(self):
                 available_spells = self.parser.get_available_spells()
                 print "available_spells:", available_spells
+                print "Paradise:", available_spells['Paradise']
+                print "Paradise:", available_spells['Paradise'][0]
                 assert('Fertile Lands' in available_spells)
                 assert(('FERTILE_LANDS',815) == available_spells['Fertile Lands'])
+                assert(1==2)
 
         def test_get_mana(self):
                 #assert(68 == self.parser.get_mana())
