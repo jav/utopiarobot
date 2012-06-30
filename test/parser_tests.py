@@ -143,10 +143,9 @@ class mystics_parser_tests(object):
                 print "Paradise:", available_spells['Paradise'][0]
                 assert('Fertile Lands' in available_spells)
                 assert(('FERTILE_LANDS',815) == available_spells['Fertile Lands'])
-                assert(1==2)
 
         def test_get_mana(self):
-                #assert(68 == self.parser.get_mana())
+                assert(68 == self.parser.get_mana())
                 pass
 
         @mock.patch('urllib2.urlopen')

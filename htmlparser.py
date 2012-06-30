@@ -132,6 +132,12 @@ class UtopiaParser(sgmllib.SGMLParser, object):
             self.parser_state['resource-bar'] += 1
             self.parser_state['resource-bar'] %= len(self.resource_list)
 
+    def start_td(self, attributes):
+        pass
+
+    def end_td(self):
+        pass
+
     def handle_data(self, data):
         if 'head' in self.parser_state and self.parser_state['head']:
             if 'title' in self.parser_state and self.parser_state['title']:
@@ -315,6 +321,9 @@ class MysticParser(UtopiaParser):
         self.parser_state['current_spell'] = None
         self.parser_state['spell_success'] = False
         self.parser_state['spell_fail'] = False
+        self.parser_state['th'] = False
+        self.parser_state['td'] = False
+        self.parser_state['mana'] = False
 
     def parse(self, s):
         log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
@@ -393,6 +402,23 @@ class MysticParser(UtopiaParser):
             log.debug("self.spell_result: %s" % self.spell_result)
             self.parser_state['spell_success'] = False
 
+    def start_th(self,attributes):
+        super(MysticParser, self).start_th(attributes)
+        self.parser_state['th'] = True
+
+    def end_th(self, attributes):
+        super(MysticParser, self).end_th()
+        if self.parser_state['th']:
+            self.parser_state['th'] = False
+
+    def start_td(self, attributes):
+        super(MysticParser, self).start_td(attributes)
+        self.parser_state['td'] = True
+
+    def end_th(self):
+        super(MysticParser, self).end_th()
+        if self.parser_state['td']:
+            self.parser_state['td'] = False
 
     def handle_data(self, data):
         super(MysticParser, self).handle_data(data)
@@ -400,6 +426,13 @@ class MysticParser(UtopiaParser):
             self.parser_state['current_spell'][0].append(data)
         if self.parser_state['spell_success'] is not False:
             self.parser_state['spell_success'] = data
+        if self.parser_state['th'] and self.parser_state['td']:
+            if self.parser_state['mana']:
+                self.mana = int(data.replace('%',''))
+                self.parser_state['mana'] = False
+            if "Mana" == data:
+                self.parser_state['mana'] = True
+
 
     def get_mystic_form(self):
         return self.mystic_form

@@ -205,7 +205,14 @@ class UPlayer(object):
         if self.parser is None or self.parser.current_page != 'PAGE_MYSTIC':
             self._get_mystics()
         assert('PAGE_MYSTIC' == self.parser.current_page)
-        self.parser.get_available_spells()
+        return self.parser.get_available_spells()
+
+    def get_mana(self):
+        log.debug("get_mana()")
+        if self.parser is None or self.parser.current_page != 'PAGE_MYSTIC':
+            self._get_mystics()
+        assert('PAGE_MYSTIC' == self.parser.current_page)
+        return self.parser.get_mana()
 
     def cast_spell(self, spell):
         log.debug("cast_spell()")
@@ -273,8 +280,10 @@ if __name__ == "__main__":
 
         log.info("Log in player (%s)...", player.username)
 
-        print player.get_resources()
-        print player.get_resources()
 
-        print player.get_available_spells()
-        print player.cast_spell("Paradise")
+        resources = player.get_resources()
+        spells = player.get_available_spells()
+        mana = player.get_mana()
+
+        while resources['Runes'] > spells['Paradise'][1] and mana > 10:
+            print player.cast_spell("Paradise")
