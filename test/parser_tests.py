@@ -97,14 +97,11 @@ class throne_parser_tests(object):
                           'Rankings':  '/wol/game/ranking',
                           'Preferences': '/wol/game/preferences/',
                           'Taunts': '/wol/game/taunts'
-
                         }
-
+                print nav_links
                 for (title, link) in links.items():
                         print "%s == nav_links[%s] (%s)" % (link, title, nav_links[title])
                         assert(link == nav_links[title])
-
-
 
         def test_resources(self):
                 resources = self.parser.get_resources()
@@ -143,6 +140,7 @@ class mystics_parser_tests(object):
                 print "Paradise:", available_spells['Paradise'][0]
                 assert('Fertile Lands' in available_spells)
                 assert(('FERTILE_LANDS',815) == available_spells['Fertile Lands'])
+                assert(('PARADISE', 4891) == available_spells['Paradise'])
 
         def test_get_mana(self):
                 assert(68 == self.parser.get_mana())
@@ -165,5 +163,20 @@ class mystics_parser_tests(object):
                 print mystic_form
                 assert('88e2dabb2a8b615561e743d05668d47d' == mystic_form['inputs']['csrfmiddlewaretoken']['value'])
 
-        def test_get_active_spells(self):
-                pass
+class mystics_advisor_parser_tests(object):
+        def setup(self):
+                self.parser = htmlparser.MysticAdvisorParser()
+                in_file = "test/mystic_advisor.html"
+                try:
+                        with open(in_file) as page:
+                                self.parser.parse(page.read())
+                except IOError as e:
+                        print "For this test to work, you need to link %s to a copy of the expected page (typically found in the page_cache dir). In the future, I'll provide some (correclty formatted) premade template." % in_file
+
+        def test_page_enum(self):
+                assert("PAGE_MYSTIC_ADVISOR" == self.parser.current_page)
+
+        # def test_get_active_spells(self):
+        #         active_spells = self.parser.get_active_spells()
+        #         assert(6 == active_spells['Minor Protection'])
+        #         assert(5 == active_spells["Nature's blessing"])

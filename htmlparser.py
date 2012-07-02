@@ -50,8 +50,9 @@ class UtopiaParser(sgmllib.SGMLParser, object):
 
         self.parser_state['a'] = False
         self.parser_state['a_text_buffer'] = []
-        self.parser_state['div'] = 0
-        self.parser_state['div_navigation'] = 0
+        self.parser_state['div'] = {}
+        self.parser_state['div_depth'] = 0
+        self.parser_state['div_navigation'] = {}
         self.parser_state['resource-bar'] = False
         self.resource_val = 0
 
@@ -67,9 +68,14 @@ class UtopiaParser(sgmllib.SGMLParser, object):
     def end_title(self):
         self.parser_state['title'] = False
 
+    def start_h1(self, attributes):
+        self.parser_state['h1'] = True
+
+    def end_h1(self):
+        self.parser_state['h1'] = False
+
     def start_h2(self, attributes):
-        """TODO: Allow nesting, (which should be broken anyway) """
-        self.parser_state['h2'] = True
+        self.parser_state['h2'] = dict(attributes)
 
     def end_h2(self):
         self.parser_state['h2'] = False
@@ -92,19 +98,22 @@ class UtopiaParser(sgmllib.SGMLParser, object):
                     #log.debug("%s was not in self.nav_links" % label)
                     pass
 
-
         self.parser_state['a'] = False
 
     def start_div(self, attributes):
-        self.parser_state['div'] += 1
+        self.parser_state['div_depth'] += 1
+        self.parser_state['div'] = dict(attributes)
+        self.parser_state['div']['depth'] = self.parser_state['div_depth']
         attr = dict(attributes)
         if 'class' in attr and 'navigation' == attr['class']:
             self.parser_state['div_navigation'] = self.parser_state['div']
 
+
     def end_div(self):
-        self.parser_state['div'] -= 1
-        if self.parser_state['div'] < self.parser_state['div_navigation']:
-            self.parser_state['div_navigation'] = False
+        self.parser_state['div'] = {}
+        self.parser_state['div_depth'] -= 1
+        if 'depth' in self.parser_state['div_navigation'] and self.parser_state['div_depth'] < self.parser_state['div_navigation']['depth']:
+            self.parser_state['div_navigation'] = {}
 
     def start_table(self, attributes):
         attr = dict(attributes)
@@ -151,14 +160,36 @@ class UtopiaParser(sgmllib.SGMLParser, object):
                 if( "Age" in self.title ):
                     self.current_page="PAGE_PROV"
                 if( "Throne Page" in self.title ):
+                    #THRONE will be overriden if any link in 'navigation' is <h1>
                     self.current_page="PAGE_THRONE"
                 if( "Mystic Circle" in self.title ):
                     self.current_page="PAGE_MYSTIC"
-
+                log.debug("SAVED PAGE: %s" % self.current_page)
         if 'h2' in self.parser_state and self.parser_state['h2']:
             if 'The game is currently ticking. Please wait a few moments' in  data:
                 self.tick_ongoing = True
 
+        if 'div' in self.parser_state and 'class' in self.parser_state['div'] and 'game-header' in self.parser_state['div']['class']:
+            log.debug("OVERRIDING THRONE DIV - data: %s, h1: %s" % (data, self.parser_state['h1']))
+            if 'a' not in self.parser_state or not self.parser_state['a']:
+                if 'h1' in self.parser_state and self.parser_state['h1']:
+                    log.debug("OVERRIDING THRONE DIV - data: %s" % data)
+                    if 'PAGE_THRONE' == self.current_page:
+                        if 'Throne' == data:
+                            self.current_page = 'PAGE_THRONE'
+                        elif 'State' == data:
+                            self.current_page = 'PAGE_STATE_ADVISOR'
+                        elif 'Military' == data:
+                            self.current_page = 'PAGE_MILITARY_ADVISOR'
+                        elif 'Buildings' == data:
+                            self.current_page = 'PAGE_GROWTH_ADVISOR'
+                        elif 'Science' == data:
+                            self.current_page = 'PAGE_SCIENCE_ADVISOR'
+                        elif 'Mystics' == data:
+                            self.current_page = 'PAGE_MYSTIC_ADVISOR'
+                        elif 'History' == data:
+                            self.current_page = 'PAGE_HISTORY_ADVISOR'
+                        log.debug("OVERRIDING THRONE DIV: current:page%s" % self.current_page)
 
         if self.parser_state['a']:
             self.parser_state['a_text_buffer'].append(data)
@@ -185,6 +216,7 @@ class LoginParser(UtopiaParser):
         self.close()
 
     def start_div(self, attributes):
+        super(LoginParser, self).start_div(attributes)
         for (name, val) in attributes:
             if 'id' == name and 'login' == val:
                 self.login_info = {}
@@ -381,11 +413,13 @@ class MysticParser(UtopiaParser):
 
 
     def start_div(self, attributes):
+        super(MysticParser, self).start_div(attributes)
         attr = dict(attributes)
         if 'class' in attr and 'good message' == attr['class']:
             self.parser_state['spell_success'] = True
 
     def end_div(self):
+        super(MysticParser, self).end_div()
         if self.parser_state['spell_success']:
             log.debug("end_div(): spell_success-collect")
             #collect string
@@ -447,3 +481,24 @@ class MysticParser(UtopiaParser):
     def get_spell_result(self):
         log.debug("get_spell_result: %s" % self.spell_result)
         return self.spell_result
+
+
+class MysticAdvisorParser(UtopiaParser):
+    def __init__(self, verbose=0):
+        super(MysticAdvisorParser, self).__init__()
+        sgmllib.SGMLParser.__init__(self, verbose)
+        self.last_page="PAGE_NONE"
+
+        self.parser_state['MysticAdvisorParser'] = {}
+        self.parser_state['MysticAdvisorParser']['th'] = False
+        self.parser_state['MysticAdvisorParser']['td'] = False
+
+        self.active_spells = {}
+
+    def parse(self, s):
+        log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
+        self.feed(s)
+        self.close()
+
+    def get_active_spells(self):
+        return self.active_spells
