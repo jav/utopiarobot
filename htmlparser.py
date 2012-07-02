@@ -170,10 +170,8 @@ class UtopiaParser(sgmllib.SGMLParser, object):
                 self.tick_ongoing = True
 
         if 'div' in self.parser_state and 'class' in self.parser_state['div'] and 'game-header' in self.parser_state['div']['class']:
-            log.debug("OVERRIDING THRONE DIV - data: %s, h1: %s" % (data, self.parser_state['h1']))
             if 'a' not in self.parser_state or not self.parser_state['a']:
                 if 'h1' in self.parser_state and self.parser_state['h1']:
-                    log.debug("OVERRIDING THRONE DIV - data: %s" % data)
                     if 'PAGE_THRONE' == self.current_page:
                         if 'Throne' == data:
                             self.current_page = 'PAGE_THRONE'
@@ -189,7 +187,6 @@ class UtopiaParser(sgmllib.SGMLParser, object):
                             self.current_page = 'PAGE_MYSTIC_ADVISOR'
                         elif 'History' == data:
                             self.current_page = 'PAGE_HISTORY_ADVISOR'
-                        log.debug("OVERRIDING THRONE DIV: current:page%s" % self.current_page)
 
         if self.parser_state['a']:
             self.parser_state['a_text_buffer'].append(data)
@@ -492,13 +489,64 @@ class MysticAdvisorParser(UtopiaParser):
         self.parser_state['MysticAdvisorParser'] = {}
         self.parser_state['MysticAdvisorParser']['th'] = False
         self.parser_state['MysticAdvisorParser']['td'] = False
-
+        self.parser_state['MysticAdvisorParser']['div'] = False
+        self.parser_state['MysticAdvisorParser']['div_depth'] = 0
+        self.current_spell = {}
         self.active_spells = {}
 
     def parse(self, s):
         log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
         self.feed(s)
         self.close()
+
+    def start_div(self, attributes):
+        super(MysticAdvisorParser, self).start_div(attributes)
+        self.parser_state['div_depth'] += 1
+        self.parser_state['MysticAdvisorParser']['div'] = dict(attributes)
+        self.parser_state['MysticAdvisorParser']['div']['depth'] =  self.parser_state['MysticAdvisorParser']['div_depth']
+        if 'class' in self.parser_state['MysticAdvisorParser']['div'] and 'good' == self.parser_state['MysticAdvisorParser']['div']['class']:
+            if 'good' == self.parser_state['MysticAdvisorParser']['div']['class']:
+                self.parser_state['MysticAdvisorParser']['good'] = True
+
+    def end_div(self):
+        super(MysticAdvisorParser, self).end_div()
+        self.parser_state['div_depth'] -= 1
+        self.parser_state['MysticAdvisorParser']['div'] = False
+
+    def start_th(self, attributes):
+        super(MysticAdvisorParser, self).start_th(attributes)
+        self.parser_state['MysticAdvisorParser']['th'] = True
+
+    def end_th(self):
+        super(MysticAdvisorParser, self).end_th()
+        self.parser_state['MysticAdvisorParser']['th'] = False
+
+    def start_td(self, attributes):
+        super(MysticAdvisorParser, self).start_td(attributes)
+        self.parser_state['MysticAdvisorParser']['td'] = True
+
+    def end_td(self):
+        super(MysticAdvisorParser, self).end_td()
+        self.parser_state['MysticAdvisorParser']['td'] = False
+
+    def handle_data(self, data):
+        super(MysticAdvisorParser, self).handle_data(data)
+        if 'good' in self.parser_state['MysticAdvisorParser'] and  self.parser_state['MysticAdvisorParser']['good']:
+            if self.parser_state['MysticAdvisorParser']['th']:
+                if 0 < len(data.strip()):
+                    self.current_spell = {}
+                    self.current_spell['name'] = data.strip()
+                    log.debug("Current spell: %s", self.current_spell['name'])
+        if self.current_spell and self.parser_state['MysticAdvisorParser']['td']:
+            if 0 < len(data.strip()):
+                data = data.replace("days","").strip()
+                try:
+                    self.current_spell['duration'] = int(data)
+                    self.active_spells[self.current_spell['name']] = self.current_spell['duration']
+                    log.debug("Spell: %s: %s"% (self.current_spell['name'], self.current_spell['duration']))
+                except:
+                    pass
+
 
     def get_active_spells(self):
         return self.active_spells

@@ -176,7 +176,8 @@ class mystics_advisor_parser_tests(object):
         def test_page_enum(self):
                 assert("PAGE_MYSTIC_ADVISOR" == self.parser.current_page)
 
-        # def test_get_active_spells(self):
-        #         active_spells = self.parser.get_active_spells()
-        #         assert(6 == active_spells['Minor Protection'])
-        #         assert(5 == active_spells["Nature's blessing"])
+        def test_get_active_spells(self):
+                active_spells = self.parser.get_active_spells()
+                print active_spells
+                assert(6 == active_spells['Minor Protection'])
+                assert(5 == active_spells["Nature's Blessing"])
