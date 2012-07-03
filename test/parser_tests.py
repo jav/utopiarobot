@@ -12,7 +12,7 @@ class login_parser_tests(object):
                         with open(in_file) as page:
                                 self.parser.parse(page.read())
                 except IOError as e:
-                        print "For this test to work, you need to link %s to a copy of the expected page (typically found in the page_cache dir). In the future, I'll provide some (correclty formatted) premade template." % in_file
+                        print "CANNOT OPEN FILE %s. sFor this test to work, you need a copy of the tested page atlink %s to a copy of the expected page. Missing file: %s" % (in_file, in_file)
 
         def test_page_enum(self):
                 assert("PAGE_INIT" == self.parser.current_page)
@@ -33,7 +33,7 @@ class lobby_parser_tests(object):
                         with open(in_file) as page:
                                 self.parser.parse(page.read())
                 except IOError as e:
-                        print "For this test to work, you need to link %s to a copy of the expected page (typically found in the page_cache dir). In the future, I'll provide some (correclty formatted) premade template." % in_file
+                        print "CANNOT OPEN FILE %s. For this test to work, you need a copy of the tested page at %s" % (in_file, in_file)
 
         def test_page_enum(self):
                 assert("PAGE_LOBBY" == self.parser.current_page)
@@ -51,8 +51,7 @@ class choose_prov_parser_tests(object):
                         with open(in_file) as page:
                                 self.parser.parse(page.read())
                 except IOError as e:
-                        print "For this test to work, you need to link %s to a copy of the expected page (typically found in the page_cache dir). In the future, I'll provide some (correclty formatted) premade template." % in_file
-
+                        print "CANNOT OPEN FILE %s. For this test to work, you need a copy of the tested page at %s" % (in_file, in_file)
         def test_page_enum(self):
                 print("self.parser.current_page: %s" % self.parser.current_page)
                 assert("PAGE_PROV" == self.parser.current_page)
@@ -70,7 +69,7 @@ class throne_parser_tests(object):
                         with open(in_file) as page:
                                 self.parser.parse(page.read())
                 except IOError as e:
-                        print "For this test to work, you need to link %s to a copy of the expected page (typically found in the page_cache dir). In the future, I'll provide some (correclty formatted) premade template." % in_file
+                        print "CANNOT OPEN FILE %s. For this test to work, you need a copy of the tested page at %s" % (in_file, in_file)
 
         def test_page_enum(self):
                 print("self.parser.current_page: %s" % self.parser.current_page)
@@ -124,7 +123,7 @@ class mystics_parser_tests(object):
                         with open(in_file) as page:
                                 self.parser.parse(page.read())
                 except IOError as e:
-                        print "For this test to work, you need to link %s to a copy of the expected page (typically found in the page_cache dir). In the future, I'll provide some (correclty formatted) premade template." % in_file
+                        print "CANNOT OPEN FILE %s. For this test to work, you need a copy of the tested page at %s" % (in_file, in_file)
 
         def test_page_enum(self):
                 assert("PAGE_MYSTIC" == self.parser.current_page)
@@ -171,7 +170,7 @@ class mystics_advisor_parser_tests(object):
                         with open(in_file) as page:
                                 self.parser.parse(page.read())
                 except IOError as e:
-                        print "For this test to work, you need to link %s to a copy of the expected page (typically found in the page_cache dir). In the future, I'll provide some (correclty formatted) premade template." % in_file
+                        print "CANNOT OPEN FILE %s. For this test to work, you need a copy of the tested page at %s" % (in_file, in_file)
 
         def test_page_enum(self):
                 assert("PAGE_MYSTIC_ADVISOR" == self.parser.current_page)
@@ -179,5 +178,22 @@ class mystics_advisor_parser_tests(object):
         def test_get_active_spells(self):
                 active_spells = self.parser.get_active_spells()
                 print active_spells
-                assert(6 == active_spells['Minor Protection'])
-                assert(5 == active_spells["Nature's Blessing"])
+                assert(15 == active_spells['Minor Protection'])
+                assert(3 == active_spells["Nature's Blessing"])
+                assert(1 == active_spells["Love and Peace"])
+                assert(14 == active_spells["Fountain of Knowledge"])
+
+
+class military_parser_tests(object):
+        def setup(self):
+                self.parser = htmlparser.MilitaryParser()
+                in_file = "test/military_page.html"
+                try:
+                        with open(in_file) as page:
+                                self.parser.parse(page.read())
+                except IOError as e:
+                        print "CANNOT OPEN FILE %s. For this test to work, you need a copy of the tested page at %s" % (in_file, in_file)
+
+        def test_page_enum(self):
+                print self.parser.current_page
+                assert("PAGE_MILITARY" == self.parser.current_page)

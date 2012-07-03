@@ -153,17 +153,19 @@ class UtopiaParser(sgmllib.SGMLParser, object):
                 self.title = data
                 log.debug("(%s) : parsing page (title): %s"% (__name__, self.title))
 
-                if( "Home" in self.title ):
+                if "Home" in self.title:
                     self.current_page = "PAGE_INIT"
-                if( "Lobby" in self.title ):
+                if "Lobby" in self.title:
                     self.current_page="PAGE_LOBBY"
-                if( "Age" in self.title ):
+                if "Age" in self.title:
                     self.current_page="PAGE_PROV"
-                if( "Throne Page" in self.title ):
+                if "Throne Page" in self.title:
                     #THRONE will be overriden if any link in 'navigation' is <h1>
                     self.current_page="PAGE_THRONE"
-                if( "Mystic Circle" in self.title ):
+                if "Mystic Circle" in self.title:
                     self.current_page="PAGE_MYSTIC"
+                if "Army" in self.title:
+                    self.current_page="PAGE_MILITARY"
                 log.debug("SAVED PAGE: %s" % self.current_page)
         if 'h2' in self.parser_state and self.parser_state['h2']:
             if 'The game is currently ticking. Please wait a few moments' in  data:
@@ -201,8 +203,8 @@ class UtopiaParser(sgmllib.SGMLParser, object):
         return self.resources
 
 class LoginParser(UtopiaParser):
-    def __init__(self):
-        super(LoginParser, self).__init__()
+    def __init__(self, verbose=0):
+        super(LoginParser, self).__init__(verbose)
         self.login_info = {}
         self.current_input = None
         self.parser_state['login_form'] = ""
@@ -257,8 +259,7 @@ class LoginParser(UtopiaParser):
 
 class LobbyParser(UtopiaParser):
     def __init__(self, verbose=0):
-        super(LobbyParser, self).__init__(self)
-        sgmllib.SGMLParser.__init__(self, verbose)
+        super(LobbyParser, self).__init__(verbose)
         self.hyperlinks = []
 
     def parse(self, s):
@@ -299,8 +300,7 @@ class LobbyParser(UtopiaParser):
 
 class ProvSelectParser(UtopiaParser):
     def __init__(self, verbose=0):
-        super(ProvSelectParser, self).__init__()
-        sgmllib.SGMLParser.__init__(self, verbose)
+        super(ProvSelectParser, self).__init__(verbose)
         self.hyperlinks = []
         self.current_page="PAGE_NONE"
 
@@ -327,8 +327,7 @@ class ProvSelectParser(UtopiaParser):
 
 class ThroneParser(UtopiaParser):
     def __init__(self, verbose=0):
-        super(ThroneParser, self).__init__()
-        sgmllib.SGMLParser.__init__(self, verbose)
+        super(ThroneParser, self).__init__(verbose)
         self.last_page="PAGE_NONE"
 
     def parse(self, s):
@@ -339,8 +338,7 @@ class ThroneParser(UtopiaParser):
 
 class MysticParser(UtopiaParser):
     def __init__(self, verbose=0):
-        super(MysticParser, self).__init__()
-        sgmllib.SGMLParser.__init__(self, verbose)
+        super(MysticParser, self).__init__(verbose)
         self.last_page="PAGE_NONE"
         self.available_spells = {}
         self.spell_result = [None, None]
@@ -482,8 +480,7 @@ class MysticParser(UtopiaParser):
 
 class MysticAdvisorParser(UtopiaParser):
     def __init__(self, verbose=0):
-        super(MysticAdvisorParser, self).__init__()
-        sgmllib.SGMLParser.__init__(self, verbose)
+        super(MysticAdvisorParser, self).__init__(verbose)
         self.last_page="PAGE_NONE"
 
         self.parser_state['MysticAdvisorParser'] = {}
@@ -539,7 +536,10 @@ class MysticAdvisorParser(UtopiaParser):
                     log.debug("Current spell: %s", self.current_spell['name'])
         if self.current_spell and self.parser_state['MysticAdvisorParser']['td']:
             if 0 < len(data.strip()):
-                data = data.replace("days","").strip()
+                if "days" in data:
+                    data = data.replace("days","").strip()
+                if "day" in data:
+                    data = data.replace("day","").strip()
                 try:
                     self.current_spell['duration'] = int(data)
                     self.active_spells[self.current_spell['name']] = self.current_spell['duration']
@@ -550,3 +550,22 @@ class MysticAdvisorParser(UtopiaParser):
 
     def get_active_spells(self):
         return self.active_spells
+
+
+class MilitaryParser(UtopiaParser):
+    def __init__(self, verbose=0):
+        super(MilitaryParser, self).__init__(verbose)
+        self.last_page="PAGE_NONE"
+
+        self.parser_state['MysticAdvisorParser'] = {}
+        self.parser_state['MysticAdvisorParser']['th'] = False
+        self.parser_state['MysticAdvisorParser']['td'] = False
+        self.parser_state['MysticAdvisorParser']['div'] = False
+        self.parser_state['MysticAdvisorParser']['div_depth'] = 0
+        self.current_spell = {}
+        self.active_spells = {}
+
+    def parse(self, s):
+        log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
+        self.feed(s)
+        self.close()
