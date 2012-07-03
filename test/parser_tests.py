@@ -197,3 +197,27 @@ class military_parser_tests(object):
         def test_page_enum(self):
                 print self.parser.current_page
                 assert("PAGE_MILITARY" == self.parser.current_page)
+
+        def test_get_troops(self):
+                troops = self.parser.get_troops()
+                print "troops:", troops
+
+                assert(1530 == troops['o-spec']['home'])
+                assert(807 == troops['o-spec']['training'])
+                assert(350 == troops['o-spec']['cost'])
+                assert(806 == troops['o-spec']['max'])
+
+                assert(839 == troops['d-spec']['home'])
+                assert(165 == troops['d-spec']['training'])
+                assert(350 == troops['d-spec']['cost'])
+                assert(806 == troops['d-spec']['max'])
+
+                assert(11184 == troops['elite']['home'])
+                assert(53 == troops['elite']['training'])
+                assert(500 == troops['elite']['cost'])
+                assert(564 == troops['elite']['max'])
+
+                assert(2222 == troops['thief']['home'])
+                assert(0 == troops['thief']['training'])
+                assert(500 == troops['thief']['cost'])
+                assert(564 == troops['thief']['max'])

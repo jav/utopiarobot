@@ -124,6 +124,12 @@ class UtopiaParser(sgmllib.SGMLParser, object):
         if self.parser_state['resource-bar']:
             self.parser_state['resource-bar'] = False
 
+    def start_tr(self, attributes):
+        pass
+
+    def end_tr(self):
+        pass
+
     def start_th(self, attributes):
         pass
 
@@ -557,15 +563,77 @@ class MilitaryParser(UtopiaParser):
         super(MilitaryParser, self).__init__(verbose)
         self.last_page="PAGE_NONE"
 
-        self.parser_state['MysticAdvisorParser'] = {}
-        self.parser_state['MysticAdvisorParser']['th'] = False
-        self.parser_state['MysticAdvisorParser']['td'] = False
-        self.parser_state['MysticAdvisorParser']['div'] = False
-        self.parser_state['MysticAdvisorParser']['div_depth'] = 0
+        self.parser_state['MilitaryParser'] = {}
+        self.parser_state['MilitaryParser']['th'] = False
+        self.parser_state['MilitaryParser']['td'] = False
+        self.parser_state['MilitaryParser']['div'] = False
+        self.parser_state['MilitaryParser']['div_depth'] = 0
+        self.parser_state['MilitaryParser']['troops'] = False
+        self.parser_state['MilitaryParser']['current_troop'] = -1
+        self.parser_state['MilitaryParser']['current_val'] = 0
+
         self.current_spell = {}
-        self.active_spells = {}
+        self.troops = {}
+        self.troops_list = ['o-spec', 'd-spec', 'elite', 'thief']
+        self.vals_list = ['home', 'training', 'cost', 'max']
 
     def parse(self, s):
         log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
         self.feed(s)
         self.close()
+
+    def start_tr(self, attributes):
+        super(MilitaryParser, self).start_tr(attributes)
+        self.parser_state['MilitaryParser']['tr'] = True
+
+    def end_tr(self):
+        super(MilitaryParser, self).end_tr()
+        self.parser_state['MilitaryParser']['tr'] = False
+        if self.parser_state['MilitaryParser']['troops']:
+            self.parser_state['MilitaryParser']['current_troop'] += 1
+            self.parser_state['MilitaryParser']['current_val'] = 0
+
+    def start_th(self, attributes):
+        super(MilitaryParser, self).start_th(attributes)
+        self.parser_state['MilitaryParser']['th'] = True
+
+    def end_th(self):
+        super(MilitaryParser, self).end_th()
+        self.parser_state['MilitaryParser']['th'] = False
+
+    def start_td(self, attributes):
+        super(MilitaryParser, self).start_td(attributes)
+        self.parser_state['MilitaryParser']['td'] = True
+
+    def end_td(self):
+        super(MilitaryParser, self).end_td()
+        self.parser_state['MilitaryParser']['td'] = False
+        self.parser_state['MilitaryParser']['current_val'] += 1
+
+    def end_table(self):
+        super(MilitaryParser, self).end_table()
+        self.parser_state['MilitaryParser']['troops'] = False
+
+    def handle_data(self, data):
+        super(MilitaryParser, self).handle_data(data)
+        if self.parser_state['MilitaryParser']['th']:
+            if "Unit (Off/Def)" in data:
+                self.parser_state['MilitaryParser']['troops'] = True
+                self.parser_state['MilitaryParser']['troops_count'] = 0
+
+        if self.parser_state['MilitaryParser']['troops']:
+            if self.parser_state['MilitaryParser']['td']:
+                data = data.replace(",","")
+                data = data.replace("gc","")
+                try:
+                    log.debug (" I want to save %s." % data)
+                    if 0 == self.parser_state['MilitaryParser']['current_val']:
+                        self.troops[self.troops_list[self.parser_state['MilitaryParser']['current_troop']]] = {}
+                    log.debug( "self.troops[%s][%s] = %s" %(self.troops_list[self.parser_state['MilitaryParser']['current_troop']], self.vals_list[self.parser_state['MilitaryParser']['current_val']], data))
+                    self.troops[self.troops_list[self.parser_state['MilitaryParser']['current_troop']]][self.vals_list[self.parser_state['MilitaryParser']['current_val']]] = int(data)
+                except:
+                    pass
+
+    def get_troops(self):
+        log.debug(self.troops)
+        return self.troops
