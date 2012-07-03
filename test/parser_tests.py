@@ -198,6 +198,11 @@ class military_parser_tests(object):
                 print self.parser.current_page
                 assert("PAGE_MILITARY" == self.parser.current_page)
 
+        def test_get_soldiers(self):
+                soldiers = self.parser.get_soldiers()
+                print soldiers
+                assert(1293 == soldiers)
+
         def test_get_troops(self):
                 troops = self.parser.get_troops()
                 print "troops:", troops

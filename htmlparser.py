@@ -571,9 +571,11 @@ class MilitaryParser(UtopiaParser):
         self.parser_state['MilitaryParser']['troops'] = False
         self.parser_state['MilitaryParser']['current_troop'] = -1
         self.parser_state['MilitaryParser']['current_val'] = 0
+        self.parser_state['MilitaryParser']['soldier_mark'] = False
 
         self.current_spell = {}
         self.troops = {}
+        self.soldier = 0
         self.troops_list = ['o-spec', 'd-spec', 'elite', 'thief']
         self.vals_list = ['home', 'training', 'cost', 'max']
 
@@ -620,20 +622,28 @@ class MilitaryParser(UtopiaParser):
             if "Unit (Off/Def)" in data:
                 self.parser_state['MilitaryParser']['troops'] = True
                 self.parser_state['MilitaryParser']['troops_count'] = 0
+            if "Number of soldiers" in data:
+                self.parser_state['MilitaryParser']['soldier_mark'] = True
 
-        if self.parser_state['MilitaryParser']['troops']:
-            if self.parser_state['MilitaryParser']['td']:
+        if self.parser_state['MilitaryParser']['td']:
+            if self.parser_state['MilitaryParser']['soldier_mark']:
+                self.soldiers = int(data.replace(",",""))
+                self.parser_state['MilitaryParser']['soldier_mark'] = False
+            if self.parser_state['MilitaryParser']['troops']:
+
                 data = data.replace(",","")
                 data = data.replace("gc","")
                 try:
-                    log.debug (" I want to save %s." % data)
                     if 0 == self.parser_state['MilitaryParser']['current_val']:
                         self.troops[self.troops_list[self.parser_state['MilitaryParser']['current_troop']]] = {}
-                    log.debug( "self.troops[%s][%s] = %s" %(self.troops_list[self.parser_state['MilitaryParser']['current_troop']], self.vals_list[self.parser_state['MilitaryParser']['current_val']], data))
                     self.troops[self.troops_list[self.parser_state['MilitaryParser']['current_troop']]][self.vals_list[self.parser_state['MilitaryParser']['current_val']]] = int(data)
                 except:
                     pass
 
     def get_troops(self):
-        log.debug(self.troops)
+        log.debug("get_troops(): %s" % self.troops)
         return self.troops
+
+    def get_soldiers(self):
+        log.debug("get_soldiers(): %s" % self.soldiers)
+        return self.soldiers
