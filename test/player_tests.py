@@ -1,16 +1,16 @@
-import htmlparser
+from utopia_robot.robot import UtopiaRobot, htmlparser
 import mock
 import urllib2
 
-import utopia
+
 
 class player_tests(object):
     def setup(self):
-        self.player = utopia.UPlayer()
+        self.player = UtopiaRobot()
 
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
-    @mock.patch.object(utopia.UPlayer,'cache_page')
+    @mock.patch.object(UtopiaRobot,'cache_page')
     def test_resources(self, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/throne_page.html').read()
@@ -26,7 +26,7 @@ class player_tests(object):
 
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
-    @mock.patch.object(utopia.UPlayer,'cache_page')
+    @mock.patch.object(UtopiaRobot,'cache_page')
     def test_mana(self, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/mystic_page.html').read()
@@ -38,7 +38,7 @@ class player_tests(object):
 
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
-    @mock.patch.object(utopia.UPlayer,'cache_page')
+    @mock.patch.object(UtopiaRobot,'cache_page')
     def test_available_spells(self, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/mystic_page.html').read()
@@ -78,7 +78,7 @@ class player_tests(object):
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
     @mock.patch.object(htmlparser.MysticParser, 'get_nav_links')
-    @mock.patch.object(utopia.UPlayer,'cache_page')
+    @mock.patch.object(UtopiaRobot,'cache_page')
     def test_cast_paradise_success(self, mock_cache_page, mock_mysticparser_nav, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/spell_paradise.html').read()
@@ -93,7 +93,7 @@ class player_tests(object):
 
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
-    @mock.patch.object(utopia.UPlayer,'cache_page')
+    @mock.patch.object(UtopiaRobot,'cache_page')
     def test_get_troops(self, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/military_page.html').read()
@@ -125,7 +125,7 @@ class player_tests(object):
 
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
-    @mock.patch.object(utopia.UPlayer,'cache_page')
+    @mock.patch.object(UtopiaRobot,'cache_page')
     def test_get_soldiers(self, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/military_page.html').read()
@@ -136,6 +136,45 @@ class player_tests(object):
         print "soldiers:", soldiers
         assert(1293 == soldiers)
 
+    @mock.patch('urllib2.urlopen')
+    @mock.patch('urllib2.Request')
+    @mock.patch.object(htmlparser.MysticParser, 'get_nav_links')
+    @mock.patch.object(UtopiaRobot,'cache_page')
+    def test_train_troops(self, mock_cache_page, mock_mysticparser_nav, mock_request, mock_urlopen):
+        return
+        mock_urlopen.return_value = mock_request
+        mock_request.read.return_value = open('test/military_page.html').read()
+        mock_mysticparser_nav.return_value = {'Military': '/wol/game/train_army'}
+        mock_cache_page.return_value = True
 
-    def test_train_troops(self):
-        pass
+        print ("assert()")
+        military={}
+        military['d-specs'] = 1
+        military['o-specs'] = 1
+
+        assert(5 == self.player.train_military(military))
+        military_form = self.player.parser.get_military_form()
+        print military_form
+        assert('88e2dabb2a8b615561e743d05668d47d' == mystic_form['inputs']['csrfmiddlewaretoken']['value'])
+
+#train form-data
+# csrfmiddlewaretoken:88e2dabb2a8b615561e743d05668d47d
+# draft_rate:AGGRESSIVE
+# draft_target:66
+# wage_rate:200
+# unit-quantity_0:1
+# unit-quantity_1:2
+# unit-quantity_2:3
+# unit-quantity_3:4
+# train:Train troops
+
+#change recruitlvl
+# csrfmiddlewaretoken:88e2dabb2a8b615561e743d05668d47d
+# draft_rate:NORMAL
+# draft_target:65
+# wage_rate:201
+# unit-quantity_0:
+# unit-quantity_1:
+# unit-quantity_2:
+# unit-quantity_3:
+# train:Train troops

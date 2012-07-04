@@ -1,8 +1,6 @@
-import htmlparser
+from utopia_robot import htmlparser
 import mock
 import urllib2
-
-import utopia
 
 class login_parser_tests(object):
         def setup(self):
