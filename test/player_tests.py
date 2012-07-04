@@ -122,3 +122,20 @@ class player_tests(object):
         assert(0 == troops['thief']['training'])
         assert(500 == troops['thief']['cost'])
         assert(564 == troops['thief']['max'])
+
+    @mock.patch('urllib2.urlopen')
+    @mock.patch('urllib2.Request')
+    @mock.patch.object(utopia.UPlayer,'cache_page')
+    def test_get_soldiers(self, mock_cache_page, mock_request, mock_urlopen):
+        mock_urlopen.return_value = mock_request
+        mock_request.read.return_value = open('test/military_page.html').read()
+        mock_cache_page.return_value = True
+
+        soldiers = self.player.get_soldiers()
+
+        print "soldiers:", soldiers
+        assert(1293 == soldiers)
+
+
+    def test_train_troops(self):
+        pass

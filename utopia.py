@@ -305,6 +305,12 @@ class UPlayer(object):
         assert('PAGE_MILITARY' == self.parser.current_page)
         return self.parser.get_troops()
 
+    def get_soldiers(self):
+        log.debug("get_soldiers()")
+        if self.parser is None or self.parser.current_page != 'PAGE_MILITARY':
+            self._get_military()
+        assert('PAGE_MILITARY' == self.parser.current_page)
+        return self.parser.get_soldiers()
 
 if __name__ == "__main__":
 
