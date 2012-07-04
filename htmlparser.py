@@ -422,7 +422,6 @@ class MysticParser(UtopiaParser):
     def end_div(self):
         super(MysticParser, self).end_div()
         if self.parser_state['spell_success']:
-            log.debug("end_div(): spell_success-collect")
             #collect string
             vals = []
             for word in self.parser_state['spell_success'].split(" "):

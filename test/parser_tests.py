@@ -143,22 +143,22 @@ class mystics_parser_tests(object):
 
         def test_get_mana(self):
                 assert(68 == self.parser.get_mana())
-                pass
 
-        @mock.patch('urllib2.urlopen')
-        @mock.patch('urllib2.Request')
-        @mock.patch.object(htmlparser.MysticParser, 'get_nav_links')
-        @mock.patch.object(utopia.UPlayer,'cache_page')
-        def test_cast_paradise_success(self, mock_cache_page, mock_mysticparser_nav, mock_request, mock_urlopen):
-                mock_urlopen.return_value = mock_request
-                mock_request.read.return_value = open('test/spell_paradise.html').read()
-                mock_mysticparser_nav.return_value = {'Mystics': '/wol/game/enchantment'}
-                mock_cache_page.return_value = True
+        def test_cast_paradise_success(self):
+                parser = htmlparser.MysticParser()
+                in_file = 'test/spell_paradise.html'
+                try:
+                        with open(in_file) as page:
+                                parser.parse(page.read())
+                except IOError as e:
+                        print "CANNOT OPEN FILE %s. For this test to work, you need a copy of the tested page at %s" % (in_file, in_file)
 
-                player = utopia.UPlayer()
-                print ("assert()")
-                assert(5 == player.cast_spell('Paradise'))
-                mystic_form = player.parser.get_mystic_form()
+
+                parser.parse(in_file)
+                paradise_result = parser.get_spell_result()
+                print "paradise_result: %s" % paradise_result
+                assert(5 == paradise_result)
+                mystic_form = parser.get_mystic_form()
                 print mystic_form
                 assert('88e2dabb2a8b615561e743d05668d47d' == mystic_form['inputs']['csrfmiddlewaretoken']['value'])
 

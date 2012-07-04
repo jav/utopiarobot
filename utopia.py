@@ -281,9 +281,19 @@ if __name__ == "__main__":
         log.info("Log in player (%s)...", player.username)
 
 
-        resources = player.get_resources()
-        spells = player.get_available_spells()
         mana = player.get_mana()
+        spells = player.get_available_spells()
 
-        while resources['Runes'] > spells['Paradise'][1] and mana > 10:
-            print player.cast_spell("Paradise")
+        while spells['Minor Protection'] <= 1:
+            self.cast_spell('Minor Protection')
+            spells = player.get_available_spells()
+
+
+        resources = player.get_resources()
+
+        if self.get_soldiers() > 0:
+            troops = get_troops()
+            if (troops['d-specs']['Home'] + troops['elite']['Home'])*3 < resouces['Acres'] :
+                #Safe assumption, both have 5 def
+                # leave 150 raw dpa
+                pass
