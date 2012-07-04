@@ -10,9 +10,11 @@ class player_tests(object):
 
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
-    def test_resources(self, mock_request, mock_urlopen):
+    @mock.patch.object(utopia.UPlayer,'cache_page')
+    def test_resources(self, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/throne_page.html').read()
+        mock_cache_page.return_value = True
         resources = self.player.get_resources()
         print "Resources:", resources
         assert(480594 == resources['Money'])
@@ -22,12 +24,25 @@ class player_tests(object):
         assert(213924 == resources['Net Worth'])
         assert(153.021 == resources['Net Worth/Acre'])
 
+    @mock.patch('urllib2.urlopen')
+    @mock.patch('urllib2.Request')
+    @mock.patch.object(utopia.UPlayer,'cache_page')
+    def test_mana(self, mock_cache_page, mock_request, mock_urlopen):
+        mock_urlopen.return_value = mock_request
+        mock_request.read.return_value = open('test/mystic_page.html').read()
+        mock_cache_page.return_value = True
+
+        mana = self.player.get_mana()
+        print "Mana:", mana
+        assert(68  == mana)
 
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
-    def test_available_spells(self, mock_request, mock_urlopen):
+    @mock.patch.object(utopia.UPlayer,'cache_page')
+    def test_available_spells(self, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/mystic_page.html').read()
+        mock_cache_page.return_value = True
         available_spells = self.player.get_available_spells()
         print "Available spells:", available_spells
         assert(('FERTILE_LANDS',815) == available_spells['Fertile Lands'])
@@ -47,14 +62,18 @@ class player_tests(object):
         assert(('MINOR_PROTECTION', 570) == available_spells['Minor Protection'])
 
 
-    # @mock.patch('urllib2.urlopen')
-    # @mock.patch('urllib2.Request')
-    # def test_active_spells(self, mock_request, mock_urlopen):
-    #     mock_urlopen.return_value = mock_request
-    #     mock_request.read.return_value = open('test/mystic_advisor.html').read()
-    #     available_spells = self.player.get_available_spells()
-    #     print "Available spells:", available_spells
-    #     assert(1==2)
+    @mock.patch('urllib2.urlopen')
+    @mock.patch('urllib2.Request')
+    def test_active_spells(self, mock_request, mock_urlopen):
+        mock_urlopen.return_value = mock_request
+        mock_request.read.return_value = open('test/mystic_advisor.html').read()
+        active_spells = self.player.get_active_spells()
+        print "Active spells:", active_spells
+        assert(14 == active_spells['Fountain of Knowledge'])
+        assert( 3 == active_spells["Nature's Blessing"])
+        assert(15 == active_spells['Minor Protection'])
+        assert( 1 == active_spells['Love and Peace'])
+
 
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
@@ -72,3 +91,34 @@ class player_tests(object):
         print mystic_form
         assert('88e2dabb2a8b615561e743d05668d47d' == mystic_form['inputs']['csrfmiddlewaretoken']['value'])
 
+    @mock.patch('urllib2.urlopen')
+    @mock.patch('urllib2.Request')
+    @mock.patch.object(utopia.UPlayer,'cache_page')
+    def test_get_troops(self, mock_cache_page, mock_request, mock_urlopen):
+        mock_urlopen.return_value = mock_request
+        mock_request.read.return_value = open('test/military_page.html').read()
+        mock_cache_page.return_value = True
+
+        troops = self.player.get_troops()
+
+        print "troops:", troops
+        assert(1530 == troops['o-spec']['home'])
+        assert(1530 == troops['o-spec']['home'])
+        assert(807 == troops['o-spec']['training'])
+        assert(350 == troops['o-spec']['cost'])
+        assert(806 == troops['o-spec']['max'])
+
+        assert(839 == troops['d-spec']['home'])
+        assert(165 == troops['d-spec']['training'])
+        assert(350 == troops['d-spec']['cost'])
+        assert(806 == troops['d-spec']['max'])
+
+        assert(11184 == troops['elite']['home'])
+        assert(53 == troops['elite']['training'])
+        assert(500 == troops['elite']['cost'])
+        assert(564 == troops['elite']['max'])
+
+        assert(2222 == troops['thief']['home'])
+        assert(0 == troops['thief']['training'])
+        assert(500 == troops['thief']['cost'])
+        assert(564 == troops['thief']['max'])

@@ -35,6 +35,11 @@ class UPlayer(object):
     nav_links = {
         'Throne': '/wol/game/throne',
         'Mystics': '/wol/game/enchantment',
+        'Military': '/wol/game/train_army',
+        }
+
+    advisor_links = {
+        'Mystics': '/wol/game/council_spells'
         }
 
     #properties
@@ -190,6 +195,48 @@ class UPlayer(object):
         if self.parser.get_nav_links():
             self.nav_links = self.parser.get_nav_links()
 
+    def _get_mystic_advisor(self):
+        log.debug("_get_mystic_advisor()")
+        assert(0 < len(self.advisor_links['Mystics']))
+        data = None
+        req = urllib2.Request(URL_BASE + self.advisor_links['Mystics'], data, self.headers)
+        res = urllib2.urlopen(req)
+        self.result = res.read()
+        self.parser = htmlparser.MysticAdvisorParser()
+        self.parser.parse(self.result)
+        self.cache_page(self.parser.current_page, self.result)
+        log.debug("Page loaded, self.parser.current_page: %s" % self.parser.current_page)
+        if 'PAGE_INIT' == self.parser.current_page:
+            log.info("Not logged in, -> do_login()")
+            self._do_login(self)
+            self.parser = htmlparser.MysticsParser()
+            self.parser.parse(self.result)
+
+        assert('PAGE_MYSTIC_ADVISOR' == self.parser.current_page)
+        if self.parser.get_nav_links():
+            self.nav_links = self.parser.get_nav_links()
+
+    def _get_military(self):
+        log.debug("_get_military()")
+        assert(0 < len(self.nav_links['Military']))
+        data = None
+        req = urllib2.Request(URL_BASE + self.nav_links['Military'], data, self.headers)
+        res = urllib2.urlopen(req)
+        self.result = res.read()
+        self.parser = htmlparser.MilitaryParser()
+        self.parser.parse(self.result)
+        self.cache_page(self.parser.current_page, self.result)
+        log.debug("Page loaded, self.parser.current_page: %s" % self.parser.current_page)
+        if 'PAGE_INIT' == self.parser.current_page:
+            log.info("Not logged in, -> do_login()")
+            self._do_login(self)
+            self.parser = htmlparser.MilitaryParser()
+            self.parser.parse(self.result)
+
+        assert('PAGE_MILITARY' == self.parser.current_page)
+        if self.parser.get_nav_links():
+            self.nav_links = self.parser.get_nav_links()
+
     def _check_login(self):
         log.debug("_check_login()")
         return self.is_loggedin
@@ -206,6 +253,13 @@ class UPlayer(object):
             self._get_mystics()
         assert('PAGE_MYSTIC' == self.parser.current_page)
         return self.parser.get_available_spells()
+
+    def get_active_spells(self):
+        log.debug("get_active_spells()")
+        if self.parser is None or self.parser.current_age != 'PAGE_MYSTIC_ADVISOR':
+            self._get_mystic_advisor()
+        assert('PAGE_MYSTIC_ADVISOR' == self.parser.current_page)
+        return self.parser.get_active_spells()
 
     def get_mana(self):
         log.debug("get_mana()")
@@ -243,6 +297,13 @@ class UPlayer(object):
         self.cache_page(self.parser.current_page, self.result)
         #Return the result
         return self.parser.get_spell_result()
+
+    def get_troops(self):
+        log.debug("get_troops()")
+        if self.parser is None or self.parser.current_page != 'PAGE_MILITARY':
+            self._get_military()
+        assert('PAGE_MILITARY' == self.parser.current_page)
+        return self.parser.get_troops()
 
 
 if __name__ == "__main__":

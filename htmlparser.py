@@ -365,7 +365,7 @@ class MysticParser(UtopiaParser):
 
     def start_form(self, attributes):
         attr = dict(attributes)
-        if "" == attr['action'] and "POST" == attr['method'] and 'name' not in attr:
+        if 'action' in attr and 'method' in attr and "" == attr['action'] and 'name' not in attr and "POST" == attr['method']:
             self.parser_state['mystic_form'] = True
             self.mystic_form = {}
             self.mystic_form['form'] = attr
