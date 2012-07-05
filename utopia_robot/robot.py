@@ -64,7 +64,6 @@ class UtopiaRobot(object):
             fh.close()
 
     def _simulate_wait(self):
-        assert(1==2)
         time.sleep(random.randrange(3,20))
 
 
