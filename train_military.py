@@ -48,10 +48,23 @@ def main():
         player.cast_spell('Minor Protection')
         spells = player.get_available_spells()
 
-    resources = player.get_resources()
+    while player.get_mana >= 10 and player.get_soldiers() > 0:
+        resources = player.get_resources()
+        leet_count = resources['Money'] / 500
 
-    if player.get_soldiers() > 0:
-        troops={"thief": 1}
+        while 1 > leet_count and player.get_mana >= 10:
+            player.cast_spell("Tree of Gold")
+            resources = player.get_resources()
+            leet_count = resources['Money'] / 500
+
+        if 1 > leet_count:
+            spec_count = resources['Money'] / 350
+            troops={'d-spec': spec_count}
+            if 1 > spec_count:
+                break
+        else:
+            troops={'elite': leet_count}
+
         print "train_military(%s): %s" % (troops, player.train_military(troops))
         # troops = get_troops()
         # if (troops['d-specs']['Home'] + troops['elite']['Home'])*3 < resouces['Acres'] :
