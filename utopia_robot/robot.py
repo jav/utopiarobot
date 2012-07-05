@@ -312,6 +312,14 @@ class UtopiaRobot(object):
         assert('PAGE_MILITARY' == self.parser.current_page)
         return self.parser.get_soldiers()
 
+    def get_draft_rate(self):
+        log.debug("get_draft_rate()")
+        if self.parser is None or self.parser.current_page != 'PAGE_MILITARY':
+            self._get_military()
+        assert('PAGE_MILITARY' == self.parser.current_page)
+        return self.parser.get_draft_rate()
+
+
     def train_military(self, troops_dict):
         log.debug("train_troops( %s )" % troops_dict)
         if self.parser is None or self.parser.current_page != 'PAGE_MILITARY':
@@ -323,17 +331,21 @@ class UtopiaRobot(object):
         log.debug("url: %s" % url)
 
         log.debug("military_form['inputs']: %s" % military_form['inputs'])
-        values = military_form['inputs']
-        for troop in troops_dict:
-            if 'o-spec' == troop:
-                field = 'unit-quantity_0'
-            if 'd-spec' == troop:
-                field = 'unit-quantity_1'
-            if 'elite' == troop:
-                field = 'unit-quantity_2'
-            if 'tief' == troop:
-                field = 'unit-quantity_3'
-            values[field]['value'] = troops_dict[troop]
+
+        for (troop, field) in zip(['o-spec','d-spec','elite', 'thief'],['unit-quantity_0', 'unit-quantity_1', 'unit-quantity_2', 'unit-quantity_3']):
+            if troop in troops_dict:
+                military_form['inputs'][field]['value'] = troops_dict[troop]
+            else:
+                military_form['inputs'][field]['value'] = ""
+
+        log.debug("military_form['inputs']: %s" % military_form['inputs'])
+        values = {}
+        for k,v in military_form['inputs'].items():
+            if 'value' in v:
+                values[k] = v['value']
+
+        values['draft_rate'] = self.parser.get_draft_rate()[1]
+        log.debug("values: %s" % values)
 
         data = urllib.urlencode(values)
         req = urllib2.Request(url, data, self.headers)

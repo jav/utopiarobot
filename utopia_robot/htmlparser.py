@@ -167,6 +167,18 @@ class UtopiaParser(sgmllib.SGMLParser, object):
     def end_input(self):
         pass
 
+    def start_select(self, attributes):
+        pass
+
+    def end_select(self):
+        pass
+
+    def start_option(self, attributes):
+        pass
+
+    def end_option(self):
+        pass
+
     def handle_data(self, data):
         if 'head' in self.parser_state and self.parser_state['head']:
             if 'title' in self.parser_state and self.parser_state['title']:
@@ -186,7 +198,7 @@ class UtopiaParser(sgmllib.SGMLParser, object):
                     self.current_page="PAGE_MYSTIC"
                 if "Army" in self.title:
                     self.current_page="PAGE_MILITARY"
-                log.debug("SAVED PAGE: %s" % self.current_page)
+                log.debug("DETECTED PAGE: %s" % self.current_page)
         if 'h2' in self.parser_state and self.parser_state['h2']:
             if 'The game is currently ticking. Please wait a few moments' in  data:
                 self.tick_ongoing = True
@@ -580,6 +592,13 @@ class MilitaryParser(UtopiaParser):
         self.parser_state['MilitaryParser']['soldier_mark'] = False
         self.parser_state['MilitaryParser']['form'] = False
         self.parser_state['MilitaryParser']['inputs'] = False
+        self.parser_state['MilitaryParser']['select'] = False
+        self.parser_state['MilitaryParser']['option'] = False
+        self.parser_state['MilitaryParser']['selected_draft_val'] = False
+        self.parser_state['MilitaryParser']['last_draft_level'] = False
+        self.parser_state['MilitaryParser']['last_draft_label'] = False
+        self.parser_state['MilitaryParser']['select_draft_rate'] = False
+
 
         self.military_form = {}
         self.troops = {}
@@ -587,6 +606,8 @@ class MilitaryParser(UtopiaParser):
         self.troops_list = ['o-spec', 'd-spec', 'elite', 'thief']
         self.vals_list = ['home', 'training', 'cost', 'max']
         self.train_result = None
+        self.draft_levels = {}
+        self.selected_draft_rate = None
 
     def parse(self, s):
         self.feed(s)
@@ -655,11 +676,41 @@ class MilitaryParser(UtopiaParser):
     def start_input(self, attributes):
         super(MilitaryParser, self).start_input(attributes)
         attr=dict(attributes)
+        #self.parser_state['MilitaryParser']['input']
         if self.parser_state['MilitaryParser']['form']:
             if 'name' in attr:
                 self.parser_state['MilitaryParser']['inputs'][attr['name']] = attr
             else:
                 self.parser_state['MilitaryParser']['other_inputs'].append(attr)
+
+    def start_select(self, attributes):
+        super(MilitaryParser, self).start_select(attributes)
+        attr=dict(attributes)
+        self.parser_state['MilitaryParser']['select'] = attr
+        if 'name' in attr and 'draft_rate' == attr['name']:
+            self.parser_state['MilitaryParser']['select_draft_rate'] = True
+
+
+    def end_select(self):
+        super(MilitaryParser, self).end_select()
+        self.parser_state['MilitaryParser']['select'] = False
+
+    def start_option(self, attributes):
+        super(MilitaryParser, self).start_option(attributes)
+        attr=dict(attributes)
+        self.parser_state['MilitaryParser']['option'] = attr
+        if self.parser_state['MilitaryParser']['select_draft_rate']:
+            self.parser_state['MilitaryParser']['last_draft_level'] = attr['value']
+            if 'selected' in attr and 'selected' == attr['selected']:
+                self.parser_state['MilitaryParser']['selected_draft_val'] = attr['value']
+
+    def end_option(self):
+        super(MilitaryParser, self).end_option()
+        self.parser_state['MilitaryParser']['option'] = False
+        self.draft_levels[self.parser_state['MilitaryParser']['last_draft_label']] = self.parser_state['MilitaryParser']['last_draft_level']
+        if self.parser_state['MilitaryParser']['selected_draft_val']:
+            self.selected_draft_rate = {self.parser_state['MilitaryParser']['last_draft_label']: self.parser_state['MilitaryParser']['last_draft_level']}
+            self.parser_state['MilitaryParser']['selected_draft_val'] = False
 
     def handle_data(self, data):
         super(MilitaryParser, self).handle_data(data)
@@ -683,14 +734,22 @@ class MilitaryParser(UtopiaParser):
                     self.troops[self.troops_list[self.parser_state['MilitaryParser']['current_troop']]][self.vals_list[self.parser_state['MilitaryParser']['current_val']]] = int(data)
                 except:
                     pass
+
         if self.parser_state['MilitaryParser']['div']:
             if 'class' in self.parser_state['MilitaryParser']['div'] and 'good message' == self.parser_state['MilitaryParser']['div']['class']:
                 log.debug("RACE_PROP %s", RACE_PROP)
                 self.train_result={}
                 for race_troop, troop in zip(RACE_PROP['human']['troops']+["thieves"], ['o-spec', 'd-spec', 'elite', 'thief']): # TODO: Make race a variable!
+                    log.debug("Parsing 'good message' - data: %s", data)
                     match = re.search("([0-9]+) %s" % race_troop, data)
-                    log.debug("train_result[%s] = %s" % (troop, match.group(1)))
-                    self.train_result[troop] = int(match.group(1))
+                    if match is not None:
+                        log.debug("train_result[%s] = %s" % (troop, match.group(1)))
+                        self.train_result[troop] = int(match.group(1))
+        #if self.parser_state['MilitaryParser']['inputs']
+
+        if self.parser_state['MilitaryParser']['select_draft_rate']:
+            self.parser_state['MilitaryParser']['last_draft_label'] = data.strip()
+
     def get_military_form(self):
         log.debug("get_military_form(): %s" % self.military_form)
         return self.military_form
@@ -705,3 +764,8 @@ class MilitaryParser(UtopiaParser):
 
     def get_train_result(self):
         return self.train_result
+
+    def get_draft_rate(self):
+        if self.selected_draft_rate is None:
+            return self.selected_draft_rate
+        return self.selected_draft_rate.items()[0]

@@ -52,13 +52,14 @@ def main():
 
     if player.get_soldiers() > 0:
         troops={"d-spec": 1}
-        player.train_military(troops)
+        print "train_military(%s): %s" % (troops, player.train_military(troops))
         # troops = get_troops()
         # if (troops['d-specs']['Home'] + troops['elite']['Home'])*3 < resouces['Acres'] :
         #     #Safe assumption, both have 5 def
         #     # leave 150 raw dpa
         #     pass
 
+    print "DONE"
 
 if __name__ == "__main__":
     main()

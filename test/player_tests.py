@@ -159,11 +159,13 @@ class player_tests(object):
         assert(33 == military_result['d-spec'])
         assert(22 == military_result['elite'])
         assert(11 == military_result['thief'])
+        print "self.player.get_draft_rate():", self.player.get_draft_rate()
+        print "self.player.get_draft_rate()[1]:", self.player.get_draft_rate()[1]
+        assert('AGGRESSIVE' == self.player.get_draft_rate()[1])
 
         military_form = self.player.parser.get_military_form()
         print military_form
         assert('88e2dabb2a8b615561e743d05668d47d' == military_form['inputs']['csrfmiddlewaretoken']['value'])
-
 
 #train form-data
 # csrfmiddlewaretoken:88e2dabb2a8b615561e743d05668d47d
