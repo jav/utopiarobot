@@ -1,0 +1,6 @@
+*~
+*.pyc
+*.save
+cookie_file.txt
+page_cache
+test/anonymize.sh
