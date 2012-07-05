@@ -4,7 +4,7 @@ import cookielib
 import inspect
 #from ipdb import set_trace
 import logging
-from optparse import OptionParser
+
 import os
 import urllib
 import urllib2
@@ -188,7 +188,7 @@ class UtopiaRobot(object):
         if 'PAGE_INIT' == self.parser.current_page:
             log.info("Not logged in, -> do_login()")
             self._do_login(self)
-            self.parser = htmlparser.MysticsParser()
+            self.parser = htmlparser.MysticParser()
             self.parser.parse(self.result)
 
         assert('PAGE_MYSTIC' == self.parser.current_page)
@@ -323,7 +323,7 @@ class UtopiaRobot(object):
         log.debug("url: %s" % url)
 
         log.debug("military_form['inputs']: %s" % military_form['inputs'])
-        data = military_form['inputs']
+        values = military_form['inputs']
         for troop in troops_dict:
             if 'o-spec' == troop:
                 field = 'unit-quantity_0'
@@ -333,9 +333,9 @@ class UtopiaRobot(object):
                 field = 'unit-quantity_2'
             if 'tief' == troop:
                 field = 'unit-quantity_3'
-            data[field]['value'] = troops_dict[troop]
+            values[field]['value'] = troops_dict[troop]
 
-
+        data = urllib.urlencode(values)
         req = urllib2.Request(url, data, self.headers)
         res = urllib2.urlopen(req)
         self.result = res.read()

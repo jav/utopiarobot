@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
+import logging
+from optparse import OptionParser
+
 from utopia_robot.robot import UtopiaRobot
+
+log = logging.getLogger(__name__)
 
 def main():
     parser = OptionParser()
@@ -40,17 +45,19 @@ def main():
     spells = player.get_available_spells()
 
     while spells['Minor Protection'] <= 1:
-        self.cast_spell('Minor Protection')
+        player.cast_spell('Minor Protection')
         spells = player.get_available_spells()
 
     resources = player.get_resources()
 
-    if self.get_soldiers() > 0:
-        troops = get_troops()
-        if (troops['d-specs']['Home'] + troops['elite']['Home'])*3 < resouces['Acres'] :
-            #Safe assumption, both have 5 def
-            # leave 150 raw dpa
-            pass
+    if player.get_soldiers() > 0:
+        troops={"d-spec": 1}
+        player.train_military(troops)
+        # troops = get_troops()
+        # if (troops['d-specs']['Home'] + troops['elite']['Home'])*3 < resouces['Acres'] :
+        #     #Safe assumption, both have 5 def
+        #     # leave 150 raw dpa
+        #     pass
 
 
 if __name__ == "__main__":
