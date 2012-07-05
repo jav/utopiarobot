@@ -1,6 +1,8 @@
-import  logging
+import logging
+import re
 import sgmllib
 import string
+from utopia_robot.race_properties import RACE_PROP
 
 log = logging.getLogger(__name__)
 
@@ -153,6 +155,18 @@ class UtopiaParser(sgmllib.SGMLParser, object):
     def end_td(self):
         pass
 
+    def start_form(self, attributes):
+        pass
+
+    def end_form(self):
+        pass
+
+    def start_input(self, attributes):
+        pass
+
+    def end_input(self):
+        pass
+
     def handle_data(self, data):
         if 'head' in self.parser_state and self.parser_state['head']:
             if 'title' in self.parser_state and self.parser_state['title']:
@@ -216,7 +230,6 @@ class LoginParser(UtopiaParser):
         self.parser_state['login_form'] = ""
 
     def parse(self, s):
-        log.debug("%s : parse() - parser_state: %s" % (__name__, self.parser_state))
         self.feed(s)
         self.close()
 
@@ -269,7 +282,6 @@ class LobbyParser(UtopiaParser):
         self.hyperlinks = []
 
     def parse(self, s):
-        log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
         self.feed(s)
         self.close()
 
@@ -311,7 +323,6 @@ class ProvSelectParser(UtopiaParser):
         self.current_page="PAGE_NONE"
 
     def parse(self, s):
-        log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
         self.feed(s)
         self.close()
 
@@ -337,7 +348,6 @@ class ThroneParser(UtopiaParser):
         self.last_page="PAGE_NONE"
 
     def parse(self, s):
-        log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
         self.feed(s)
         self.close()
 
@@ -359,7 +369,6 @@ class MysticParser(UtopiaParser):
         self.parser_state['mana'] = False
 
     def parse(self, s):
-        log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
         self.feed(s)
         self.close()
 
@@ -497,7 +506,6 @@ class MysticAdvisorParser(UtopiaParser):
         self.active_spells = {}
 
     def parse(self, s):
-        log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
         self.feed(s)
         self.close()
 
@@ -552,7 +560,6 @@ class MysticAdvisorParser(UtopiaParser):
                 except:
                     pass
 
-
     def get_active_spells(self):
         return self.active_spells
 
@@ -571,15 +578,17 @@ class MilitaryParser(UtopiaParser):
         self.parser_state['MilitaryParser']['current_troop'] = -1
         self.parser_state['MilitaryParser']['current_val'] = 0
         self.parser_state['MilitaryParser']['soldier_mark'] = False
+        self.parser_state['MilitaryParser']['form'] = False
+        self.parser_state['MilitaryParser']['inputs'] = False
 
-        self.current_spell = {}
+        self.military_form = {}
         self.troops = {}
         self.soldier = 0
         self.troops_list = ['o-spec', 'd-spec', 'elite', 'thief']
         self.vals_list = ['home', 'training', 'cost', 'max']
+        self.train_result = None
 
     def parse(self, s):
-        log.debug("%s : parse() - state: %s"% (__name__, self.parser_state))
         self.feed(s)
         self.close()
 
@@ -615,6 +624,43 @@ class MilitaryParser(UtopiaParser):
         super(MilitaryParser, self).end_table()
         self.parser_state['MilitaryParser']['troops'] = False
 
+    def start_div(self, attributes):
+        super(MilitaryParser, self).start_div(attributes)
+        attr=dict(attributes)
+        self.parser_state['MilitaryParser']['div'] = attr
+        self.parser_state['MilitaryParser']['div_depth'] += 1
+
+    def end_div(self):
+        super(MilitaryParser, self).end_div()
+        self.parser_state['MilitaryParser']['div'] = False
+        self.parser_state['MilitaryParser']['div_depth'] -= 1
+
+    def start_form(self, attributes):
+        super(MilitaryParser, self).start_form(attributes)
+        attr=dict(attributes)
+        self.parser_state['MilitaryParser']['form'] = attr
+        self.parser_state['MilitaryParser']['inputs'] = {}
+        self.parser_state['MilitaryParser']['other_inputs'] = []
+        log.debug("starting form: %s" % self.parser_state['MilitaryParser']['form'] )
+
+    def end_form(self):
+        super(MilitaryParser, self).end_form()
+        if self.parser_state['MilitaryParser']['inputs'] and 'csrfmiddlewaretoken' in self.parser_state['MilitaryParser']['inputs']:
+            self.military_form = {}
+            self.military_form['form'] = self.parser_state['MilitaryParser']['form']
+            self.military_form['inputs'] = self.parser_state['MilitaryParser']['inputs']
+            self.military_form['other_inputs'] = self.parser_state['MilitaryParser']['other_inputs']
+            log.debug("self.military_form: %s" % self.military_form)
+
+    def start_input(self, attributes):
+        super(MilitaryParser, self).start_input(attributes)
+        attr=dict(attributes)
+        if self.parser_state['MilitaryParser']['form']:
+            if 'name' in attr:
+                self.parser_state['MilitaryParser']['inputs'][attr['name']] = attr
+            else:
+                self.parser_state['MilitaryParser']['other_inputs'].append(attr)
+
     def handle_data(self, data):
         super(MilitaryParser, self).handle_data(data)
         if self.parser_state['MilitaryParser']['th']:
@@ -629,7 +675,6 @@ class MilitaryParser(UtopiaParser):
                 self.soldiers = int(data.replace(",",""))
                 self.parser_state['MilitaryParser']['soldier_mark'] = False
             if self.parser_state['MilitaryParser']['troops']:
-
                 data = data.replace(",","")
                 data = data.replace("gc","")
                 try:
@@ -638,6 +683,17 @@ class MilitaryParser(UtopiaParser):
                     self.troops[self.troops_list[self.parser_state['MilitaryParser']['current_troop']]][self.vals_list[self.parser_state['MilitaryParser']['current_val']]] = int(data)
                 except:
                     pass
+        if self.parser_state['MilitaryParser']['div']:
+            if 'class' in self.parser_state['MilitaryParser']['div'] and 'good message' == self.parser_state['MilitaryParser']['div']['class']:
+                log.debug("RACE_PROP %s", RACE_PROP)
+                self.train_result={}
+                for race_troop, troop in zip(RACE_PROP['human']['troops']+["thieves"], ['o-spec', 'd-spec', 'elite', 'thief']): # TODO: Make race a variable!
+                    match = re.search("([0-9]+) %s" % race_troop, data)
+                    log.debug("train_result[%s] = %s" % (troop, match.group(1)))
+                    self.train_result[troop] = int(match.group(1))
+    def get_military_form(self):
+        log.debug("get_military_form(): %s" % self.military_form)
+        return self.military_form
 
     def get_troops(self):
         log.debug("get_troops(): %s" % self.troops)
@@ -646,3 +702,6 @@ class MilitaryParser(UtopiaParser):
     def get_soldiers(self):
         log.debug("get_soldiers(): %s" % self.soldiers)
         return self.soldiers
+
+    def get_train_result(self):
+        return self.train_result

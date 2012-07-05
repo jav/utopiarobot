@@ -138,24 +138,32 @@ class player_tests(object):
 
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
-    @mock.patch.object(htmlparser.MysticParser, 'get_nav_links')
+    @mock.patch.object(htmlparser.MilitaryParser, 'get_nav_links')
     @mock.patch.object(UtopiaRobot,'cache_page')
-    def test_train_troops(self, mock_cache_page, mock_mysticparser_nav, mock_request, mock_urlopen):
-        return
+    def test_train_troops(self, mock_cache_page, mock_militaryparser_nav, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
-        mock_request.read.return_value = open('test/military_page.html').read()
-        mock_mysticparser_nav.return_value = {'Military': '/wol/game/train_army'}
+        mock_request.read.return_value = open('test/military_trained.html').read()
+        mock_militaryparser_nav.return_value = {'Military': '/wol/game/train_army'}
         mock_cache_page.return_value = True
 
-        print ("assert()")
         military={}
-        military['d-specs'] = 1
-        military['o-specs'] = 1
+        military['o-spec'] = 44
+        military['d-spec'] = 33
+        military['elite'] = 22
+        military['thief'] = 11
 
-        assert(5 == self.player.train_military(military))
+        print "Want to train: %s" % military
+        military_result = self.player.train_military(military)
+        print "Militarty result: %s" % military_result
+        assert(44 == military_result['o-spec'])
+        assert(33 == military_result['d-spec'])
+        assert(22 == military_result['elite'])
+        assert(11 == military_result['thief'])
+
         military_form = self.player.parser.get_military_form()
         print military_form
-        assert('88e2dabb2a8b615561e743d05668d47d' == mystic_form['inputs']['csrfmiddlewaretoken']['value'])
+        assert('88e2dabb2a8b615561e743d05668d47d' == military_form['inputs']['csrfmiddlewaretoken']['value'])
+
 
 #train form-data
 # csrfmiddlewaretoken:88e2dabb2a8b615561e743d05668d47d

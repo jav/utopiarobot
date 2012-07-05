@@ -312,6 +312,40 @@ class UtopiaRobot(object):
         assert('PAGE_MILITARY' == self.parser.current_page)
         return self.parser.get_soldiers()
 
+    def train_military(self, troops_dict):
+        log.debug("train_troops( %s )" % troops_dict)
+        if self.parser is None or self.parser.current_page != 'PAGE_MILITARY':
+            self._get_military()
+        assert('PAGE_MILITARY' == self.parser.current_page)
+        military_form = self.parser.get_military_form()
+
+        url = URL_BASE + self.nav_links['Military'] + military_form['form']['action']
+        log.debug("url: %s" % url)
+
+        log.debug("military_form['inputs']: %s" % military_form['inputs'])
+        data = military_form['inputs']
+        for troop in troops_dict:
+            if 'o-spec' == troop:
+                field = 'unit-quantity_0'
+            if 'd-spec' == troop:
+                field = 'unit-quantity_1'
+            if 'elite' == troop:
+                field = 'unit-quantity_2'
+            if 'tief' == troop:
+                field = 'unit-quantity_3'
+            data[field]['value'] = troops_dict[troop]
+
+
+        req = urllib2.Request(url, data, self.headers)
+        res = urllib2.urlopen(req)
+        self.result = res.read()
+        #Check the result
+        self.parser = htmlparser.MilitaryParser()
+        self.parser.parse(self.result)
+        self.cache_page(self.parser.current_page, self.result)
+        #Return the result
+        return self.parser.get_train_result()
+
 if __name__ == "__main__":
 
         parser = OptionParser()

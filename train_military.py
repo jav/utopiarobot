@@ -36,14 +36,12 @@ def main():
 
     log.info("Log in player (%s)...", player.username)
 
-
     mana = player.get_mana()
     spells = player.get_available_spells()
 
     while spells['Minor Protection'] <= 1:
         self.cast_spell('Minor Protection')
         spells = player.get_available_spells()
-
 
     resources = player.get_resources()
 
