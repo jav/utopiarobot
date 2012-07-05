@@ -739,12 +739,15 @@ class MilitaryParser(UtopiaParser):
             if 'class' in self.parser_state['MilitaryParser']['div'] and 'good message' == self.parser_state['MilitaryParser']['div']['class']:
                 log.debug("RACE_PROP %s", RACE_PROP)
                 self.train_result={}
-                for race_troop, troop in zip(RACE_PROP['human']['troops']+["thieves"], ['o-spec', 'd-spec', 'elite', 'thief']): # TODO: Make race a variable!
+                for race_troop, troop in zip(RACE_PROP['human']['troops']+[("thief", "thieves")], ['o-spec', 'd-spec', 'elite', 'thief']): # TODO: Make race a variable!
                     log.debug("Parsing 'good message' - data: %s", data)
-                    match = re.search("([0-9]+) %s" % race_troop, data)
+                    match = re.search("([0-9]+) (%s|%s)" % race_troop, data)
                     if match is not None:
                         log.debug("train_result[%s] = %s" % (troop, match.group(1)))
-                        self.train_result[troop] = int(match.group(1))
+                        trained = int(match.group(1))
+                    else:
+                        trained = 0
+                    self.train_result[troop] =trained
         #if self.parser_state['MilitaryParser']['inputs']
 
         if self.parser_state['MilitaryParser']['select_draft_rate']:

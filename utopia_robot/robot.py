@@ -4,6 +4,8 @@ import cookielib
 import inspect
 #from ipdb import set_trace
 import logging
+import random
+import time
 
 import os
 import urllib
@@ -61,6 +63,11 @@ class UtopiaRobot(object):
             fh.write(res)
             fh.close()
 
+    def _simulate_wait(self):
+        assert(1==2)
+        time.sleep(random.randrange(3,20))
+
+
     def _do_login(self, parser):
         log.debug("do_login")
 
@@ -73,6 +80,7 @@ class UtopiaRobot(object):
                 data = urllib.urlencode(values)
                 log.debug("Loading page: %s" % URL_LOGIN)
                 req = urllib2.Request(URL_LOGIN, data, self.headers)
+                _simulate_wait()
                 res = urllib2.urlopen(req)
                 self.result = res.read()
 
@@ -109,6 +117,7 @@ class UtopiaRobot(object):
             URL_TAKE_LOGIN = "%s%s" % (URL_BASE, login_info['form']['action'])
             log.debug("accessing %s POST:%s" % (URL_TAKE_LOGIN, data) )
             req = urllib2.Request(URL_TAKE_LOGIN, data, self.headers)
+            self._simulate_wait()
             res = urllib2.urlopen(req)
             self.result = res.read()
             self.cache_page(self.parser.current_page, self.result)
@@ -125,6 +134,7 @@ class UtopiaRobot(object):
             data = None
             log.debug("accessing %s POST:%s" % (URL_TAKE_WORLD_CHOICE, data) )
             req = urllib2.Request(URL_TAKE_WORLD_CHOICE, data, self.headers)
+            self._simulate_wait()
             res = urllib2.urlopen(req)
             self.result = res.read()
             log.debug(self.result)
@@ -141,6 +151,7 @@ class UtopiaRobot(object):
             data = None
             log.debug("accessing %s POST:%s" % (URL_TAKE_PROV_CHOICE, data) )
             req = urllib2.Request(URL_TAKE_PROV_CHOICE, data, self.headers)
+            self._simulate_wait()
             res = urllib2.urlopen(req)
             self.result = res.read()
             log.debug(self.result)
@@ -157,6 +168,7 @@ class UtopiaRobot(object):
         log.debug("_get_throne()")
         data = None
         req = urllib2.Request(URL_BASE + self.nav_links['Throne'], data, self.headers)
+        self._simulate_wait()
         res = urllib2.urlopen(req)
         self.result = res.read()
 
@@ -179,6 +191,7 @@ class UtopiaRobot(object):
         assert(0 < len(self.nav_links['Mystics']))
         data = None
         req = urllib2.Request(URL_BASE + self.nav_links['Mystics'], data, self.headers)
+        self._simulate_wait()
         res = urllib2.urlopen(req)
         self.result = res.read()
         self.parser = htmlparser.MysticParser()
@@ -200,6 +213,7 @@ class UtopiaRobot(object):
         assert(0 < len(self.advisor_links['Mystics']))
         data = None
         req = urllib2.Request(URL_BASE + self.advisor_links['Mystics'], data, self.headers)
+        self._simulate_wait()
         res = urllib2.urlopen(req)
         self.result = res.read()
         self.parser = htmlparser.MysticAdvisorParser()
@@ -221,6 +235,7 @@ class UtopiaRobot(object):
         assert(0 < len(self.nav_links['Military']))
         data = None
         req = urllib2.Request(URL_BASE + self.nav_links['Military'], data, self.headers)
+        self._simulate_wait()
         res = urllib2.urlopen(req)
         self.result = res.read()
         self.parser = htmlparser.MilitaryParser()
@@ -289,6 +304,7 @@ class UtopiaRobot(object):
         url = URL_BASE + self.nav_links['Mystics'] + mystic_form['form']['action']
         log.debug("url: %s" % url)
         req = urllib2.Request(url, data, self.headers)
+        self._simulate_wait()
         res = urllib2.urlopen(req)
         self.result = res.read()
         #Check the result
@@ -349,6 +365,7 @@ class UtopiaRobot(object):
 
         data = urllib.urlencode(values)
         req = urllib2.Request(url, data, self.headers)
+        self._simulate_wait()
         res = urllib2.urlopen(req)
         self.result = res.read()
         #Check the result

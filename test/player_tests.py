@@ -11,10 +11,13 @@ class player_tests(object):
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
     @mock.patch.object(UtopiaRobot,'cache_page')
-    def test_resources(self, mock_cache_page, mock_request, mock_urlopen):
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_resources(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/throne_page.html').read()
         mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
+
         resources = self.player.get_resources()
         print "Resources:", resources
         assert(480594 == resources['Money'])
@@ -27,10 +30,12 @@ class player_tests(object):
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
     @mock.patch.object(UtopiaRobot,'cache_page')
-    def test_mana(self, mock_cache_page, mock_request, mock_urlopen):
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_mana(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/mystic_page.html').read()
         mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
 
         mana = self.player.get_mana()
         print "Mana:", mana
@@ -39,10 +44,13 @@ class player_tests(object):
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
     @mock.patch.object(UtopiaRobot,'cache_page')
-    def test_available_spells(self, mock_cache_page, mock_request, mock_urlopen):
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_available_spells(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/mystic_page.html').read()
         mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
+
         available_spells = self.player.get_available_spells()
         print "Available spells:", available_spells
         assert(('FERTILE_LANDS',815) == available_spells['Fertile Lands'])
@@ -64,9 +72,14 @@ class player_tests(object):
 
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
-    def test_active_spells(self, mock_request, mock_urlopen):
+    @mock.patch.object(UtopiaRobot,'cache_page')
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_active_spells(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/mystic_advisor.html').read()
+        mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
+
         active_spells = self.player.get_active_spells()
         print "Active spells:", active_spells
         assert(14 == active_spells['Fountain of Knowledge'])
@@ -79,11 +92,13 @@ class player_tests(object):
     @mock.patch('urllib2.Request')
     @mock.patch.object(htmlparser.MysticParser, 'get_nav_links')
     @mock.patch.object(UtopiaRobot,'cache_page')
-    def test_cast_paradise_success(self, mock_cache_page, mock_mysticparser_nav, mock_request, mock_urlopen):
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_cast_paradise_success(self, mock_simulate_wait, mock_cache_page, mock_mysticparser_nav, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/spell_paradise.html').read()
         mock_mysticparser_nav.return_value = {'Mystics': '/wol/game/enchantment'}
         mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
 
         print ("assert()")
         assert(5 == self.player.cast_spell('Paradise'))
@@ -94,10 +109,12 @@ class player_tests(object):
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
     @mock.patch.object(UtopiaRobot,'cache_page')
-    def test_get_troops(self, mock_cache_page, mock_request, mock_urlopen):
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_get_troops(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/military_page.html').read()
         mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
 
         troops = self.player.get_troops()
 
@@ -126,10 +143,12 @@ class player_tests(object):
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
     @mock.patch.object(UtopiaRobot,'cache_page')
-    def test_get_soldiers(self, mock_cache_page, mock_request, mock_urlopen):
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_get_soldiers(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/military_page.html').read()
         mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
 
         soldiers = self.player.get_soldiers()
 
@@ -140,11 +159,13 @@ class player_tests(object):
     @mock.patch('urllib2.Request')
     @mock.patch.object(htmlparser.MilitaryParser, 'get_nav_links')
     @mock.patch.object(UtopiaRobot,'cache_page')
-    def test_train_troops(self, mock_cache_page, mock_militaryparser_nav, mock_request, mock_urlopen):
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_train_troops(self, mock_simulate_wait, mock_cache_page, mock_militaryparser_nav, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/military_trained.html').read()
         mock_militaryparser_nav.return_value = {'Military': '/wol/game/train_army'}
         mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
 
         military={}
         military['o-spec'] = 44

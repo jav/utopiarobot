@@ -51,7 +51,7 @@ def main():
     resources = player.get_resources()
 
     if player.get_soldiers() > 0:
-        troops={"elite": 1}
+        troops={"thief": 1}
         print "train_military(%s): %s" % (troops, player.train_military(troops))
         # troops = get_troops()
         # if (troops['d-specs']['Home'] + troops['elite']['Home'])*3 < resouces['Acres'] :
