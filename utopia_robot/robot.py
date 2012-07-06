@@ -276,6 +276,8 @@ class UtopiaRobot(object):
 
     def get_available_spells(self):
         """Get which spells are available to be cast.
+           The return is a dict( (tuple) )
+           'in-game-spell-name' = ('SPELL_CODE', int(cost))
            If we are not on the mystics page, we will load it."""
         log.debug("get_available_spells()")
         if self.parser is None or self.parser.current_page != 'PAGE_MYSTIC':
@@ -289,7 +291,7 @@ class UtopiaRobot(object):
            Only a few spells are implemented so far.
            """
         log.debug("get_active_spells()")
-        if self.parser is None or self.parser.current_age != 'PAGE_MYSTIC_ADVISOR':
+        if self.parser is None or self.parser.current_page != 'PAGE_MYSTIC_ADVISOR':
             self._get_mystic_advisor()
         assert('PAGE_MYSTIC_ADVISOR' == self.parser.current_page)
         return self.parser.get_active_spells()
