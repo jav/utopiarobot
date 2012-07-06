@@ -56,6 +56,8 @@ class UtopiaRobot(object):
         urllib2.install_opener(opener)
 
     def cache_page(self, page, res):
+        """Save a copy of the page. Currently implemented using the
+           'PAGE_SOMETHING' identifier as key."""
         if self.page_cache:
             file_name = str(zlib.crc32(page))
             fh = open(self.page_cache + "/"+ file_name + ".html", 'w+')
@@ -64,10 +66,13 @@ class UtopiaRobot(object):
             fh.close()
 
     def _simulate_wait(self):
+        """Wait rand(seconds). Expected to be used before we load a page."""
         time.sleep(random.randrange(3,20))
 
 
     def _do_login(self, parser):
+        """Perform login (from the login page through province selection
+        and onwards until we're in the game. (internal function)"""
         log.debug("do_login")
 
         # OK! Assert that we're on the login page!
@@ -164,6 +169,7 @@ class UtopiaRobot(object):
 
 
     def _get_throne(self):
+        """Load the throne page (internal function)"""
         log.debug("_get_throne()")
         data = None
         req = urllib2.Request(URL_BASE + self.nav_links['Throne'], data, self.headers)
@@ -186,6 +192,7 @@ class UtopiaRobot(object):
             self.nav_links = self.parser.get_nav_links()
 
     def _get_mystics(self):
+        """Load the mystics page (internal function)"""
         log.debug("_get_mystics()")
         assert(0 < len(self.nav_links['Mystics']))
         data = None
@@ -208,6 +215,7 @@ class UtopiaRobot(object):
             self.nav_links = self.parser.get_nav_links()
 
     def _get_mystic_advisor(self):
+        """Get the mystics council/advisor page (internal function) """
         log.debug("_get_mystic_advisor()")
         assert(0 < len(self.advisor_links['Mystics']))
         data = None
@@ -230,6 +238,7 @@ class UtopiaRobot(object):
             self.nav_links = self.parser.get_nav_links()
 
     def _get_military(self):
+        """Get the military page (internal function)"""
         log.debug("_get_military()")
         assert(0 < len(self.nav_links['Military']))
         data = None
@@ -252,16 +261,22 @@ class UtopiaRobot(object):
             self.nav_links = self.parser.get_nav_links()
 
     def _check_login(self):
+        """Check if we're logged in or not (NOT IMPLEMENTED)"""
         log.debug("_check_login()")
         return self.is_loggedin
 
     def get_resources(self):
+        """Get the players resources (from the top of the page)
+           This is implemented in the UtopiaParser baseclass, so it
+           should always be available (with the exception of login-pages)"""
         log.debug("get_resources()")
         if self.parser is None or self.parser.get_resources() is None:
             self._get_throne()
         return self.parser.get_resources()
 
     def get_available_spells(self):
+        """Get which spells are available to be cast.
+           If we are not on the mystics page, we will load it."""
         log.debug("get_available_spells()")
         if self.parser is None or self.parser.current_page != 'PAGE_MYSTIC':
             self._get_mystics()
@@ -269,6 +284,10 @@ class UtopiaRobot(object):
         return self.parser.get_available_spells()
 
     def get_active_spells(self):
+        """Get which spells are active.
+           If we are not on the mystics_council/advisor page, we will load it.
+           Only a few spells are implemented so far.
+           """
         log.debug("get_active_spells()")
         if self.parser is None or self.parser.current_age != 'PAGE_MYSTIC_ADVISOR':
             self._get_mystic_advisor()
@@ -276,6 +295,9 @@ class UtopiaRobot(object):
         return self.parser.get_active_spells()
 
     def get_mana(self):
+        """Get player mana
+           If we are not on the mystics page, we will load it.
+           """
         log.debug("get_mana()")
         if self.parser is None or self.parser.current_page != 'PAGE_MYSTIC':
             self._get_mystics()
@@ -283,6 +305,10 @@ class UtopiaRobot(object):
         return self.parser.get_mana()
 
     def cast_spell(self, spell):
+        """Cast a spell
+           If we are not on the mystics page, we will load it.
+           Returns the result (if successfull, unsucessfull is not yet implemented).
+           """
         log.debug("cast_spell()")
         #Ensure we are on the mystics page
         if self.parser is None or self.parser.current_page != 'PAGE_MYSTIC':
@@ -314,6 +340,10 @@ class UtopiaRobot(object):
         return self.parser.get_spell_result()
 
     def get_troops(self):
+        """Get the players troops.
+        Will load the military page (if not already loaded)
+        TODO: Get the troops also from the Throne page
+        """
         log.debug("get_troops()")
         if self.parser is None or self.parser.current_page != 'PAGE_MILITARY':
             self._get_military()
@@ -321,6 +351,10 @@ class UtopiaRobot(object):
         return self.parser.get_troops()
 
     def get_soldiers(self):
+        """Get the players untrained soldiers.
+        Will load the military page (if not already loaded)
+        TODO: Get the troops also from the Throne page
+        """
         log.debug("get_soldiers()")
         if self.parser is None or self.parser.current_page != 'PAGE_MILITARY':
             self._get_military()
@@ -328,6 +362,10 @@ class UtopiaRobot(object):
         return self.parser.get_soldiers()
 
     def get_draft_rate(self):
+        """Get the players draftrate.
+        Will load the military page (if not already loaded)
+        TODO: Get the troops also from the Throne page
+        """
         log.debug("get_draft_rate()")
         if self.parser is None or self.parser.current_page != 'PAGE_MILITARY':
             self._get_military()
@@ -336,6 +374,18 @@ class UtopiaRobot(object):
 
 
     def train_military(self, troops_dict):
+        """Trains a set of troops.
+        Input is expected as a dict with the following structure
+        {
+            "o-spec": <int to be trained>
+            "d-spec": <int to be trained>
+            "elite": <int to be trained>
+            "thief": <int to be trained>
+        }
+        Will load the military page (if not already loaded)
+        TODO: Get the troops also from the Throne page
+        """
+
         log.debug("train_troops( %s )" % troops_dict)
         if self.parser is None or self.parser.current_page != 'PAGE_MILITARY':
             self._get_military()
