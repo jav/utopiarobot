@@ -42,13 +42,27 @@ def main():
     log.info("Log in player (%s)...", player.username)
 
     mana = player.get_mana()
-    spells = player.get_available_spells()
+    available_spells = player.get_available_spells()
+    spells = player.get_active_spells()
+    resources = player.get_resources()
 
-    while spells['Minor Protection'] <= 1:
-        player.cast_spell('Minor Protection')
-        spells = player.get_available_spells()
+    # First and foremost, make sure we have Minor Protection
+    while spells['Minor Protection'] <= 2 and  resources['Runes'] > available_spells['Minor Protection'][1] and 10 < player.get_mana():
+        if player.cast_spell('Minor Protection') is not None:
+            break
+        spells = player.get_active_spells()
+        resources = player.get_resources()
 
-    while player.get_mana >= 10 and player.get_soldiers() > 0:
+    resources = player.get_resources()
+    # If we are low on food, make sure we cast Fertile lands.
+    while spells['Fertile Lands'] <= 2 and resources['Food'] < 30000 and resources['Runes'] > available_spells['Fertile Lands'][1] and 10 < player.get_mana():
+        if player.cast_spell('Fertile Lands') is not None:
+            break
+        spells = player.get_active_spells()
+        resources = player.get_resources()
+
+    resources = player.get_resources()
+    while 10 < player.get_mana() and player.get_soldiers() > 0:
         resources = player.get_resources()
         leet_count = resources['Money'] / 500
 
@@ -71,6 +85,10 @@ def main():
         #     #Safe assumption, both have 5 def
         #     # leave 150 raw dpa
         #     pass
+
+    while resources['Runes'] > available_spells['Paradise'][1] and 10 < player.get_mana():
+        player.cast_spell('Paradise')
+        resources = player.get_resources()
 
     print "DONE"
 
