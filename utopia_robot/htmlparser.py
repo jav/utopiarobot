@@ -55,8 +55,12 @@ class UtopiaParser(sgmllib.SGMLParser, object):
         self.parser_state['div'] = {}
         self.parser_state['div_depth'] = 0
         self.parser_state['div_navigation'] = {}
-        self.parser_state['resource-bar'] = False
+        self.parser_state['resource-bar'] = {}
+        self.parser_state['resource-bar']['index'] = -1
         self.resource_val = 0
+
+    def parse(self, s):
+        pass
 
     def start_head(self, attributes):
         self.parser_state['head'] = True
@@ -120,11 +124,23 @@ class UtopiaParser(sgmllib.SGMLParser, object):
     def start_table(self, attributes):
         attr = dict(attributes)
         if 'id' in attr and 'resource-bar' == attr['id']:
-            self.parser_state['resource-bar'] = 0
+            self.parser_state['resource-bar']['index'] = 0
 
     def end_table(self):
-        if self.parser_state['resource-bar']:
-            self.parser_state['resource-bar'] = False
+        if 0 <= self.parser_state['resource-bar']['index']:
+            self.parser_state['resource-bar']['index'] = -1
+
+    def start_thead(self, attributes):
+        pass
+
+    def end_thead(self):
+        pass
+
+    def start_tbody(self, attributes):
+        pass
+
+    def end_tbody(self):
+        pass
 
     def start_tr(self, attributes):
         pass
@@ -136,8 +152,8 @@ class UtopiaParser(sgmllib.SGMLParser, object):
         pass
 
     def end_th(self):
-        if self.parser_state['resource-bar'] is not False:
-            resource_name = self.resource_list[self.parser_state['resource-bar']]
+        if 0 <= self.parser_state['resource-bar']['index']:
+            resource_name = self.resource_list[self.parser_state['resource-bar']['index']]
             val = self.resource_val.replace(",","")
             try:
                 if "Net Worth/Acre" == resource_name:
@@ -146,8 +162,8 @@ class UtopiaParser(sgmllib.SGMLParser, object):
                     self.resources[resource_name] = int(val)
             except ValueError as ex:
                 pass
-            self.parser_state['resource-bar'] += 1
-            self.parser_state['resource-bar'] %= len(self.resource_list)
+            self.parser_state['resource-bar']['index'] += 1
+            self.parser_state['resource-bar']['index'] %= len(self.resource_list)
 
     def start_td(self, attributes):
         pass
@@ -225,13 +241,15 @@ class UtopiaParser(sgmllib.SGMLParser, object):
         if self.parser_state['a']:
             self.parser_state['a_text_buffer'].append(data)
 
-        if self.parser_state['resource-bar'] is not False:
+        if 0 <= self.parser_state['resource-bar']['index']:
             self.resource_val = data
 
     def get_nav_links(self):
+        log.debug("get_nav_links(): %s" % self.nav_links)
         return self.nav_links
 
     def get_resources(self):
+        log.debug("get_resources(): %s" % self.resources)
         return self.resources
 
 class LoginParser(UtopiaParser):
@@ -242,6 +260,7 @@ class LoginParser(UtopiaParser):
         self.parser_state['login_form'] = ""
 
     def parse(self, s):
+        super(LoginParser, self).parse(s)
         self.feed(s)
         self.close()
 
@@ -294,6 +313,7 @@ class LobbyParser(UtopiaParser):
         self.hyperlinks = []
 
     def parse(self, s):
+        super(LobbyParser, self).parse(s)
         self.feed(s)
         self.close()
 
@@ -335,6 +355,7 @@ class ProvSelectParser(UtopiaParser):
         self.current_page="PAGE_NONE"
 
     def parse(self, s):
+        super(ProvSelectParser, self).parse(s)
         self.feed(s)
         self.close()
 
@@ -360,6 +381,7 @@ class ThroneParser(UtopiaParser):
         self.last_page="PAGE_NONE"
 
     def parse(self, s):
+        super(ThroneParser, self).parse(s)
         self.feed(s)
         self.close()
 
@@ -381,6 +403,7 @@ class MysticParser(UtopiaParser):
         self.parser_state['mana'] = False
 
     def parse(self, s):
+        super(MysticParser, self).parse(s)
         self.feed(s)
         self.close()
 
@@ -490,13 +513,15 @@ class MysticParser(UtopiaParser):
 
 
     def get_mystic_form(self):
+        log.debug("get_mystic_form(): %s" % self.mystic_form)
         return self.mystic_form
 
     def get_available_spells(self):
-        log.debug("get_available_spells()")
+        log.debug("get_available_spells(): %s" % self.available_spells)
         return self.available_spells
 
     def get_mana(self):
+        log.debug("get_mana(): %s" % self.mana)
         return self.mana
 
     def get_spell_result(self):
@@ -518,6 +543,7 @@ class MysticAdvisorParser(UtopiaParser):
         self.active_spells = {}
 
     def parse(self, s):
+        super(MysticAdvisorParser, self).parse(s)
         self.feed(s)
         self.close()
 
@@ -573,6 +599,7 @@ class MysticAdvisorParser(UtopiaParser):
                     pass
 
     def get_active_spells(self):
+        log.debug("get_active_spells(): %s" % self.active_spells)
         return self.active_spells
 
 
@@ -610,6 +637,7 @@ class MilitaryParser(UtopiaParser):
         self.selected_draft_rate = None
 
     def parse(self, s):
+        super(MilitaryParser, self).parse(s)
         self.feed(s)
         self.close()
 
