@@ -43,10 +43,13 @@ def main():
 
     mana = player.get_mana()
     available_spells = player.get_available_spells()
+    log.debug("available_spells: %s" % available_spells)
     spells = player.get_active_spells()
     resources = player.get_resources()
 
     # First and foremost, make sure we have Minor Protection
+    if 'Minor Protection' not in spells:
+        spells['Minor Protection'] = 0
     while spells['Minor Protection'] <= 2 and  resources['Runes'] > available_spells['Minor Protection'][1] and 10 < player.get_mana():
         if player.cast_spell('Minor Protection') is not None:
             break
@@ -55,6 +58,8 @@ def main():
 
     resources = player.get_resources()
     # If we are low on food, make sure we cast Fertile lands.
+    if 'Fertile Lands' not in spells:
+        spells['Fertile Lands'] = 0
     while spells['Fertile Lands'] <= 2 and resources['Food'] < 30000 and resources['Runes'] > available_spells['Fertile Lands'][1] and 10 < player.get_mana():
         if player.cast_spell('Fertile Lands') is not None:
             break
