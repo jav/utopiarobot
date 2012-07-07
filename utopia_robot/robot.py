@@ -426,6 +426,9 @@ class UtopiaRobot(object):
         #Return the result
         return self.parser.get_train_result()
 
+    def get_buildings(self):
+        return {}
+
 if __name__ == "__main__":
 
         parser = OptionParser()

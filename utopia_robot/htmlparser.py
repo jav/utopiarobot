@@ -214,6 +214,8 @@ class UtopiaParser(sgmllib.SGMLParser, object):
                     self.current_page="PAGE_MYSTIC"
                 if "Army" in self.title:
                     self.current_page="PAGE_MILITARY"
+                if "Buildings" in self.title:
+                    self.current_page="PAGE_GROWTH"
                 log.debug("DETECTED PAGE: %s" % self.current_page)
         if 'h2' in self.parser_state and self.parser_state['h2']:
             if 'The game is currently ticking. Please wait a few moments' in  data:
@@ -794,9 +796,89 @@ class MilitaryParser(UtopiaParser):
         return self.soldiers
 
     def get_train_result(self):
+        log.debug("get_train_result(): %s" % self.train_result)
         return self.train_result
 
     def get_draft_rate(self):
+        log.debug("get_draft_rate(): %s" % self.selected_draft_rate)
         if self.selected_draft_rate is None:
             return self.selected_draft_rate
         return self.selected_draft_rate.items()[0]
+
+
+class GrowthParser(UtopiaParser):
+    def __init__(self, verbose=0):
+        super(GrowthParser, self).__init__(verbose)
+        self.last_page="PAGE_NONE"
+
+        self.parser_state['GrowthParser'] = {}
+        self.parser_state['GrowthParser']['th'] = False
+        self.parser_state['GrowthParser']['tbody'] = False
+        self.parser_state['GrowthParser']['td'] = False
+        self.parser_state['GrowthParser']['buildings_list_started'] = False
+        self.parser_state['GrowthParser']['building_index'] = 0
+        self.parser_state['GrowthParser']['building_val_index'] = 0
+        self.parser_state['GrowthParser']['current_building'] = None
+
+        self.buildings_list = ['Homes', 'Farms', 'Mills', 'Banks', 'Training Grounds', 'Armouries', 'Military Barracks', 'Forts', 'Guard Stations', 'Hospitals', 'Guilds', 'Towers', "Thieves' Dens", 'Watch Towers', 'Libraries', 'Schools', 'Stables', 'Dungeons']
+
+        self.build_form = {}
+        self.build_result = {}
+        self.buildings = {}
+
+    def parse(self, s):
+        super(GrowthParser, self).parse(s)
+        self.feed(s)
+        self.close()
+
+    def start_th(self, attributes):
+        super(GrowthParser, self).start_th(attributes)
+        self.parser_state['GrowthParser']['th'] = True
+
+    def end_th(self):
+        super(GrowthParser, self).end_th()
+        self.parser_state['GrowthParser']['th'] = False
+
+    def start_tbody(self, attributes):
+        super(GrowthParser, self).start_tbody(attributes)
+        self.parser_state['GrowthParser']['tbody'] = True
+
+    def end_tbody(self):
+        super(GrowthParser, self).end_tbody()
+        if self.parser_state['GrowthParser']['buildings_list_started']:
+            log.debug("Ending buildings section.")
+        self.parser_state['GrowthParser']['tbody'] = False
+        self.parser_state['GrowthParser']['buildings_list_started'] = False
+
+    def start_td(self, attributes):
+        super(GrowthParser, self).start_td(attributes)
+        self.parser_state['GrowthParser']['td'] = True
+
+    def end_td(self):
+        super(GrowthParser, self).end_td()
+        self.parser_state['GrowthParser']['td'] = False
+
+    def handle_data(self, data):
+        super(GrowthParser, self).handle_data(data)
+        if "You Own" == data:
+            log.debug("Starting buildings section.")
+            self.parser_state['GrowthParser']['buildings_list_started'] = True
+        if self.parser_state['GrowthParser']['tbody'] and self.parser_state['GrowthParser']['buildings_list_started']:
+            if self.parser_state['GrowthParser']['th']:
+
+                log.debug("Storing %s to self.buildings." % data)
+                self.parser_state['GrowthParser']['current_building'] = self.buildings_list[self.parser_state['GrowthParser']['building_index']]
+                self.buildings[self.parser_state['GrowthParser']['current_building']] = {}
+                self.parser_state['GrowthParser']['building_val_index'] = 0
+                self.parser_state['GrowthParser']['building_index'] += 1
+            if self.parser_state['GrowthParser']['td'] and 2 > self.parser_state['GrowthParser']['building_val_index']:
+                if self.parser_state['GrowthParser']['building_val_index'] == 0:
+                    self.buildings[self.parser_state['GrowthParser']['current_building']]['built'] = int(data.replace(',',''))
+                else:
+                    self.buildings[self.parser_state['GrowthParser']['current_building']]['incoming'] = int(data.replace(',',''))
+                self.parser_state['GrowthParser']['building_val_index'] += 1
+
+    def get_buildings(self):
+        log.debug("get_buildings(): %s" % self.buildings)
+        return self.buildings
+

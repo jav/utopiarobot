@@ -239,3 +239,70 @@ class military_parser_tests(object):
                 assert(0 == troops['thief']['training'])
                 assert(500 == troops['thief']['cost'])
                 assert(564 == troops['thief']['max'])
+
+class growth_parser_tests(object):
+        def setup(self):
+                self.parser = htmlparser.GrowthParser()
+                in_file = "test/growth_page.html"
+                try:
+                        with open(in_file) as page:
+                                self.parser.parse(page.read())
+                except IOError as e:
+                        print "CANNOT OPEN FILE %s. For this test to work, you need a copy of the tested page at %s" % (in_file, in_file)
+
+        def test_page_enum(self):
+                print self.parser.current_page
+                assert("PAGE_GROWTH" == self.parser.current_page)
+
+        def test_get_buildings(self):
+                buildings = self.parser.get_buildings()
+                print "buildings:", buildings
+
+                assert(228 == buildings['Homes']['built'])
+                assert( 36 == buildings['Homes']['incoming'])
+                assert(167 == buildings['Farms']['built'])
+                assert( 18 == buildings['Farms']['incoming'])
+                assert(  0 == buildings['Mills']['built'])
+                assert(  0 == buildings['Mills']['incoming'])
+                assert(486 == buildings['Banks']['built'])
+                assert( 50 == buildings['Banks']['incoming'])
+                assert(106 == buildings['Training Grounds']['built'])
+                assert(  0 == buildings['Training Grounds']['incoming'])
+                assert(  0 == buildings['Armouries']['built'])
+                assert(  0 == buildings['Armouries']['incoming'])
+
+                assert(  0 == buildings['Military Barracks']['built'])
+                assert(  0 == buildings['Military Barracks']['incoming'])
+
+                assert( 98 == buildings['Forts']['built'])
+                assert(  0 == buildings['Forts']['incoming'])
+
+                assert(  0 == buildings['Guard Stations']['built'])
+                assert(  0 == buildings['Guard Stations']['incoming'])
+
+                assert(  0 == buildings['Hospitals']['built'])
+                assert(  0 == buildings['Hospitals']['incoming'])
+
+                assert(248 == buildings['Guilds']['built'])
+                assert( 15 == buildings['Guilds']['incoming'])
+
+                assert(196 == buildings['Towers']['built'])
+                assert( 32 == buildings['Towers']['incoming'])
+
+                assert( 28 == buildings["Thieves' Dens"]['built'])
+                assert(  0 == buildings["Thieves' Dens"]['incoming'])
+
+                assert(  0 == buildings['Watch Towers']['built'])
+                assert(  0 == buildings['Watch Towers']['incoming'])
+
+                assert(  0 == buildings['Libraries']['built'])
+                assert(  0 == buildings['Libraries']['incoming'])
+
+                assert(  0 == buildings['Schools']['built'])
+                assert(  0 == buildings['Schools']['incoming'])
+
+                assert( 96 == buildings['Stables']['built'])
+                assert(  0 == buildings['Stables']['incoming'])
+
+                assert(  0 == buildings['Dungeons']['built'])
+                assert(  0 == buildings['Dungeons']['incoming'])
