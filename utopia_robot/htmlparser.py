@@ -819,6 +819,8 @@ class GrowthParser(UtopiaParser):
         self.parser_state['GrowthParser']['building_index'] = 0
         self.parser_state['GrowthParser']['building_val_index'] = 0
         self.parser_state['GrowthParser']['current_building'] = None
+        self.parser_state['GrowthParser']['inputs'] = {}
+        self.parser_state['GrowthParser']['other_inputs'] = []
 
         self.buildings_list = ['Homes', 'Farms', 'Mills', 'Banks', 'Training Grounds', 'Armouries', 'Military Barracks', 'Forts', 'Guard Stations', 'Hospitals', 'Guilds', 'Towers', "Thieves' Dens", 'Watch Towers', 'Libraries', 'Schools', 'Stables', 'Dungeons']
 
@@ -848,7 +850,6 @@ class GrowthParser(UtopiaParser):
         if self.parser_state['GrowthParser']['buildings_list_started']:
             log.debug("Ending buildings section.")
         self.parser_state['GrowthParser']['tbody'] = False
-        self.parser_state['GrowthParser']['buildings_list_started'] = False
 
     def start_td(self, attributes):
         super(GrowthParser, self).start_td(attributes)
@@ -857,6 +858,38 @@ class GrowthParser(UtopiaParser):
     def end_td(self):
         super(GrowthParser, self).end_td()
         self.parser_state['GrowthParser']['td'] = False
+
+    def start_form(self, attributes):
+        super(GrowthParser, self).start_form(attributes)
+        attr = dict(attributes)
+        self.parser_state['GrowthParser']['form'] = True
+        self.parser_state['GrowthParser']['current_form'] = attr
+
+    def end_form(self):
+        super(GrowthParser, self).end_form()
+        self.parser_state['GrowthParser']['form'] = False
+        if self.parser_state['GrowthParser']['buildings_list_started']:
+            self.build_form['form'] = self.parser_state['GrowthParser']['current_form']
+            self.build_form['inputs'] = self.parser_state['GrowthParser']['inputs']
+            self.build_form['other_inputs'] = self.parser_state['GrowthParser']['other_inputs']
+            self.parser_state['GrowthParser']['buildings_list_started'] = False
+        log.debug("Nulling form-state.")
+        self.parser_state['GrowthParser']['inputs'] = {}
+        self.parser_state['GrowthParser']['other_inputs'] = []
+
+    def start_input(self, attributes):
+        super(GrowthParser, self).start_input(attributes)
+        attr = dict(attributes)
+        self.parser_state['GrowthParser']['input'] = True
+        if 'name' in attr:
+            log.debug("Storing ['%s'] : %s" % (attr['name'], attr))
+            self.parser_state['GrowthParser']['inputs'][attr['name']] = attr
+        else:
+            self.parser_state['GrowthParser']['other_inputs'].append(attr)
+
+    def end_input(self):
+        super(GrowthParser, self).end_input()
+        self.parser_state['GrowthParser']['input'] = False
 
     def handle_data(self, data):
         super(GrowthParser, self).handle_data(data)
@@ -882,3 +915,6 @@ class GrowthParser(UtopiaParser):
         log.debug("get_buildings(): %s" % self.buildings)
         return self.buildings
 
+    def get_build_form(self):
+        log.debug("get_growth_form_fields(): %s" % self.build_form)
+        return self.build_form

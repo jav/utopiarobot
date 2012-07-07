@@ -270,39 +270,38 @@ class growth_parser_tests(object):
                 assert(  0 == buildings['Training Grounds']['incoming'])
                 assert(  0 == buildings['Armouries']['built'])
                 assert(  0 == buildings['Armouries']['incoming'])
-
                 assert(  0 == buildings['Military Barracks']['built'])
                 assert(  0 == buildings['Military Barracks']['incoming'])
-
                 assert( 98 == buildings['Forts']['built'])
                 assert(  0 == buildings['Forts']['incoming'])
-
                 assert(  0 == buildings['Guard Stations']['built'])
                 assert(  0 == buildings['Guard Stations']['incoming'])
-
                 assert(  0 == buildings['Hospitals']['built'])
                 assert(  0 == buildings['Hospitals']['incoming'])
-
                 assert(248 == buildings['Guilds']['built'])
                 assert( 15 == buildings['Guilds']['incoming'])
-
                 assert(196 == buildings['Towers']['built'])
                 assert( 32 == buildings['Towers']['incoming'])
-
                 assert( 28 == buildings["Thieves' Dens"]['built'])
                 assert(  0 == buildings["Thieves' Dens"]['incoming'])
-
                 assert(  0 == buildings['Watch Towers']['built'])
                 assert(  0 == buildings['Watch Towers']['incoming'])
-
                 assert(  0 == buildings['Libraries']['built'])
                 assert(  0 == buildings['Libraries']['incoming'])
-
                 assert(  0 == buildings['Schools']['built'])
                 assert(  0 == buildings['Schools']['incoming'])
-
                 assert( 96 == buildings['Stables']['built'])
                 assert(  0 == buildings['Stables']['incoming'])
-
                 assert(  0 == buildings['Dungeons']['built'])
                 assert(  0 == buildings['Dungeons']['incoming'])
+
+
+        def test_get_form_fields(self):
+                build_form = self.parser.get_build_form()
+                print "build_form:", build_form
+                assert("88e2dabb2a8b615561e743d05668d47d" == build_form['inputs']['csrfmiddlewaretoken']['value'])
+                assert("Order Construction" == build_form['inputs']['build']['value'])
+                for i in range(0, 18):
+                        field = 'quantity_%d'%i
+                        print field
+                        assert( field in build_form['inputs'] )
