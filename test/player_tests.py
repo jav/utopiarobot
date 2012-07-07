@@ -209,3 +209,37 @@ class player_tests(object):
 # unit-quantity_2:
 # unit-quantity_3:
 # train:Train troops
+
+    # @mock.patch('urllib2.urlopen')
+    # @mock.patch('urllib2.Request')
+    # @mock.patch.object(UtopiaRobot,'cache_page')
+    # @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    # def test_get_buildings(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
+    #     mock_urlopen.return_value = mock_request
+    #     mock_request.read.return_value = open('test/growth_page.html').read()
+    #     mock_cache_page.return_value = True
+    #     mock_simulate_wait.return_value = True
+
+    #     buildings = self.player.get_buildings()
+
+    #     print "buildings:", buildings
+    #     assert(1293 == buildings['homes']['built'])
+
+    # @mock.patch('urllib2.urlopen')
+    # @mock.patch('urllib2.Request')
+    # @mock.patch.object(htmlparser.GrowthParser, 'get_nav_links')
+    # @mock.patch.object(UtopiaRobot,'cache_page')
+    # @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    # def test_train_troops(self, mock_simulate_wait, mock_cache_page, mock_militaryparser_nav, mock_request, mock_urlopen):
+    #     mock_urlopen.return_value = mock_request
+    #     mock_request.read.return_value = open('test/growth_built.html').read()
+    #     mock_militaryparser_nav.return_value = {'Military': '/wol/game/build'}
+    #     mock_cache_page.return_value = True
+    #     mock_simulate_wait.return_value = True
+
+    #     buildings={}
+
+    #     print "Want to train: %s" % military
+    #     military_result = self.player.train_military(military)
+    #     print "Militarty result: %s" % military_result
+    #     assert(44 == military_result['o-spec'])
