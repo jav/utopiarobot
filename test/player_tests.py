@@ -213,7 +213,6 @@ class player_tests(object):
     def test_get_buildings(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/growth_page.html').read()
-
         mock_cache_page.return_value = True
         mock_simulate_wait.return_value = True
 
@@ -258,21 +257,31 @@ class player_tests(object):
         assert(  0 == buildings['Dungeons']['incoming'])
 
 
-    # @mock.patch('urllib2.urlopen')
-    # @mock.patch('urllib2.Request')
-    # @mock.patch.object(htmlparser.GrowthParser, 'get_nav_links')
-    # @mock.patch.object(UtopiaRobot,'cache_page')
-    # @mock.patch.object(UtopiaRobot,'_simulate_wait')
-    # def test_train_troops(self, mock_simulate_wait, mock_cache_page, mock_militaryparser_nav, mock_request, mock_urlopen):
-    #     mock_urlopen.return_value = mock_request
-    #     mock_request.read.return_value = open('test/growth_built.html').read()
-    #     mock_militaryparser_nav.return_value = {'Military': '/wol/game/build'}
-    #     mock_cache_page.return_value = True
-    #     mock_simulate_wait.return_value = True
+    @mock.patch('urllib2.urlopen')
+    @mock.patch('urllib2.Request')
+    @mock.patch.object(UtopiaRobot,'cache_page')
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_build(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
+        mock_urlopen.return_value = mock_request
+        mock_request.read.return_value = open('test/growth_built.html').read()
+        mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
 
-    #     buildings={}
+        buildings={
+            'Homes': 1,
+            'Farms': 1,
+            'Banks': 1,
+            'Guilds': 1,
+            'Towers': 1,
+            'Stables': 1,
+            }
 
-    #     print "Want to train: %s" % military
-    #     military_result = self.player.train_military(military)
-    #     print "Militarty result: %s" % military_result
-    #     assert(44 == military_result['o-spec'])
+        print "Want to build: %s" % buildings
+        buildings_result = self.player.build(buildings)
+        print "Build result: %s" % buildings_result
+        assert(1 == buildings_result['Homes'])
+        assert(1 == buildings_result['Farms'])
+        assert(1 == buildings_result['Banks'])
+        assert(1 == buildings_result['Guilds'])
+        assert(1 == buildings_result['Towers'])
+        assert(1 == buildings_result['Stables'])

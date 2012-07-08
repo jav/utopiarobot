@@ -2,8 +2,7 @@ import logging
 import re
 import sgmllib
 import string
-from utopia_robot.race_properties import RACE_PROP
-
+from utopia_robot.lists import RACE_PROP, BUILDINGS
 log = logging.getLogger(__name__)
 
 # pages = {
@@ -771,7 +770,7 @@ class MilitaryParser(UtopiaParser):
                 self.train_result={}
                 for race_troop, troop in zip(RACE_PROP['human']['troops']+[("thief", "thieves")], ['o-spec', 'd-spec', 'elite', 'thief']): # TODO: Make race a variable!
                     log.debug("Parsing 'good message' - data: %s", data)
-                    match = re.search("([0-9]+) (%s|%s)" % race_troop, data)
+                    match = re.search("([0-9]+) (%s|%s)" % race_troop, data, re.IGNORECASE)
                     if match is not None:
                         log.debug("train_result[%s] = %s" % (troop, match.group(1)))
                         trained = int(match.group(1))
@@ -821,8 +820,11 @@ class GrowthParser(UtopiaParser):
         self.parser_state['GrowthParser']['current_building'] = None
         self.parser_state['GrowthParser']['inputs'] = {}
         self.parser_state['GrowthParser']['other_inputs'] = []
+        self.parser_state['GrowthParser']['div'] = False
+        self.parser_state['GrowthParser']['building_results'] = False
 
-        self.buildings_list = ['Homes', 'Farms', 'Mills', 'Banks', 'Training Grounds', 'Armouries', 'Military Barracks', 'Forts', 'Guard Stations', 'Hospitals', 'Guilds', 'Towers', "Thieves' Dens", 'Watch Towers', 'Libraries', 'Schools', 'Stables', 'Dungeons']
+        self.buildings_list = [building[1] for building in BUILDINGS]
+# ['Homes', 'Farms', 'Mills', 'Banks', 'Training Grounds', 'Armouries', 'Military Barracks', 'Forts', 'Guard Stations', 'Hospitals', 'Guilds', 'Towers', "Thieves' Dens", 'Watch Towers', 'Libraries', 'Schools', 'Stables', 'Dungeons']
 
         self.build_form = {}
         self.build_result = {}
@@ -847,8 +849,6 @@ class GrowthParser(UtopiaParser):
 
     def end_tbody(self):
         super(GrowthParser, self).end_tbody()
-        if self.parser_state['GrowthParser']['buildings_list_started']:
-            log.debug("Ending buildings section.")
         self.parser_state['GrowthParser']['tbody'] = False
 
     def start_td(self, attributes):
@@ -882,7 +882,6 @@ class GrowthParser(UtopiaParser):
         attr = dict(attributes)
         self.parser_state['GrowthParser']['input'] = True
         if 'name' in attr:
-            log.debug("Storing ['%s'] : %s" % (attr['name'], attr))
             self.parser_state['GrowthParser']['inputs'][attr['name']] = attr
         else:
             self.parser_state['GrowthParser']['other_inputs'].append(attr)
@@ -891,15 +890,27 @@ class GrowthParser(UtopiaParser):
         super(GrowthParser, self).end_input()
         self.parser_state['GrowthParser']['input'] = False
 
+    def start_div(self, attributes):
+        super(GrowthParser, self).start_div(attributes)
+        attr = dict(attributes)
+        self.parser_state['GrowthParser']['div'] = True
+        if 'class' in attr and 'good message' == attr['class']:
+            log.debug("BUIILDING RESULTS: TRUE")
+            self.parser_state['GrowthParser']['building_results'] = True
+
+    def end_div(self):
+        super(GrowthParser, self).end_div()
+        self.parser_state['GrowthParser']['div'] = False
+        if self.parser_state['GrowthParser']['building_results']:
+            log.debug("BUIILDING RESULTS: FALSE")
+        self.parser_state['GrowthParser']['building_results'] = False
+
     def handle_data(self, data):
         super(GrowthParser, self).handle_data(data)
         if "You Own" == data:
-            log.debug("Starting buildings section.")
             self.parser_state['GrowthParser']['buildings_list_started'] = True
         if self.parser_state['GrowthParser']['tbody'] and self.parser_state['GrowthParser']['buildings_list_started']:
             if self.parser_state['GrowthParser']['th']:
-
-                log.debug("Storing %s to self.buildings." % data)
                 self.parser_state['GrowthParser']['current_building'] = self.buildings_list[self.parser_state['GrowthParser']['building_index']]
                 self.buildings[self.parser_state['GrowthParser']['current_building']] = {}
                 self.parser_state['GrowthParser']['building_val_index'] = 0
@@ -911,6 +922,19 @@ class GrowthParser(UtopiaParser):
                     self.buildings[self.parser_state['GrowthParser']['current_building']]['incoming'] = int(data.replace(',',''))
                 self.parser_state['GrowthParser']['building_val_index'] += 1
 
+        if self.parser_state['GrowthParser']['building_results']:
+            log.debug("For each bulding regexp it.")
+            for singular, plural in BUILDINGS:
+                log.debug("Regexp: %s"% "([0-9]+) (%s|%s)" % (singular, plural))
+                match = re.search("([0-9]+) (%s|%s)" % (singular, plural), data, re.IGNORECASE)
+                if match is not None:
+                    built = int(match.group(1))
+                    log.debug("Building result[%s] = %s" % (plural, match.group(1)))
+                else:
+                    built = 0
+                    log.debug("Building result[%s] = 0" % plural)
+                self.build_result[plural] = built
+
     def get_buildings(self):
         log.debug("get_buildings(): %s" % self.buildings)
         return self.buildings
@@ -918,3 +942,7 @@ class GrowthParser(UtopiaParser):
     def get_build_form(self):
         log.debug("get_growth_form_fields(): %s" % self.build_form)
         return self.build_form
+
+    def get_building_result(self):
+        log.debug("get_building_result(): %s"% self.build_result)
+        return self.build_result

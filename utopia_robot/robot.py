@@ -14,6 +14,7 @@ import re
 import zlib
 
 import htmlparser
+from utopia_robot.lists import RACE_PROP, BUILDINGS
 
 log = logging.getLogger(__name__)
 
@@ -210,7 +211,7 @@ class UtopiaRobot(object):
         if 'PAGE_INIT' == self.parser.current_page:
             log.info("Not logged in, -> do_login()")
             self._do_login(self)
-            self.parser = htmlparser.ThroneParser()
+            self.parser = htmlparser.GrowthParser()
             self.parser.parse(self.result)
 
         assert('PAGE_GROWTH' == self.parser.current_page)
@@ -413,15 +414,11 @@ class UtopiaRobot(object):
         Will load the military page (if not already loaded)
         TODO: Get the troops also from the Throne page
         """
-
         log.debug("train_troops( %s )" % troops_dict)
         if self.parser is None or self.parser.current_page != 'PAGE_MILITARY':
             self._get_military()
         assert('PAGE_MILITARY' == self.parser.current_page)
         military_form = self.parser.get_military_form()
-
-        url = URL_BASE + self.nav_links['Military'] + military_form['form']['action']
-        log.debug("url: %s" % url)
 
         log.debug("military_form['inputs']: %s" % military_form['inputs'])
 
@@ -441,6 +438,8 @@ class UtopiaRobot(object):
         log.debug("values: %s" % values)
 
         data = urllib.urlencode(values)
+        url = URL_BASE + self.nav_links['Military'] + military_form['form']['action']
+        log.debug("url: %s" % url)
         req = urllib2.Request(url, data, self.headers)
         self._simulate_wait()
         res = urllib2.urlopen(req)
@@ -461,6 +460,46 @@ class UtopiaRobot(object):
             self._get_growth()
         assert('PAGE_GROWTH' == self.parser.current_page)
         return self.parser.get_buildings()
+
+    def build(self, buildings_dict):
+        """Build stuff!
+        Expects a dict with keys from lists.BUILDINGS (the plural case-sensitive version)
+        Will load the growth page.
+        """
+        log.debug("build(): %s"%buildings_dict)
+        if self.parser is None or self.parser.current_page != 'PAGE_GROWTH':
+            self._get_growth()
+        assert('PAGE_GROWTH' == self.parser.current_page)
+        growth_form = self.parser.get_build_form()
+        log.debug("growth_form: %s"%self.parser.get_build_form())
+
+        log.debug("BUILDINGS: %s"%BUILDINGS)
+        for building in BUILDINGS:
+            log.debug("building: %s"% building[1])
+            if building[1] in buildings_dict:
+                log.debug("growth_form['inputs']['%s]['value'] = %d" % ('quantity_%d'%BUILDINGS.index(building), buildings_dict[building[1]] ))
+                growth_form['inputs']['quantity_%d'%BUILDINGS.index(building)]['value'] = buildings_dict[building[1]]
+
+        log.debug("ABOUT TO BUILD: %s"%growth_form['inputs'])
+
+        values = {}
+        for k,v in growth_form['inputs'].items():
+            if 'value' in v:
+                values[k] = v['value']
+
+        data = urllib.urlencode(values)
+        url = URL_BASE + self.nav_links['Growth'] + growth_form['form']['action']
+        log.debug("url: %s" % url)
+        req = urllib2.Request(url, data, self.headers)
+        self._simulate_wait()
+        res = urllib2.urlopen(req)
+        self.result = res.read()
+        #Check the result
+        self.parser = htmlparser.GrowthParser()
+        self.parser.parse(self.result)
+        self.cache_page(self.parser.current_page, self.result)
+        #Return the result
+        return self.parser.get_building_result()
 
 if __name__ == "__main__":
 

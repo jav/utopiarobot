@@ -2,6 +2,7 @@
 
 import logging
 from optparse import OptionParser
+import sys
 
 from utopia_robot.robot import UtopiaRobot
 
@@ -40,6 +41,9 @@ def main():
     log.debug("set password = %s (masked)" % "".join(["*" for c in player.password]))
 
     log.info("Log in player (%s)...", player.username)
+
+    log.debug("build_result: %s" % player.build({"Farms": 1}))
+    sys.exit()
 
     mana = player.get_mana()
     available_spells = player.get_available_spells()
