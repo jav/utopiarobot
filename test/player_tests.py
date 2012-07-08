@@ -157,10 +157,9 @@ class player_tests(object):
 
     @mock.patch('urllib2.urlopen')
     @mock.patch('urllib2.Request')
-    @mock.patch.object(htmlparser.MilitaryParser, 'get_nav_links')
     @mock.patch.object(UtopiaRobot,'cache_page')
     @mock.patch.object(UtopiaRobot,'_simulate_wait')
-    def test_train_troops(self, mock_simulate_wait, mock_cache_page, mock_militaryparser_nav, mock_request, mock_urlopen):
+    def test_train_troops(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/military_trained.html').read()
         #mock_militaryparser_nav.return_value = {'Military': '/wol/game/train_army'}
