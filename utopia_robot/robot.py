@@ -38,6 +38,7 @@ class UtopiaRobot(object):
         'Throne': '/wol/game/throne',
         'Mystics': '/wol/game/enchantment',
         'Military': '/wol/game/train_army',
+        'Growth': '/wol/game/build',
         }
 
     advisor_links = {
@@ -188,6 +189,31 @@ class UtopiaRobot(object):
             self.parser.parse(self.result)
 
         assert('PAGE_THRONE' == self.parser.current_page)
+        if self.parser.get_nav_links():
+            self.nav_links = self.parser.get_nav_links()
+
+    def _get_growth(self):
+        """Load the Growth page (internal function)"""
+        log.debug("_get_growth()")
+        log.debug("nav: %s" % self.nav_links)
+        assert(0 < len(self.nav_links['Growth']))
+        data = None
+        req = urllib2.Request(URL_BASE + self.nav_links['Growth'], data, self.headers)
+        self._simulate_wait()
+        res = urllib2.urlopen(req)
+        self.result = res.read()
+
+        self.parser = htmlparser.GrowthParser()
+        self.parser.parse(self.result)
+        self.cache_page(self.parser.current_page, self.result)
+
+        if 'PAGE_INIT' == self.parser.current_page:
+            log.info("Not logged in, -> do_login()")
+            self._do_login(self)
+            self.parser = htmlparser.ThroneParser()
+            self.parser.parse(self.result)
+
+        assert('PAGE_GROWTH' == self.parser.current_page)
         if self.parser.get_nav_links():
             self.nav_links = self.parser.get_nav_links()
 
@@ -427,7 +453,14 @@ class UtopiaRobot(object):
         return self.parser.get_train_result()
 
     def get_buildings(self):
-        return {}
+        """Get the players buildings.
+        Will load the growth page (if not already loaded)
+        """
+        log.debug("get_buildings()")
+        if self.parser is None or self.parser.current_page != 'PAGE_GROWTH':
+            self._get_growth()
+        assert('PAGE_GROWTH' == self.parser.current_page)
+        return self.parser.get_buildings()
 
 if __name__ == "__main__":
 
