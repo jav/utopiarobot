@@ -822,6 +822,8 @@ class GrowthParser(UtopiaParser):
         self.parser_state['GrowthParser']['other_inputs'] = []
         self.parser_state['GrowthParser']['div'] = False
         self.parser_state['GrowthParser']['building_results'] = False
+        self.parser_state['GrowthParser']['building_info'] = False
+        self.parser_state['GrowthParser']['building_info_current'] = None
 
         self.buildings_list = [building[1] for building in BUILDINGS]
 # ['Homes', 'Farms', 'Mills', 'Banks', 'Training Grounds', 'Armouries', 'Military Barracks', 'Forts', 'Guard Stations', 'Hospitals', 'Guilds', 'Towers', "Thieves' Dens", 'Watch Towers', 'Libraries', 'Schools', 'Stables', 'Dungeons']
@@ -829,11 +831,26 @@ class GrowthParser(UtopiaParser):
         self.build_form = {}
         self.build_result = {}
         self.buildings = {}
+        self.build_info = {}
 
     def parse(self, s):
         super(GrowthParser, self).parse(s)
         self.feed(s)
         self.close()
+
+    def start_table(self, attributes):
+        super(GrowthParser, self).start_table(attributes)
+        attr = dict(attributes)
+
+        if 'class' in attr and 'two-column-stats' == attr['class']:
+            self.parser_state['GrowthParser']['building_info'] = True
+            log.debug("self.parser_state['GrowthParser']['building_info'] = True")
+
+    def end_table(self):
+        super(GrowthParser, self).end_table()
+        if self.parser_state['GrowthParser']['building_info']:
+            self.parser_state['GrowthParser']['building_info'] = False
+            log.debug("self.parser_state['GrowthParser']['building_info'] = False")
 
     def start_th(self, attributes):
         super(GrowthParser, self).start_th(attributes)
@@ -923,7 +940,6 @@ class GrowthParser(UtopiaParser):
                 self.parser_state['GrowthParser']['building_val_index'] += 1
 
         if self.parser_state['GrowthParser']['building_results']:
-            log.debug("For each bulding regexp it.")
             for singular, plural in BUILDINGS:
                 log.debug("Regexp: %s"% "([0-9]+) (%s|%s)" % (singular, plural))
                 match = re.search("([0-9]+) (%s|%s)" % (singular, plural), data, re.IGNORECASE)
@@ -934,6 +950,46 @@ class GrowthParser(UtopiaParser):
                     built = 0
                     log.debug("Building result[%s] = 0" % plural)
                 self.build_result[plural] = built
+
+        if self.parser_state['GrowthParser']['building_info']:
+            log.debug("Trying to read build-info data.")
+            if self.parser_state['GrowthParser']['th']:
+                self.parser_state['GrowthParser']['building_info_current'] = data
+            if self.parser_state['GrowthParser']['td']:
+                label = self.parser_state['GrowthParser']['building_info_current']
+                val = data
+                log.debug("label: %s, val: %s" % (label, val))
+                if "Total Land" == label:
+                    val = val.replace(',','')
+                    val = val.replace('acres','').replace(' acre','')
+                    self.build_info[label] = int(val.strip())
+                if "Construction Cost" == label:
+                    val = val.replace(',','')
+                    val = val.replace('gc per acre','')
+                    self.build_info[label] = int(val.strip())
+                elif "Total Undeveloped land" == label:
+                    val = val.replace(',','')
+                    val = val.replace('acres','').replace(' acre','')
+                    self.build_info[label] = int(val.strip())
+                elif "Maximum Buildable Now" == label:
+                    val = val.replace(',','')
+                    val = val.replace('acres','').replace(' acre','')
+                    self.build_info[label] = int(val.strip())
+                elif "Construction Time" == label:
+                    val = val.replace(',','')
+                    val = val.replace(' days','')
+                    self.build_info[label] = int(val.strip())
+                elif "Raze Cost" == label:
+                    val = val.replace(',','')
+                    val = val.replace('gc per acre','')
+                    self.build_info[label] = int(val.strip())
+                elif "Free Building Credits" == label:
+                    val = val.replace(',','')
+                    self.build_info[label] = int(val.strip())
+                elif "Maximum Razeable Now" == label:
+                    val = val.replace(',','')
+                    val = val.replace('acres','').replace(' acre','')
+                    self.build_info[label] = int(val.strip())
 
     def get_buildings(self):
         log.debug("get_buildings(): %s" % self.buildings)
@@ -946,3 +1002,7 @@ class GrowthParser(UtopiaParser):
     def get_building_result(self):
         log.debug("get_building_result(): %s"% self.build_result)
         return self.build_result
+
+    def get_build_info(self):
+        log.debug("get_build_info(): %s"% self.build_info)
+        return self.build_info

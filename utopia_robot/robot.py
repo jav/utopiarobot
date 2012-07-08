@@ -501,6 +501,16 @@ class UtopiaRobot(object):
         #Return the result
         return self.parser.get_building_result()
 
+    def get_build_info(self):
+        """Get the build_info.
+        Will load the growth page (if not already loaded)
+        """
+        log.debug("get_build_info()")
+        if self.parser is None or self.parser.current_page != 'PAGE_GROWTH':
+            self._get_growth()
+        assert('PAGE_GROWTH' == self.parser.current_page)
+        return self.parser.get_build_info()
+
 if __name__ == "__main__":
 
         parser = OptionParser()

@@ -67,6 +67,15 @@ def main():
         spells = player.get_active_spells()
         resources = player.get_resources()
 
+    # If we are low on food, make sure we cast Fertile lands.
+    if 'Patritoism' not in spells:
+        spells['Patriotism'] = 0
+    while spells['Patriotism'] <= 2 and resources['Runes'] > available_spells['Patriotism'][1] and 10 < player.get_mana():
+        if player.cast_spell('Patriotism') is not None:
+            break
+        spells = player.get_active_spells()
+        resources = player.get_resources()
+
     resources = player.get_resources()
     while 10 < player.get_mana() and player.get_soldiers() > 0:
         resources = player.get_resources()

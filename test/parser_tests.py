@@ -305,3 +305,16 @@ class growth_parser_tests(object):
                         field = 'quantity_%d'%i
                         print field
                         assert( field in build_form['inputs'] )
+
+        def test_get_build_info(self):
+                build_info = self.parser.get_build_info()
+                print "build_info:", build_info
+
+                assert(1814 == build_info['Total Land'])
+                assert( 865 == build_info['Construction Cost'])
+                assert(  10 == build_info['Total Undeveloped land'])
+                assert(  10 == build_info['Maximum Buildable Now'])
+                assert(  16 == build_info['Construction Time'])
+                assert( 463 == build_info['Raze Cost'])
+                assert(  32 == build_info['Free Building Credits'])
+                assert( 143 == build_info['Maximum Razeable Now'])
