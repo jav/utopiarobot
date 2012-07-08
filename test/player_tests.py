@@ -285,3 +285,65 @@ class player_tests(object):
         assert(1 == buildings_result['Guilds'])
         assert(1 == buildings_result['Towers'])
         assert(1 == buildings_result['Stables'])
+
+    @mock.patch('urllib2.urlopen')
+    @mock.patch('urllib2.Request')
+    @mock.patch.object(UtopiaRobot,'cache_page')
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_build_info(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
+        mock_urlopen.return_value = mock_request
+        mock_request.read.return_value = open('test/growth_built.html').read()
+        mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
+
+        buildings={
+            'Homes': 1,
+            'Farms': 1,
+            'Banks': 1,
+            'Guilds': 1,
+            'Towers': 1,
+            'Stables': 1,
+            }
+
+        print "Want to build: %s" % buildings
+        buildings_result = self.player.build(buildings)
+        print "Build result: %s" % buildings_result
+        assert(1 == buildings_result['Homes'])
+        assert(1 == buildings_result['Farms'])
+        assert(1 == buildings_result['Banks'])
+        assert(1 == buildings_result['Guilds'])
+        assert(1 == buildings_result['Towers'])
+        assert(1 == buildings_result['Stables'])
+
+    @mock.patch('urllib2.urlopen')
+    @mock.patch('urllib2.Request')
+    @mock.patch.object(UtopiaRobot,'cache_page')
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_build_info(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
+        mock_urlopen.return_value = mock_request
+        mock_request.read.return_value = open('test/growth_built_plural.html').read()
+        mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
+
+        buildings={
+            'Homes': 2,
+            'Farms': 2,
+            'Banks': 2,
+            'Training Grounds': 2,
+            'Forts': 2,
+            'Guilds': 2,
+            'Towers': 2,
+            'Stables': 2,
+            }
+
+        print "Want to build: %s" % buildings
+        buildings_result = self.player.build(buildings)
+        print "Build result: %s" % buildings_result
+        assert(2 == buildings_result['Homes'])
+        assert(2 == buildings_result['Farms'])
+        assert(2 == buildings_result['Banks'])
+        assert(2 == buildings_result['Training Grounds'])
+        assert(2 == buildings_result['Forts'])
+        assert(2 == buildings_result['Guilds'])
+        assert(2 == buildings_result['Towers'])
+        assert(2 == buildings_result['Stables'])

@@ -1,0 +1,744 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <title>
+            Utopia
+            -
+            Buildings
+        </title>
+        <link rel="shortcut icon" href="/media/v4727/common/images/fav_icon.png" />
+        <!-- STYLE SHEETS -->
+        <link rel="stylesheet" type="text/css" href="/media/v4727/common/css/reset.css" />
+        <link rel="stylesheet" type="text/css" href="/media/v4727/common/css/layout.css" />
+        <link rel="stylesheet" type="text/css" href="/media/v4727/common/css/uniform.default.css" media="screen" charset="utf-8" />
+        <link type="text/css" href="/media/v4727/common/jqueryui/css/ui-lightness/jquery-ui.css" rel="Stylesheet"/>
+        <link rel="stylesheet" href="/media/v4727/external/jquery-wysiwyg/jquery.wysiwyg.css" type="text/css">
+        <link rel="stylesheet" type="text/css" href="/media/v4727/common/css/default_theme/theme.css" />
+
+        
+        
+
+        <!-- SCRIPTS -->
+        <!-- PUT THIS TAG IN THE head SECTION -->
+<script type="text/javascript" src="http://partner.googleadservices.com/gampad/google_service.js">
+</script>
+<script type="text/javascript">
+  GS_googleAddAdSenseService("ca-pub-8478455431877379");
+  GS_googleEnableAllServices();
+</script>
+<script type="text/javascript">
+  GA_googleAddSlot("ca-pub-8478455431877379", "Utopia_game-mid_mpu");
+  GA_googleAddSlot("ca-pub-8478455431877379", "Utopia_game-right_skyscraper");
+  GA_googleAddSlot("ca-pub-8478455431877379", "Utopia_game-top_leaderboard");
+</script>
+<script type="text/javascript">
+  GA_googleFetchAds();
+</script>
+<!-- END OF TAG FOR head SECTION -->
+        <script type="text/javascript" src="/media/v4727/common/js/jquery-1.7.1.min.js"></script>
+        <script type="text/javascript"> 
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-10656365-1']);
+    _gaq.push(['_trackPageview']);
+ 
+    (function() {
+        var ga = document.createElement('script'); 
+        ga.type = 'text/javascript'; 
+        ga.async = true;
+        
+            ga.src = 'http://www.google-analytics.com/ga.js';
+        
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+    })(); 
+</script>
+
+
+    <script type="text/javascript">
+        $(document).ready(function(eventObject) {
+            try {
+            	div_removed = ($('#leaderboard-ad').length == 0);
+                iframe_blocked = $('#leaderboard-ad').children().length < 3;
+                div_hidden = $('#leaderboard-ad').is(':hidden');
+                
+                if (div_removed || iframe_blocked || div_hidden){                	
+                	_gaq.push(['_trackEvent', 'ad_blocking', 'ads', 'blocked']);
+                	
+                	style="";
+                	style += "width: 728px;";
+                	style += "padding: 10px 10px;";
+                	style += "margin: 0 auto;";
+                	style += "font-size: 14px;";
+                	style += "line-height: 22px;";
+                	style += "text-align: center;";                	
+                    style += "border: 1px solid;";
+                    style += "border-radius: 8px;";
+                    style += "-moz-border-radius: 8px;";
+                    style += "-webkit-border-radius: 8px;";
+                    style += "behavior: url(../PIE.htc);";                    
+                    style += "color: #FFFCF7;";
+                    style += "-moz-text-shadow: -1px 1px 2px #331100, 1px -1px 2px #331100;";
+                    style += "-webkit-text-shadow: -1px 1px 2px #331100, 1px -1px 2px #331100;";
+                    style += "text-shadow: -1px 1px 2px #331100, 1px -1px 1px #331100;";                    
+                    style += "border-color: #feffea;";
+                    style += "-moz-box-shadow: 1px -1px 1px 0px #D3AEA9 , -1px 1px 2px #331100, inset 0px 0px 10px #000;";
+                    style += "-webkit-box-shadow: 1px -1px 1px 0px #D3AEA9 , -1px 1px 2px #331100, inset 0px 0px 10px #000;";
+                    style += "box-shadow: 1px -1px 1px 0px #D3AEA9 , -1px 1px 2px #331100, inset 0px 0px 10px #000;";                    
+                    style += "background: #521802;";
+                    style += "background: -moz-radial-gradient(center, ellipse cover, #641E04 0%, #401100 100%);";
+                    style += "background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#641E04 ), color-stop(100%,#401100));"; 
+                    style += "background: -webkit-radial-gradient(center, ellipse cover,  #641E04  0%,#401100 100%);";
+                    style += "background: -o-radial-gradient(center, ellipse cover,  #641E04  0%,#401100 100%);";
+                    style += "background: -ms-radial-gradient(center, ellipse cover,  #641E04  0%,#401100 100%);";
+                    style += "background: radial-gradient(center, ellipse cover,  #641E04  0%,#401100 100%);";
+                    style += "behavior: url(../PIE.htc);";
+                    
+                    $('#content-area').before('<div style="'+style+'">Utopia depends on advertising to fund development and maintenance. Please support the game by <a href="http://bit.ly/GIYTtt" target="_blank">adding an exception</a> to your ad blocker so that Utopia ads are shown, or buying ad-blocking in our <a class="shop-login-link" href="#">shop</a>.</div>');
+                	appeal = $('#content-area').prev();
+                	
+                	if ($(appeal).length == 0 || $(appeal).is(':hidden'))
+                	    _gaq.push(['_trackEvent', 'ad_blocking', 'appeal', 'blocked']);
+                	else
+                        _gaq.push(['_trackEvent', 'ad_blocking', 'appeal', 'shown']);
+                }    
+                else
+                	_gaq.push(['_trackEvent', 'ad_blocking', 'ads', 'shown']);
+                
+            }
+            catch (err) {}
+            
+        });    
+    </script>
+
+        <script type="text/javascript" src="/media/v4727/common/jqueryui/js/jquery-ui.js"></script>
+        <script type="text/javascript" src="/media/v4727/common/js/jquery-plugins.js"></script>
+        <script type="text/javascript" src="/media/v4727/common/js/chatter.js"></script>
+        <script type="text/javascript" src="/media/v4727/common/js/utils.js"></script>
+        <script type="text/javascript" src="/media/v4727/common/js/jquery.tools.min.js"></script>
+        <script type="text/javascript" src="/media/v4727/common/js/django_jquery_ajax.js"></script>
+        <script type="text/javascript" src="/media/v4727/common/js/account_options.js"></script>
+        <script type="text/javascript" src="/media/v4727/common/js/jquery.uniform.min.js"></script>
+        <script type="text/javascript" src="/media/v4727/common/js/feedback.js"></script>
+
+        <script type="text/javascript" src="/media/v4727/external/jquery-wysiwyg/jquery.wysiwyg.js"></script>
+
+
+        <script type="text/javascript">
+            function setupJWYSIWYG() {
+                // Style any formatted comments on the page.
+                $('textarea.formatted-text').wysiwyg({
+                    'controls': {
+                        'justifyLeft': {'visible': false},
+                        'justifyCenter': {'visible': false},
+                        'justifyRight': {'visible': false},
+                        'justifyFull': {'visible': false},
+                        'indent': {'visible': false},
+                        'outdent': {'visible': false},
+                        'undo': {'visible': false},
+                        'redo': {'visible': false},
+                        'insertHorizontalRule': {'visible': false},
+                        'insertImage': {'visible': false},
+                        'h1': {'visible': true},
+                        'h2': {'visible': false},
+                        'h3': {'visible': false},
+                        'paragraph': {'visible': false},
+                        'increaseFontSize': {'visible': false},
+                        'decreaseFontSize': {'visible': false},
+                        'html': {'visible': false},
+                        'insertTable': {'visible': false},
+                        'createLink': {'visible': false},
+                        'code': {'visible': false},
+                        'removeFormat': {'visible': false},
+                        'strikeThrough': {'visible': false},
+                        'subscript': {'visible': false},
+                        'superscript': {'visible': false}
+                    },
+                    'css': '/media/v4727/common/css/default_theme/theme.css',
+                    'initialContent': '',
+                    'iFrameClass': 'formatted-comment',
+                    'autoSave': true
+                });
+            }
+
+            $(document).ready(function(eventObject) {
+                // Setup any editable text areas.
+                
+                    setupJWYSIWYG();
+                
+
+                // Setup triggers that open overlays/lightboxes
+                var overlay_params = {
+                    mask: {
+                        color: '#000000',
+                        loadSpeed: 200,
+                        opacity: 0.5
+                    }
+                };
+                $(".overlay-trigger[rel]").overlay(overlay_params);
+                // Setup uniform form styling.
+                $("select, input:checkbox, input:radio, input:file").uniform();
+
+                // Catch clicks on shop login links
+                $(".shop-login-link").click(function() {
+                    $("#id-shop-login-form").submit();
+                });
+
+            });
+
+        </script>
+        
+    
+        
+    <script type="text/javascript" src="/media/v4727/common/js/jquery.selectbox-0.5.js"></script>
+    <script type="text/javascript" src="/media/v4727/common/js/bookmark_options.js"></script>
+
+    </head>
+
+    <body>
+        <!-- Facebook like API follows. -->
+        <div id="fb-root"></div>
+        <script>(function(d, s, id) {
+          var js, fjs = d.getElementsByTagName(s)[0];
+          if (d.getElementById(id)) return;
+          js = d.createElement(s); js.id = id;
+          js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+          fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+        </script>
+        
+            <div id="outer-container">
+                <div id="inner-container">
+                    
+                        <div id="header">
+                            
+                                <a href="/shared//"><div id="header-logo"></div></a>
+                            
+                            <div id="header-navigation">
+                                
+                                    <div class="navigation"><a href="/shared/lobby/">Lobby</a></div>
+                                    <div class="navigation"><a class="shop-login-link" href="#">Shop</a></div>
+                                    <div class="navigation"><a href="/shared/common/ranking_archive/">Rankings</a></div>
+                                
+                                <div class="navigation"><a href="http://forums.utopia-game.com/forumdisplay.php?1527-Utopia">Forum</a></div>
+                                <div class="navigation"><a href="http://wiki.utopia-game.com/index.php?title=Game_Rules">Rules</a></div>
+                                <div class="navigation"><a href="http://wiki.utopia-game.com/">Guide</a></div>
+                                <div class="navigation"><a href="http://blog.utopia-game.com/">Blog</a></div>
+                            </div>
+
+                            
+                            <div>
+                                <form id="id-shop-login-form" method="post" action="http://shop.utopia-game.com/account_management/login_from_game/">
+                                    <input type="hidden" name="auth_token" value="6B1KEptLc8+TemCseJLHmYs+iIPt7bNxp3jqxub0Dapj3rznQlay56bBgg6JNPinvvd2Ewh9Z6uPId7qsJnVHscV+X/aUouXv39H+rl1/5EwGX08vDjMffBmVjWqT1MaSZmfJC6lAtiWQhE8tkhsbnzY6NBsKyomwhi+p6RTvzDiw5uWn27KbizWq/v0izalJmbN5j8ConjnH6Y39CfZ/g==" />
+                                    <input type="hidden" name="checksum" value="ea55ab210d838168095e81de6ab40582" />
+                                </form>
+                            </div>
+                                <div id="account-container">
+                                    <div id="account-header" rel="#account-details">
+                                        
+                                            <div class="account-image"></div>
+                                        
+                                        <div class="account-name">
+                                            test_user_name
+                                        </div>
+                                        <div class="down-arrow"></div>
+                                    </div>
+                                    <div id="account-details" class="shadow navigation">
+                                        <div class="account-title">Account Details</div>
+                                        <div class="account-summary">
+                                            <div></div>
+                                            <div>test@email.com</div>
+                                            
+
+                                            
+                                                <div class="warning"><a href="/shared//account_settings/">Your profile is still incomplete!</a></div>
+                                            
+                                        </div>
+                                        <div id="account-links">
+                                            <div id="account-link-remove-ads"><a href="/shared/adblocker/update/">Remove&nbsp;Advertising</a></div>
+                                            <div id="account-link-edit-profile"><a href="/shared//user_profile_edit/">Public&nbsp;Profile</a></div>
+                                            <div id="account-link-settings"><a href="/shared//account_settings/">Account&nbsp;Settings</a></div>
+                                            <div id="account-link-report-bug"><a href="/shared/feedback/report_bug_instructions/">Report&nbsp;Bug</a></div>
+                                        </div>
+                                        
+
+                                        <div class="account-signout"><a href="/shared//logout/?next=/">Log&nbsp;Out</a></div>
+                                    </div>
+                                </div>
+                            
+                        </div>
+                    
+
+                    <div id="middle">
+                        <div id="left-column">
+
+                                
+                                    
+                                        
+                                            <div id="leaderboard-ad">
+                                                
+<script type="text/javascript"><!--
+    google_ad_client = "ca-pub-2410248215207642";
+    /* Utopia RHS Leaderboard */
+    google_ad_slot = "1695468232";
+    google_ad_width = 728;
+    google_ad_height = 90;
+//-->
+</script>
+<script type="text/javascript"
+    src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+
+                                            </div>
+                                        
+                                    
+                                
+
+                            <div id="content-area">
+                                
+
+    
+    <div id="game-navigation">
+        <div class="current-date">Feb 14, YR8</div>
+
+        
+        <div class="navigation">
+            <div><a href="/wol/game/throne">Throne</a></div>
+            <div><a href="/wol/game/kingdom_details">Kingdom</a></div>
+            <div><a href="/wol/game/province_news">News</a></div>
+        </div>
+
+
+        
+        <div class="navigation">
+            <div><a href="/wol/game/explore">Explore</a></div>
+            <div><a href="/wol/game/build">Growth</a></div>
+            <div><a href="/wol/game/science">Sciences</a></div>
+            <div><a href="/wol/game/train_army">Military</a></div>
+            <div><a href="/wol/game/wizards">Wizards</a></div>
+        </div>
+
+        
+        <div class="navigation">
+            <div><a href="/wol/game/enchantment">Mystics</a></div>
+            <div><a href="/wol/game/thievery">Thievery</a></div>
+            <div><a href="/wol/game/send_armies">War&nbsp;Room</a></div>
+            <div><a href="/wol/game/aid">Aid</a></div>
+
+            
+                
+                    
+                        
+                    
+                
+            
+        </div>
+
+        
+        <div class="navigation">
+            <div><a href="/wol/mail/inbox/">Mail</a></div>
+            <div><a href="/wol/kingdom_forum/topics/">Forum</a></div>
+            
+              
+              <div><a id="nav-kingdom-chat" href="#" onclick="chatHandler.bringUp(); return false;">Chat</a></div>
+              
+        </div>
+
+        
+        <div class="navigation">
+            
+
+            <div><a href="/wol/game/vote">Politics</a></div>
+            <div><a href="/wol/game/ranking">Rankings</a></div>
+        </div>
+
+        
+        <div class="navigation">
+            <div><a href="/wol/game/preferences/">Preferences</a></div>
+            
+                <div><a href="/wol/game/taunts">Taunts</a></div>
+            
+        </div>
+    </div>
+    
+
+    
+        
+
+    <table id="resource-bar">
+        <thead>
+            <tr>
+                <th>Money</th>
+                <th>Peasants</th>
+                <th>Food</th>
+                <th>Runes</th>
+                <th>Net Worth</th>
+                <th>Land</th>
+                <th>Net Worth/Acre</th>
+            </tr>
+        </thead>
+        <tbody>
+    
+            
+            
+            
+    
+                
+                <tr>
+                    <td>392,954</td>
+                    <td>18,537</td>
+                    <td>60,869</td>
+                    <td>2,296</td>
+                    <td>325,283</td>
+                    <td>1,987</td>
+                    <td>163.706</td>
+                </tr>
+                
+                <tr>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td><span class="positive">240</span></td>
+                    <td>-</td>
+                    <td><span class="positive">0.121</span></td>
+                </tr>
+                
+    
+            <tr>
+                <th>392,954</th>
+                <th>18,537</th>
+                <th>60,869</th>
+                <th>2,296</th>
+                <th>325,523</th>
+                <th>1,987</th>
+                <th>163.826</th>
+            </tr>
+            
+            
+            
+            
+        </tbody>
+    </table>
+
+
+    
+    
+                                
+
+    <div class="game-header">
+    
+	
+    
+	<h1>Build</h1>
+	<a href="/wol/game/raze"><h1>Raze</h1></a>
+
+    </div>
+
+    <div class="game-content">
+    
+	
+    
+	
+	<p>
+		Building infrastructure is absolutely vital to the long term growth of our province. Here you may order the construction different types of buildings, or choose to destoy some buildings so that you can use the land for other purposes. More can be learned about benefits of each building from the <a href="http://wiki.utopia-game.com/index.php/Special:Search?search=growth">guide</a> and the <a href="/wol/game/council_internal">Internal Affairs</a> council page.
+	</p>
+	
+	
+    <div class="good message">
+        You have given orders to commence work on 2 homes, 2 farms, 2 banks, 2 training grounds, 2 forts, 2 guilds, 2 towers and 2 stables.
+    </div>
+
+	
+	<table class="two-column-stats">
+		<tbody>
+			<tr>
+				<th>Total Land</th>
+				<td>1,987 acres</td>
+				
+				<th>Construction Cost</th>
+				<td>876gc per acre</td>
+			</tr>
+			<tr>
+				<th>Total Undeveloped land</th>
+				<td>17 acres</td>
+				
+				<th>Maximum Buildable Now</th>
+				<td>17 acres</td>
+			</tr>
+			<tr>
+				<th>Construction Time</th>
+				<td>16 days</td>
+				
+				<th>Raze Cost</th>
+				<td>474gc per acre</td>
+			</tr>
+			<tr>
+				<th>Free Building Credits</th>
+				<td>10</td>
+				
+				<th>Maximum Razeable Now</th>
+				<td>828 acres</td>
+			</tr>
+			
+			<tr>
+				<th colspan="2"></th>
+				<th colspan="2"><a href="/wol/game/council_internal">More....</a></th>
+			</tr>
+		<tbody>
+	</table>
+
+
+    
+        <form method="POST" action="">
+            <div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='88e2dabb2a8b615561e743d05668d47d' /></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Building</th>
+                        <th>You Own</th>
+                        <th>In Progress</th>
+                        <th></th>
+                        <th>Building</th>
+                        <th>You Own</th>
+                        <th>In Progress</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr>
+                        <th>Homes</th>
+                        <td>269</td>
+                        <td>2</td>
+                        <td><input id="id_quantity_0" type="text" class="four-digit-input" name="quantity_0" /></td>
+                        
+                        <th>Farms</th>
+                        <td>196</td>
+                        <td>2</td>
+                        <td><input id="id_quantity_1" type="text" class="four-digit-input" name="quantity_1" /></td>
+                        
+                    </tr>
+                    
+                    <tr>
+                        <th>Mills</th>
+                        <td>0</td>
+                        <td>0</td>
+                        <td><input id="id_quantity_2" type="text" class="four-digit-input" name="quantity_2" /></td>
+                        
+                        <th>Banks</th>
+                        <td>541</td>
+                        <td>2</td>
+                        <td><input id="id_quantity_3" type="text" class="four-digit-input" name="quantity_3" /></td>
+                        
+                    </tr>
+                    
+                    <tr>
+                        <th>Training Grounds</th>
+                        <td>106</td>
+                        <td>2</td>
+                        <td><input id="id_quantity_4" type="text" class="four-digit-input" name="quantity_4" /></td>
+                        
+                        <th>Armouries</th>
+                        <td>0</td>
+                        <td>0</td>
+                        <td><input id="id_quantity_5" type="text" class="four-digit-input" name="quantity_5" /></td>
+                        
+                    </tr>
+                    
+                    <tr>
+                        <th>Military Barracks</th>
+                        <td>0</td>
+                        <td>0</td>
+                        <td><input id="id_quantity_6" type="text" class="four-digit-input" name="quantity_6" /></td>
+                        
+                        <th>Forts</th>
+                        <td>98</td>
+                        <td>2</td>
+                        <td><input id="id_quantity_7" type="text" class="four-digit-input" name="quantity_7" /></td>
+                        
+                    </tr>
+                    
+                    <tr>
+                        <th>Guard Stations</th>
+                        <td>0</td>
+                        <td>0</td>
+                        <td><input id="id_quantity_8" type="text" class="four-digit-input" name="quantity_8" /></td>
+                        
+                        <th>Hospitals</th>
+                        <td>0</td>
+                        <td>0</td>
+                        <td><input id="id_quantity_9" type="text" class="four-digit-input" name="quantity_9" /></td>
+                        
+                    </tr>
+                    
+                    <tr>
+                        <th>Guilds</th>
+                        <td>284</td>
+                        <td>2</td>
+                        <td><input id="id_quantity_10" type="text" class="four-digit-input" name="quantity_10" /></td>
+                        
+                        <th>Towers</th>
+                        <td>321</td>
+                        <td>2</td>
+                        <td><input id="id_quantity_11" type="text" class="four-digit-input" name="quantity_11" /></td>
+                        
+                    </tr>
+                    
+                    <tr>
+                        <th>Thieves' Dens</th>
+                        <td>28</td>
+                        <td>0</td>
+                        <td><input id="id_quantity_12" type="text" class="four-digit-input" name="quantity_12" /></td>
+                        
+                        <th>Watch Towers</th>
+                        <td>0</td>
+                        <td>0</td>
+                        <td><input id="id_quantity_13" type="text" class="four-digit-input" name="quantity_13" /></td>
+                        
+                    </tr>
+                    
+                    <tr>
+                        <th>Libraries</th>
+                        <td>0</td>
+                        <td>0</td>
+                        <td><input id="id_quantity_14" type="text" class="four-digit-input" name="quantity_14" /></td>
+                        
+                        <th>Schools</th>
+                        <td>0</td>
+                        <td>0</td>
+                        <td><input id="id_quantity_15" type="text" class="four-digit-input" name="quantity_15" /></td>
+                        
+                    </tr>
+                    
+                    <tr>
+                        <th>Stables</th>
+                        <td>97</td>
+                        <td>16</td>
+                        <td><input id="id_quantity_16" type="text" class="four-digit-input" name="quantity_16" /></td>
+                        
+                        <th>Dungeons</th>
+                        <td>0</td>
+                        <td>0</td>
+                        <td><input id="id_quantity_17" type="text" class="four-digit-input" name="quantity_17" /></td>
+                        
+                    </tr>
+                    
+                <tbody>
+            </table>
+            <p><tr><th><label for="id_accelerate">Accelerated Construction (Double Cost and/or use of Free Building Credits).</label></th><td><input type="checkbox" name="accelerate" id="id_accelerate" /></td></tr></p>
+            <input type="submit" value="Order Construction" name="build"/>
+        </form>
+    
+
+    </div>
+    
+                            </div>
+                        </div>
+                        <div id="right-column">
+                            
+                                
+                                    <div id="skyscraper-ad">
+                                        
+                                            <!-- Skyscraper (120 x 600) Ad -->
+<script type="text/javascript"><!--
+google_ad_client = "ca-pub-2410248215207642";
+/* Utopia RHS Skyscraper */
+google_ad_slot = "3426698714";
+google_ad_width = 120;
+google_ad_height = 600;
+//-->
+</script>
+<script type="text/javascript"
+    src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+                                        
+                                    </div>
+                                
+                            
+                        </div>
+                        
+                            <div id="ad-words">
+                                <script type="text/javascript"><!--
+google_ad_client = "ca-pub-2410248215207642";
+/* Utopia Classic 468x15 */
+google_ad_slot = "8608949118";
+google_ad_width = 468;
+google_ad_height = 15;
+//-->
+</script>
+<script type="text/javascript"
+src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+                            </div>
+                        
+                    </div>
+
+                    <div id="footer">
+                        <div id="version">
+                            Version: 4727
+                        </div>
+                    </div>
+
+                </div> <!--Close inner-container -->
+            </div> <!--Close outer-container -->
+        
+
+        <!-- Extra HTML -->
+        <div class="overlay" id="report-content-dialog">
+    <h1>Report Content</h1>
+    <div class="report-dialog-content">
+        <p>You are about to report that the content below is in breach of the <a href="http://wiki.utopia-game.com/index.php?title=Game_Rules#Language_.26_Attitude">Code of Conduct</a>. This is a serious allegation, which may result in disciplinary action against the player that uploaded it.</p><p><strong>WARNING: Falsely reporting content is also considered an offense, and may result in your account being suspended, or worse.</strong></p>
+        <div class="reported-content"></div>
+        <input class="button-link" type="submit" value="Report this content"></input>
+    </div>
+    <div class="spinner"></div>
+</div>
+<div style="display:none" id="report-this-label">Report this</div>
+<div style="display:none" id="report-this-url">/shared/feedback/report_content/</div>
+        
+    
+    
+<script type="text/javascript">
+    chatHandler.chatCtlUrl = '/wol/game/chatctl/';
+    chatHandler.chatPostUrl = '/wol/game/chatctl/post/';
+    chatHandler.updateUrl = '/chat/live/';
+    chatHandler.standaloneUrl = '/wol/game/chat/standalone';
+    
+        $(document).ready(function() {
+            chatHandler.init();
+            });
+    
+</script>
+<div id="chatter-box" style="display: none">
+    <div id="chat-content">
+        <div class="chat-line">
+        </div>
+    </div>
+    <form name="chat-submit" id="chat-submit" action="" method="post" onsubmit="chatHandler.onSubmit(); return false;" class="chat-submit-gradient">
+        <table id="chat-submit-table">
+            <tr>
+                <td id="chat-submit-input-head">TestProvince&gt;</td>
+                <td id="chat-submit-input-cell">
+                    <div id="chat-submit-controls">
+                        
+                            <a class="chat-submit-control" href="#" onclick="chatHandler.bringUp(); return false;"
+                                ><img src="/media/v4727//common/images/chat_close.png" style="vertical-align: middle" /></a><a class="chat-submit-control" href="/wol/game/chat/standalone" target="_blank" onclick="chatHandler.launchStandalone(); return false;"><img src="/media/v4727//common/images/chat_popout.png"  style="vertical-align: middle"/></a>
+                        
+                    </div>
+                    <div id="chat-submit-input-cell-input"><input type="text" name="chat-submit-line" id="chat-submit-line" /></div>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+    
+    <script src="http://reverbim.com/chat/loader/" type="text/javascript"></script>
+    <script type="text/javascript">$(document).ready(function(){setupReverb({developer_id: '7ea6a238', channel_name: 'Test Kingdom', ticket: 'WG7bnWRR2Riu5hBfLO2ogUQnkskUDLdOyAZiq+5OT84+xyxdKTnispoehufdmfomUzmJRJX6Wp9tImtIoG/L/6Y7e4sjDvOFHGdKDtjJcT+kLIOpVXZnQCMmzOTmHDiI' });});</script>
+    
+
+    </body>
+</html>

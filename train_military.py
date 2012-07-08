@@ -42,9 +42,6 @@ def main():
 
     log.info("Log in player (%s)...", player.username)
 
-    log.debug("build_result: %s" % player.build({"Farms": 1}))
-    sys.exit()
-
     mana = player.get_mana()
     available_spells = player.get_available_spells()
     log.debug("available_spells: %s" % available_spells)
@@ -98,6 +95,8 @@ def main():
     while resources['Runes'] > available_spells['Paradise'][1] and 10 < player.get_mana():
         player.cast_spell('Paradise')
         resources = player.get_resources()
+
+    #log.debug("build_result: %s" % player.build({"Farms": 1}))
 
     print "DONE"
 
