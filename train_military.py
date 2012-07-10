@@ -49,32 +49,36 @@ def main():
     resources = player.get_resources()
 
     # First and foremost, make sure we have Minor Protection
-    if 'Minor Protection' not in spells:
-        spells['Minor Protection'] = 0
-    while spells['Minor Protection'] <= 2 and  resources['Runes'] > available_spells['Minor Protection'][1] and 10 < player.get_mana():
-        if player.cast_spell('Minor Protection') is not None:
-            break
-        spells = player.get_active_spells()
-        resources = player.get_resources()
+    if 'Minor Protection' in available_spells:
+        if 'Minor Protection' not in spells:
+            spells['Minor Protection'] = 0
+        while spells['Minor Protection'] <= 2 and  resources['Runes'] > available_spells['Minor Protection'][1] and 10 < player.get_mana():
+            if player.cast_spell('Minor Protection') is not None:
+                break
+            spells = player.get_active_spells()
+            resources = player.get_resources()
 
     resources = player.get_resources()
-    # If we are low on food, make sure we cast Fertile lands.
-    if 'Fertile Lands' not in spells:
-        spells['Fertile Lands'] = 0
-    while spells['Fertile Lands'] <= 2 and resources['Food'] < 30000 and resources['Runes'] > available_spells['Fertile Lands'][1] and 10 < player.get_mana():
-        if player.cast_spell('Fertile Lands') is not None:
-            break
-        spells = player.get_active_spells()
-        resources = player.get_resources()
 
     # If we are low on food, make sure we cast Fertile lands.
-    if 'Patritoism' not in spells:
-        spells['Patriotism'] = 0
-    while spells['Patriotism'] <= 2 and resources['Runes'] > available_spells['Patriotism'][1] and 10 < player.get_mana():
-        if player.cast_spell('Patriotism') is not None:
-            break
-        spells = player.get_active_spells()
-        resources = player.get_resources()
+    if 'Fertile Lands' in available_spells:
+        if 'Fertile Lands' not in spells:
+            spells['Fertile Lands'] = 0
+        while spells['Fertile Lands'] <= 2 and resources['Food'] < 30000 and resources['Runes'] > available_spells['Fertile Lands'][1] and 10 < player.get_mana():
+            if player.cast_spell('Fertile Lands') is not None:
+                break
+            spells = player.get_active_spells()
+            resources = player.get_resources()
+
+    # If we are low on food, make sure we cast Fertile lands.
+    if 'Patriotism' in available_spells:
+        if 'Patritoism' not in spells:
+            spells['Patriotism'] = 0
+        while spells['Patriotism'] <= 2 and resources['Runes'] > available_spells['Patriotism'][1] and 10 < player.get_mana():
+            if player.cast_spell('Patriotism') is not None:
+                break
+            spells = player.get_active_spells()
+            resources = player.get_resources()
 
     resources = player.get_resources()
     while 10 < player.get_mana() and player.get_soldiers() > 0:
@@ -83,6 +87,7 @@ def main():
 
         while 1 > leet_count and player.get_mana >= 10:
             player.cast_spell("Tree of Gold")
+            available_spells = player.get_available_spells()
             resources = player.get_resources()
             leet_count = resources['Money'] / 500
 
@@ -95,17 +100,33 @@ def main():
             troops={'elite': leet_count}
 
         print "train_military(%s): %s" % (troops, player.train_military(troops))
-        # troops = get_troops()
-        # if (troops['d-specs']['Home'] + troops['elite']['Home'])*3 < resouces['Acres'] :
-        #     #Safe assumption, both have 5 def
-        #     # leave 150 raw dpa
-        #     pass
 
-    while resources['Runes'] > available_spells['Paradise'][1] and 10 < player.get_mana():
-        player.cast_spell('Paradise')
-        resources = player.get_resources()
+    # if 'Paradise' in available_spells:
+    #     while resources['Runes'] > available_spells['Paradise'][1] and 10 < player.get_mana():
+    #         player.cast_spell('Paradise')
+    #         resources = player.get_resources()
 
     #log.debug("build_result: %s" % player.build({"Farms": 1}))
+
+    build_info = player.get_build_info()
+    buildings = player.get_buildings()
+    for k,v in buildings.items():
+        buildings[k]['total'] = v['built'] + v['incoming']
+    resources = player.get_resources()
+    to_build = {}
+    if 0 < build_info['Total Undeveloped land'] and build_info['Construction Cost'] < resources['Money']:
+        # min 8% farms
+        if 0.07 < buildings['Farms']['total'] / build_info['Total Land']:
+            to_build['Farms'] = int((0.07 - (buildings['Farms']['total'] / build_info['Total Land'])) * build_info['Total Land'])
+        if 0.15 < buildings['Guilds']['total'] / build_info['Total Land']:
+            to_build['Guilds'] = int((0.15 - (buildings['Guilds']['total'] / build_info['Total Land'])) * build_info['Total Land'])
+        if 0.12 < buildings['Towers']['total'] / build_info['Total Land']:
+            to_build['Towers'] = int((0.12 - (buildings['Guilds']['total'] / build_info['Total Land'])) * build_info['Total Land'])
+
+        player.build(to_build)
+    log.info("build_info: %s" ,player.get_build_info())
+    log.info("buildings: %s", player.get_buildings())
+
 
     print "DONE"
 
