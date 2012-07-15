@@ -52,7 +52,7 @@ def main():
     if 'Minor Protection' in available_spells:
         if 'Minor Protection' not in spells:
             spells['Minor Protection'] = 0
-        while spells['Minor Protection'] <= 2 and  resources['Runes'] > available_spells['Minor Protection'][1] and 10 < player.get_mana():
+        while spells['Minor Protection'] <= 2 and  resources['Runes'] > available_spells['Minor Protection'][1] and 20 < player.get_mana():
             if player.cast_spell('Minor Protection') is not None:
                 break
             spells = player.get_active_spells()
@@ -64,7 +64,7 @@ def main():
     if 'Fertile Lands' in available_spells:
         if 'Fertile Lands' not in spells:
             spells['Fertile Lands'] = 0
-        while spells['Fertile Lands'] <= 2 and resources['Food'] < 30000 and resources['Runes'] > available_spells['Fertile Lands'][1] and 10 < player.get_mana():
+        while spells['Fertile Lands'] <= 2 and resources['Food'] < 30000 and resources['Runes'] > available_spells['Fertile Lands'][1] and 20 < player.get_mana():
             if player.cast_spell('Fertile Lands') is not None:
                 break
             spells = player.get_active_spells()
@@ -74,18 +74,18 @@ def main():
     if 'Patriotism' in available_spells:
         if 'Patritoism' not in spells:
             spells['Patriotism'] = 0
-        while spells['Patriotism'] <= 2 and resources['Runes'] > available_spells['Patriotism'][1] and 10 < player.get_mana():
+        while spells['Patriotism'] <= 2 and resources['Runes'] > available_spells['Patriotism'][1] and 20 < player.get_mana():
             if player.cast_spell('Patriotism') is not None:
                 break
             spells = player.get_active_spells()
             resources = player.get_resources()
 
     resources = player.get_resources()
-    while 10 < player.get_mana() and player.get_soldiers() > 0:
+    while 20 < player.get_mana() and player.get_soldiers() > 0:
         resources = player.get_resources()
         leet_count = resources['Money'] / 500
 
-        while 1 > leet_count and player.get_mana >= 10:
+        while 1 > leet_count and player.get_mana >= 20:
             player.cast_spell("Tree of Gold")
             available_spells = player.get_available_spells()
             resources = player.get_resources()
