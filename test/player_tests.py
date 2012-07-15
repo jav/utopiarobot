@@ -183,6 +183,21 @@ class player_tests(object):
     @mock.patch('urllib2.Request')
     @mock.patch.object(UtopiaRobot,'cache_page')
     @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_get_spec_credits(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
+        mock_urlopen.return_value = mock_request
+        mock_request.read.return_value = open('test/military_page.html').read()
+        mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
+
+        credits = self.player.get_spec_credits()
+
+        print "credits:", credits
+        assert(123 == credits)
+
+    @mock.patch('urllib2.urlopen')
+    @mock.patch('urllib2.Request')
+    @mock.patch.object(UtopiaRobot,'cache_page')
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
     def test_train_troops(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/military_trained.html').read()

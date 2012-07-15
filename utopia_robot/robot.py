@@ -399,6 +399,17 @@ class UtopiaRobot(object):
         assert('PAGE_MILITARY' == self.parser.current_page)
         return self.parser.get_soldiers()
 
+    def get_spec_credits(self):
+        """Get the players unused free specialist credits. soldiers.
+        Will load the military page (if not already loaded)
+        TODO: Get the troops also from the Throne page
+        """
+        log.debug("get_spec_credits()")
+        if self.parser is None or self.parser.current_page != 'PAGE_MILITARY':
+            self._get_military()
+        assert('PAGE_MILITARY' == self.parser.current_page)
+        return self.parser.get_spec_credits()
+
     def get_draft_rate(self):
         """Get the players draftrate.
         Will load the military page (if not already loaded)

@@ -261,6 +261,11 @@ class military_parser_tests(object):
                 assert(500 == troops['thief']['cost'])
                 assert(564 == troops['thief']['max'])
 
+        def test_get_spec_credits(self):
+                credits = self.parser.get_spec_credits()
+                print "credits:", credits
+                assert(123 == credits)
+
 class growth_parser_tests(object):
         def setup(self):
                 self.parser = htmlparser.GrowthParser()

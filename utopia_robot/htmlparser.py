@@ -656,7 +656,7 @@ class MilitaryParser(UtopiaParser):
         self.parser_state['MilitaryParser']['last_draft_level'] = False
         self.parser_state['MilitaryParser']['last_draft_label'] = False
         self.parser_state['MilitaryParser']['select_draft_rate'] = False
-
+        self.parser_state['MilitaryParser']['spec_credits'] = False
 
         self.military_form = {}
         self.troops = {}
@@ -666,6 +666,7 @@ class MilitaryParser(UtopiaParser):
         self.train_result = None
         self.draft_levels = {}
         self.selected_draft_rate = None
+        self.spec_credits = 0
 
     def parse(self, s):
         super(MilitaryParser, self).parse(s)
@@ -779,6 +780,8 @@ class MilitaryParser(UtopiaParser):
                 self.parser_state['MilitaryParser']['troops_count'] = 0
             if "Number of soldiers" in data:
                 self.parser_state['MilitaryParser']['soldier_mark'] = True
+            if "Free specialist credits left" in data:
+                self.parser_state['MilitaryParser']['spec_credits'] = True
 
         if self.parser_state['MilitaryParser']['td']:
             if self.parser_state['MilitaryParser']['soldier_mark']:
@@ -793,6 +796,9 @@ class MilitaryParser(UtopiaParser):
                     self.troops[self.troops_list[self.parser_state['MilitaryParser']['current_troop']]][self.vals_list[self.parser_state['MilitaryParser']['current_val']]] = int(data)
                 except:
                     pass
+            if self.parser_state['MilitaryParser']['spec_credits']:
+                self.spec_credits = int(data)
+                self.parser_state['MilitaryParser']['spec_credits'] = False
 
         if self.parser_state['MilitaryParser']['div']:
             if 'class' in self.parser_state['MilitaryParser']['div'] and 'good message' == self.parser_state['MilitaryParser']['div']['class']:
@@ -834,6 +840,9 @@ class MilitaryParser(UtopiaParser):
             return self.selected_draft_rate
         return self.selected_draft_rate.items()[0]
 
+    def get_spec_credits(self):
+        log.debug("get_spec_credits(): %s" % self.spec_credits)
+        return self.spec_credits
 
 class GrowthParser(UtopiaParser):
     def __init__(self, verbose=0):
