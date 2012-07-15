@@ -301,6 +301,15 @@ class UtopiaRobot(object):
             self._get_throne()
         return self.parser.get_resources()
 
+    def get_plague(self):
+        """Get the players plague status.
+           If we are not on the Throne page, we will load it."""
+        log.debug("get_plague()")
+        if self.parser is None or self.parser.current_page != 'PAGE_THRONE':
+            self._get_throne()
+        assert('PAGE_THRONE' == self.parser.current_page)
+        return self.parser.get_plague()
+
     def get_available_spells(self):
         """Get which spells are available to be cast.
            The return is a dict( (tuple) )

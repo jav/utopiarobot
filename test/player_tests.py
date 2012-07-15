@@ -31,6 +31,32 @@ class player_tests(object):
     @mock.patch('urllib2.Request')
     @mock.patch.object(UtopiaRobot,'cache_page')
     @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_plague_false(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
+        mock_urlopen.return_value = mock_request
+        mock_request.read.return_value = open('test/throne_page.html').read()
+        mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
+
+        plague = self.player.get_plague()
+        assert(False == plague)
+
+    @mock.patch('urllib2.urlopen')
+    @mock.patch('urllib2.Request')
+    @mock.patch.object(UtopiaRobot,'cache_page')
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_plague_true(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
+        mock_urlopen.return_value = mock_request
+        mock_request.read.return_value = open('test/throne_plague.html').read()
+        mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
+
+        plague = self.player.get_plague()
+        assert(True == plague)
+
+    @mock.patch('urllib2.urlopen')
+    @mock.patch('urllib2.Request')
+    @mock.patch.object(UtopiaRobot,'cache_page')
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
     def test_mana(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
         mock_urlopen.return_value = mock_request
         mock_request.read.return_value = open('test/mystic_page.html').read()

@@ -112,6 +112,27 @@ class throne_parser_tests(object):
                 assert(1398   == resources['Land'])
                 assert(153.021   == resources['Net Worth/Acre'])
 
+        def test_plague(self):
+                plague = self.parser.get_plague()
+                print "plague:", plague
+                assert(False == plague)
+
+class throne_parser_tests_plague(object):
+        def setup(self):
+                self.parser = htmlparser.ThroneParser()
+                in_file = "test/throne_plague.html"
+                try:
+                        with open(in_file) as page:
+                                self.parser.parse(page.read())
+                except IOError as e:
+                        print "CANNOT OPEN FILE %s. For this test to work, you need a copy of the tested page at %s" % (in_file, in_file)
+
+        def test_plague(self):
+                plague = self.parser.get_plague()
+                print "plague:", plague
+                assert(True == plague)
+
+
 
 class mystics_parser_tests(object):
         def setup(self):

@@ -120,6 +120,12 @@ class UtopiaParser(sgmllib.SGMLParser, object):
         if 'depth' in self.parser_state['div_navigation'] and self.parser_state['div_depth'] < self.parser_state['div_navigation']['depth']:
             self.parser_state['div_navigation'] = {}
 
+    def start_p(self, attributes):
+        pass
+
+    def end_p(self):
+        pass
+
     def start_table(self, attributes):
         attr = dict(attributes)
         if 'id' in attr and 'resource-bar' == attr['id']:
@@ -381,11 +387,35 @@ class ThroneParser(UtopiaParser):
         super(ThroneParser, self).__init__(verbose)
         self.last_page="PAGE_NONE"
 
+        self.parser_state['ThroneParser'] = {}
+        self.parser_state['ThroneParser']['plague'] = False
+
+        self.plague = False
+
     def parse(self, s):
         super(ThroneParser, self).parse(s)
         self.feed(s)
         self.close()
 
+    def start_p(self, attributes):
+        super(ThroneParser, self).start_p(attributes)
+        attr = dict(attributes)
+        if 'class' in attr and 'advice-message'== attr['class']:
+            self.parser_state['ThroneParser']['plague'] = True
+
+    def end_p(self):
+        super(ThroneParser, self).end_p()
+        self.parser_state['ThroneParser']['plague'] = False
+
+    def handle_data(self, data):
+        super(ThroneParser, self).handle_data(data)
+        if self.parser_state['ThroneParser']['plague']:
+            if "The Plague has spread" in data:
+                self.plague = True
+
+    def get_plague(self):
+        log.debug("get_plague(): %s" % self.plague)
+        return self.plague
 
 class MysticParser(UtopiaParser):
     def __init__(self, verbose=0):
