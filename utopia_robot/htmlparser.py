@@ -991,13 +991,11 @@ class GrowthParser(UtopiaParser):
                 self.build_result[plural] = built
 
         if self.parser_state['GrowthParser']['building_info']:
-            log.debug("Trying to read build-info data.")
             if self.parser_state['GrowthParser']['th']:
                 self.parser_state['GrowthParser']['building_info_current'] = data
             if self.parser_state['GrowthParser']['td']:
                 label = self.parser_state['GrowthParser']['building_info_current']
                 val = data
-                log.debug("label: %s, val: %s" % (label, val))
                 if "Total Land" == label:
                     val = val.replace(',','')
                     val = val.replace('acres','').replace(' acre','')
