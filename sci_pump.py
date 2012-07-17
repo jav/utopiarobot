@@ -54,8 +54,9 @@ def main():
             spells['Minor Protection'] = 0
         while spells['Minor Protection'] <= 1 and  resources['Runes'] > available_spells['Minor Protection'][1] and 20 < player.get_mana():
             if player.cast_spell('Minor Protection') is not None:
+                log.info("Cast Minor Protection: Success")
                 break
-            spells = player.get_active_spells()
+            log.info("Cast Minor Protection: Failed")
             resources = player.get_resources()
 
     resources = player.get_resources()
@@ -66,17 +67,20 @@ def main():
             spells['Fertile Lands'] = 0
         while spells['Fertile Lands'] <= 1 and resources['Food'] < 30000 and resources['Runes'] > available_spells['Fertile Lands'][1] and 20 < player.get_mana():
             if player.cast_spell('Fertile Lands') is not None:
+                log.info("Cast Fertile Lands: Success")
                 break
-            spells = player.get_active_spells()
+            log.info("Cast Fertile Lands: Failed")
             resources = player.get_resources()
 
-    if 'Love and Peace' in available_spells:
-        if 'Love and Peace' not in spells:
-            spells['Love and Peace'] = 0
-        while spells['Love and Peace'] <= 2 and resources['Runes'] > available_spells['Love and Peace'][1] and 20 < player.get_mana():
-            if player.cast_spell('Love and Peace') is not None:
+    # If we are low on food, make sure we cast Fertile lands.
+    if 'Fountain of Knowledge' in available_spells:
+        if 'Fountain of Knowledge' not in spells:
+            spells['Fountain of Knowledge'] = 0
+        while spells['Fountain of Knowledge'] <= 1 and resources['Food'] < 30000 and resources['Runes'] > available_spells['Fountain of Knowledge'][1] and 20 < player.get_mana():
+            if player.cast_spell('Fountain of Knowledge') is not None:
+                log.info("Cast Fertile Lands: Success")
                 break
-            spells = player.get_active_spells()
+            log.info("Cast Fertile Lands: Failed")
             resources = player.get_resources()
 
     resources = player.get_resources()
@@ -100,12 +104,11 @@ def main():
 
         print "train_military(%s): %s" % (troops, player.train_military(troops))
 
-    # if 'Paradise' in available_spells:
-    #     while resources['Runes'] > available_spells['Paradise'][1] and 10 < player.get_mana():
-    #         player.cast_spell('Paradise')
-    #         resources = player.get_resources()
-
-    #log.debug("build_result: %s" % player.build({"Farms": 1}))
+    if 'Paradise' in available_spells:
+        while resources['Runes'] > available_spells['Paradise'][1] and 10 < player.get_mana():
+            result = player.cast_spell('Paradise')
+            log.info("Cast Paradise - Result: %s" % result)
+            resources = player.get_resources()
 
     build_info = player.get_build_info()
     buildings = player.get_buildings()
@@ -117,10 +120,16 @@ def main():
         # min 8% farms
         if 0.07 < buildings['Farms']['total'] / build_info['Total Land']:
             to_build['Farms'] = int((0.07 - (buildings['Farms']['total'] / build_info['Total Land'])) * build_info['Total Land'])
+            log.info("To build['Farms'] : %s" % to_build['Farms'])
         if 0.15 < buildings['Guilds']['total'] / build_info['Total Land']:
             to_build['Guilds'] = int((0.15 - (buildings['Guilds']['total'] / build_info['Total Land'])) * build_info['Total Land'])
+            log.info("To build['Guilds'] : %s" % to_build['Guilds'])
         if 0.12 < buildings['Towers']['total'] / build_info['Total Land']:
-            to_build['Towers'] = int((0.12 - (buildings['Guilds']['total'] / build_info['Total Land'])) * build_info['Total Land'])
+            to_build['Towers'] = int((0.15 - (buildings['Towers']['total'] / build_info['Total Land'])) * build_info['Total Land'])
+            log.info("To build['Towers'] : %s" % to_build['Towers'])
+        if 0.12 < buildings['Schools']['total'] / build_info['Total Land']:
+            to_build['Schools'] = int((0.12 - (buildings['Schools']['total'] / build_info['Total Land'])) * build_info['Total Land'])
+            log.info("To build['Schools'] : %s" % to_build['Schools'])
 
         player.build(to_build)
     log.info("build_info: %s" ,player.get_build_info())
