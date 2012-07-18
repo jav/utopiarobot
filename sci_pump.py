@@ -28,17 +28,17 @@ def main():
     logging.basicConfig(level=logging.WARN)
 
     #Actual logic
-    log.debug("Instanciating player")
+    log.info("Instanciating player")
     player = UtopiaRobot()
 
     if(options.page_cache):
         player.page_cache = options.page_cache
 
     player.username = options.username
-    log.debug("set username = %s" % player.username)
+    log.info("set username = %s" % player.username)
 
     player.password = options.password
-    log.debug("set password = %s (masked)" % "".join(["*" for c in player.password]))
+    log.info("set password = %s (masked)" % "".join(["*" for c in player.password]))
 
     log.info("Log in player (%s)...", player.username)
 
@@ -59,6 +59,7 @@ def main():
             log.info("Cast Minor Protection: Failed")
             resources = player.get_resources()
 
+    log.info("Cast Minor Protection: Done")
     resources = player.get_resources()
 
     # If we are low on food, make sure we cast Fertile lands.
@@ -71,6 +72,7 @@ def main():
                 break
             log.info("Cast Fertile Lands: Failed")
             resources = player.get_resources()
+    log.info("Cast Fertile Lands: Done")
 
     # If we are low on food, make sure we cast Fertile lands.
     if 'Fountain of Knowledge' in available_spells:
@@ -82,6 +84,7 @@ def main():
                 break
             log.info("Cast Fertile Lands: Failed")
             resources = player.get_resources()
+    log.info("Cast Fontain of Knowledge: Done")
 
     resources = player.get_resources()
     while 20 < player.get_mana() and player.get_soldiers() > 0:
@@ -102,7 +105,7 @@ def main():
         else:
             troops={'elite': leet_count}
 
-        print "train_military(%s): %s" % (troops, player.train_military(troops))
+        log.info("train_military(%s): %s" % (troops, player.train_military(troops)))
 
     # If we reach this point, and we're out of money. Let's try to spend our spec-credits
     resources = player.get_resources()
@@ -115,14 +118,18 @@ def main():
             result = player.cast_spell('Paradise')
             log.info("Cast Paradise - Result: %s" % result)
             resources = player.get_resources()
+    log.info("Cast Paradise: Done")
 
+    log.info("Prep building.")
     build_info = player.get_build_info()
     buildings = player.get_buildings()
-    for k,v in buildings.items():
-        buildings[k]['total'] = v['built'] + v['incoming']
     resources = player.get_resources()
-    to_build = {}
-    if 0 < build_info['Total Undeveloped land'] and build_info['Construction Cost'] < resources['Money']:
+
+    while 0 < build_info['Total Undeveloped land'] and build_info['Construction Cost'] < resources['Money']:
+        for k,v in buildings.items():
+            buildings[k]['total'] = v['built'] + v['incoming']
+
+        to_build = {}
         # min 8% farms
         if 0.07 < buildings['Farms']['total'] / build_info['Total Land']:
             to_build['Farms'] = int((0.07 - (buildings['Farms']['total'] / build_info['Total Land'])) * build_info['Total Land'])
@@ -138,8 +145,14 @@ def main():
             log.info("To build['Schools'] : %s" % to_build['Schools'])
 
         player.build(to_build)
-    log.info("build_info: %s" ,player.get_build_info())
-    log.info("buildings: %s", player.get_buildings())
+        log.info("build_info: %s" ,player.get_build_info())
+        log.info("buildings: %s", player.get_buildings())
+
+        build_info = player.get_build_info()
+        if 0 < build_info['Total Undeveloped land']:
+                # If we are low on food, make sure we cast Fertile lands.
+            while 'Tree of Gold' in available_spells and resources['Runes'] > available_spells['Tree of Gold'][1] and 20 < player.get_mana() and player.cast_spell('Tree of Gold') is not None:
+                resources = player.get_resources()
 
 
     print "DONE"
