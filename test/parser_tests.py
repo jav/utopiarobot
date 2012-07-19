@@ -344,3 +344,51 @@ class growth_parser_tests(object):
                 assert( 463 == build_info['Raze Cost'])
                 assert(  32 == build_info['Free Building Credits'])
                 assert( 143 == build_info['Maximum Razeable Now'])
+
+
+class science_parser_tests(object):
+        def setup(self):
+                self.parser = htmlparser.ScienceParser()
+                in_file = "test/science_page.html"
+                try:
+                        with open(in_file) as page:
+                                self.parser.parse(page.read())
+                except IOError as e:
+                        print "CANNOT OPEN FILE %s. For this test to work, you need a copy of the tested page at %s" % (in_file, in_file)
+
+        def test_page_enum(self):
+                print self.parser.current_page
+                assert("PAGE_SCIENCE" == self.parser.current_page)
+
+
+        def test_get_science(self):
+                science = self.parser.get_science()
+                print "science:", science
+
+                assert(21132 == science['Alchemy']['points'])
+                assert(5.5 == science['Alchemy']['effect'])
+                assert(0 == science['Alchemy']['incomming'])
+
+                assert(73226 == science['Tools']['points'])
+                assert(7.4 == science['Tools']['effect'])
+                assert(9996 == science['Tools']['incomming'])
+
+                assert(32578 == science['Housing']['points'])
+                assert(3.2 == science['Housing']['effect'])
+                assert(0 == science['Housing']['incomming'])
+
+                assert(4892 == science['Food']['points'])
+                assert(15.2 == science['Food']['effect'])
+                assert(0 == science['Food']['incomming'])
+
+                assert(4892 == science['Military']['points'])
+                assert(2.7 == science['Military']['effect'])
+                assert(0 == science['Military']['incomming'])
+
+                assert(21340 == science['Crime']['points'])
+                assert(23.8 == science['Crime']['effect'])
+                assert(0 == science['Crime']['incomming'])
+
+                assert(20860 == science['Channeling']['points'])
+                assert(23.6 == science['Channeling']['effect'])
+                assert(0 == science['Channeling']['incomming'])

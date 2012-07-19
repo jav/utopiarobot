@@ -531,6 +531,17 @@ class UtopiaRobot(object):
         assert('PAGE_GROWTH' == self.parser.current_page)
         return self.parser.get_build_info()
 
+    def get_science(self):
+        """Get info from the science page (not the advisor).
+        Will load the science page (if not already loaded)
+        """
+        log.debug("get_science()")
+        if self.parser is None or self.parser.current_page != 'PAGE_SCIENCE':
+            self._get_growth()
+        assert('PAGE_SCIENCE' == self.parser.current_page)
+        return self.parser.get_science()
+
+
 if __name__ == "__main__":
 
         parser = OptionParser()

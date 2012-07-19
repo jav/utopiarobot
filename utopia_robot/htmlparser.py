@@ -221,6 +221,8 @@ class UtopiaParser(sgmllib.SGMLParser, object):
                     self.current_page="PAGE_MILITARY"
                 if "Buildings" in self.title:
                     self.current_page="PAGE_GROWTH"
+                if "Science Research" in self.title:
+                    self.current_page="PAGE_SCIENCE"
                 log.debug("DETECTED PAGE: %s" % self.current_page)
         if 'h2' in self.parser_state and self.parser_state['h2']:
             if 'The game is currently ticking. Please wait a few moments' in  data:
@@ -1043,3 +1045,74 @@ class GrowthParser(UtopiaParser):
     def get_build_info(self):
         log.debug("get_build_info(): %s"% self.build_info)
         return self.build_info
+
+class ScienceParser(UtopiaParser):
+    def __init__(self, verbose=0):
+        super(ScienceParser, self).__init__(verbose)
+        self.last_page="PAGE_NONE"
+
+        self.parser_state['ScienceParser'] = {}
+        self.parser_state['ScienceParser']['th'] = False
+        self.parser_state['ScienceParser']['td'] = False
+        self.parser_state['ScienceParser']['current_sci'] = None
+        self.parser_state['ScienceParser']['current_sci_index'] = 0
+
+        self.science = {}
+        self.sci_list = ['Alchemy', 'Tools', 'Housing', 'Food', 'Military', 'Crime','Channeling']
+
+        for science in self.sci_list:
+            self.science[science] = {'points': None, 'effect': None, 'incomming':None}
+
+    def parse(self, s):
+        super(ScienceParser, self).parse(s)
+        self.feed(s)
+        self.close()
+
+    def start_th(self, attributes):
+        super(ScienceParser, self).start_th(attributes)
+        self.parser_state['ScienceParser']['th'] = True
+
+    def end_th(self):
+        super(ScienceParser, self).end_th()
+        self.parser_state['ScienceParser']['th'] = False
+        self.parser_state['ScienceParser']['current_sci_index'] = 0
+
+    def start_td(self, attributes):
+        super(ScienceParser, self).start_td(attributes)
+        self.parser_state['ScienceParser']['td'] = True
+
+    def end_td(self):
+        super(ScienceParser, self).end_td()
+        self.parser_state['ScienceParser']['td'] = False
+        self.parser_state['ScienceParser']['current_sci_index'] += 1
+
+    def handle_data(self, data):
+        super(ScienceParser, self).handle_data(data)
+        if self.parser_state['ScienceParser']['th']:
+            if data in self.sci_list:
+                self.parser_state['ScienceParser']['current_sci'] = data
+            else:
+                self.parser_state['ScienceParser']['current_sci'] = None
+
+        if self.parser_state['ScienceParser']['td']:
+            assert( 0 <= self.parser_state['ScienceParser']['current_sci_index'])
+            if self.parser_state['ScienceParser']['current_sci'] is not None:
+
+                curr_sci = self.parser_state['ScienceParser']['current_sci']
+
+                log.debug("sci: %s (%s)- %s" % (curr_sci, self.parser_state['ScienceParser']['current_sci_index'],data))
+
+                if  0 == self.parser_state['ScienceParser']['current_sci_index'] and self.science[curr_sci]['points'] is None:
+                    self.science[curr_sci]['points'] = int(data.replace(',',''))
+                elif 1 == self.parser_state['ScienceParser']['current_sci_index'] and self.science[curr_sci]['effect'] is None:
+                    data = data[:data.index('%')]
+                    self.science[curr_sci]['effect'] = float(data.replace(',','').replace('+',''))
+                elif 2 == self.parser_state['ScienceParser']['current_sci_index'] and self.science[curr_sci]['incomming'] is None:
+                    self.science[curr_sci]['incomming'] = int(data.replace(',',''))
+                elif 3 == self.parser_state['ScienceParser']['current_sci_index']:
+                    self.parser_state['ScienceParser']['current_sci'] = None
+
+
+
+    def get_science(self):
+        return self.science
