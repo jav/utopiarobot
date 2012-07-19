@@ -78,7 +78,7 @@ def main():
     if 'Fountain of Knowledge' in available_spells:
         if 'Fountain of Knowledge' not in spells:
             spells['Fountain of Knowledge'] = 0
-        while spells['Fountain of Knowledge'] <= 1 and resources['Food'] < 30000 and resources['Runes'] > available_spells['Fountain of Knowledge'][1] and 20 < player.get_mana():
+        while spells['Fountain of Knowledge'] <= 1 and resources['Runes'] > available_spells['Fountain of Knowledge'][1] and 20 < player.get_mana():
             if player.cast_spell('Fountain of Knowledge') is not None:
                 log.info("Cast Fertile Lands: Success")
                 break
