@@ -422,46 +422,46 @@ class player_tests(object):
         assert(2 == buildings_result['Towers'])
         assert(2 == buildings_result['Stables'])
 
-    # @mock.patch('urllib2.urlopen')
-    # @mock.patch('urllib2.Request')
-    # @mock.patch.object(UtopiaRobot,'cache_page')
-    # @mock.patch.object(UtopiaRobot,'_simulate_wait')
-    # def test_get_science(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
-    #     mock_urlopen.return_value = mock_request
-    #     mock_request.read.return_value = open('test/science_page.html').read()
-    #     mock_cache_page.return_value = True
-    #     mock_simulate_wait.return_value = True
+    @mock.patch('urllib2.urlopen')
+    @mock.patch('urllib2.Request')
+    @mock.patch.object(UtopiaRobot,'cache_page')
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_get_science(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
+        mock_urlopen.return_value = mock_request
+        mock_request.read.return_value = open('test/science_page.html').read()
+        mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
 
-    #     science = player.get_science()
-    #     print "Sience:: %s" % science
+        science = self.player.get_science()
+        print "Sience:: %s" % science
 
-    #     assert(21132 == science['Alchemy']['points'])
-    #     assert(5.5 == science['Alchemy']['effect'])
-    #     assert(0 == science['Alchemy']['incomming'])
+        assert(21132 == science['Alchemy']['points'])
+        assert(5.5 == science['Alchemy']['effect'])
+        assert(0 == science['Alchemy']['incomming'])
 
-    #     assert(73226 == science['Tools']['points'])
-    #     assert(7.4 == science['Tools']['effect'])
-    #     assert(9996 == science['Tools']['incomming'])
+        assert(73226 == science['Tools']['points'])
+        assert(7.4 == science['Tools']['effect'])
+        assert(9996 == science['Tools']['incomming'])
 
-    #     assert(32578 == science['Housing']['points'])
-    #     assert(3.2 == science['Housing']['effect'])
-    #     assert(0 == science['Housing']['incomming'])
+        assert(32578 == science['Housing']['points'])
+        assert(3.2 == science['Housing']['effect'])
+        assert(0 == science['Housing']['incomming'])
 
-    #     assert(4892 == science['Food']['points'])
-    #     assert(15.2 == science['Food']['effect'])
-    #     assert(0 == science['Food']['incomming'])
+        assert(4892 == science['Food']['points'])
+        assert(15.2 == science['Food']['effect'])
+        assert(0 == science['Food']['incomming'])
 
-    #     assert(4892 == science['Military']['points'])
-    #     assert(2.7 == science['Military']['effect'])
-    #     assert(0 == science['Military']['incomming'])
+        assert(4892 == science['Military']['points'])
+        assert(2.7 == science['Military']['effect'])
+        assert(0 == science['Military']['incomming'])
 
-    #     assert(21340['Crime']['points'])
-    #     assert(23.8 == science['Crime']['effect'])
-    #     assert(0 == science['Crime']['incomming'])
+        assert(21340 == science['Crime']['points'])
+        assert(23.8 == science['Crime']['effect'])
+        assert(0 == science['Crime']['incomming'])
 
-    #     assert(20860 == science['Channeling']['points'])
-    #     assert(23.6 == science['Channeling']['effect'])
-    #     assert(0 == science['Channeling']['incomming'])
+        assert(20860 == science['Channeling']['points'])
+        assert(23.6 == science['Channeling']['effect'])
+        assert(0 == science['Channeling']['incomming'])
 
     # @mock.patch('urllib2.urlopen')
     # @mock.patch('urllib2.Request')

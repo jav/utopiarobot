@@ -40,6 +40,7 @@ class UtopiaRobot(object):
         'Mystics': '/wol/game/enchantment',
         'Military': '/wol/game/train_army',
         'Growth': '/wol/game/build',
+        'Science': '/wol/game/science',
         }
 
     advisor_links = {
@@ -284,6 +285,31 @@ class UtopiaRobot(object):
             self.parser.parse(self.result)
 
         assert('PAGE_MILITARY' == self.parser.current_page)
+        if self.parser.get_nav_links():
+            self.nav_links = self.parser.get_nav_links()
+
+    def _get_science(self):
+        """Load the Science page (internal function)"""
+        log.debug("_get_science()")
+        log.debug("nav: %s" % self.nav_links)
+        assert(0 < len(self.nav_links['Science']))
+        data = None
+        req = urllib2.Request(URL_BASE + self.nav_links['Science'], data, self.headers)
+        self._simulate_wait()
+        res = urllib2.urlopen(req)
+        self.result = res.read()
+
+        self.parser = htmlparser.ScienceParser()
+        self.parser.parse(self.result)
+        self.cache_page(self.parser.current_page, self.result)
+
+        if 'PAGE_INIT' == self.parser.current_page:
+            log.info("Not logged in, -> do_login()")
+            self._do_login(self)
+            self.parser = htmlparser.ScienceParser()
+            self.parser.parse(self.result)
+
+        assert('PAGE_SCIENCE' == self.parser.current_page)
         if self.parser.get_nav_links():
             self.nav_links = self.parser.get_nav_links()
 
@@ -537,7 +563,7 @@ class UtopiaRobot(object):
         """
         log.debug("get_science()")
         if self.parser is None or self.parser.current_page != 'PAGE_SCIENCE':
-            self._get_growth()
+            self._get_science()
         assert('PAGE_SCIENCE' == self.parser.current_page)
         return self.parser.get_science()
 
