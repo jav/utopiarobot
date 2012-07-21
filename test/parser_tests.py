@@ -392,3 +392,29 @@ class science_parser_tests(object):
                 assert(20860 == science['Channeling']['points'])
                 assert(23.6 == science['Channeling']['effect'])
                 assert(0 == science['Channeling']['incomming'])
+
+
+        def test_get_form_fields(self):
+                science_form = self.parser.get_science_form()
+                print "science_form:", science_form
+                assert("896adc6656e44910f20c4265cec55f0d" == science_form['inputs']['csrfmiddlewaretoken']['value'])
+                learn_rate = self.parser.get_learn_rate()
+                print "learn_rate:", learn_rate
+                assert("Limited" == learn_rate)
+                assert(500 == science_form['inputs']['learn_min_income']['value'])
+                for i in range(0, 7):
+                        field = 'quantity_%d'%i
+                        print field
+                        assert( field in science_form['inputs'] )
+
+
+# csrfmiddlewaretoken:88e2dabb2a8b615561e743d05668d47d
+# learn_rate:ACTIVE
+# learn_min_income:500
+# quantity_0:1
+# quantity_1:2
+# quantity_2:3
+# quantity_3:4
+# quantity_4:5
+# quantity_5:6
+# quantity_6:7
