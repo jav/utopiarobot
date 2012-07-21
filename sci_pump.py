@@ -125,6 +125,7 @@ def main():
     buildings = player.get_buildings()
     resources = player.get_resources()
 
+
     while 0 < build_info['Total Undeveloped land'] and build_info['Construction Cost'] < resources['Money']:
         for k,v in buildings.items():
             buildings[k]['total'] = v['built'] + v['incoming']
@@ -144,11 +145,15 @@ def main():
             to_build['Schools'] = int((0.12 - (buildings['Schools']['total'] / build_info['Total Land'])) * build_info['Total Land'])
             log.info("To build['Schools'] : %s" % to_build['Schools'])
 
+        if 0 < len(to_build):
+            log.info("No need to build anything.")
+            break
         player.build(to_build)
         log.info("build_info: %s" ,player.get_build_info())
         log.info("buildings: %s", player.get_buildings())
 
         build_info = player.get_build_info()
+        resources = player.get_resources()
         if 0 < build_info['Total Undeveloped land']:
                 # If we are low on food, make sure we cast Fertile lands.
             while 'Tree of Gold' in available_spells and resources['Runes'] > available_spells['Tree of Gold'][1] and 20 < player.get_mana() and player.cast_spell('Tree of Gold') is not None:
