@@ -400,13 +400,12 @@ class science_parser_tests(object):
                 assert("896adc6656e44910f20c4265cec55f0d" == science_form['inputs']['csrfmiddlewaretoken']['value'])
                 learn_rate = self.parser.get_learn_rate()
                 print "learn_rate:", learn_rate
-                assert("Limited" == learn_rate)
+                assert(("Limited", "LIMITED") == learn_rate)
                 assert(500 == science_form['inputs']['learn_min_income']['value'])
                 for i in range(0, 7):
                         field = 'quantity_%d'%i
                         print field
                         assert( field in science_form['inputs'] )
-
 
 # csrfmiddlewaretoken:88e2dabb2a8b615561e743d05668d47d
 # learn_rate:ACTIVE
@@ -418,3 +417,10 @@ class science_parser_tests(object):
 # quantity_4:5
 # quantity_5:6
 # quantity_6:7
+        def test_get_science_info(self):
+                info = self.parser.get_science_info()
+                print "science_info:", info
+                assert(42055 == info['Total Money'])
+                assert((3794, 5) == info['Estimated Research Cost'])
+                assert(69514 == info['Daily Income'])
+                assert(0 == info['Books to Allocate'])

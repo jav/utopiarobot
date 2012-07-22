@@ -1052,8 +1052,9 @@ class ScienceParser(UtopiaParser):
         self.last_page="PAGE_NONE"
 
         self.parser_state['ScienceParser'] = {}
-        self.parser_state['ScienceParser']['th'] = False
         self.parser_state['ScienceParser']['h2'] = False
+        self.parser_state['ScienceParser']['table'] = False
+        self.parser_state['ScienceParser']['th'] = False
         self.parser_state['ScienceParser']['td'] = False
         self.parser_state['ScienceParser']['sci_form'] = False
         self.parser_state['ScienceParser']['input'] = False
@@ -1063,12 +1064,18 @@ class ScienceParser(UtopiaParser):
         self.parser_state['ScienceParser']['current_sci_index'] = 0
         self.parser_state['ScienceParser']['rate_selector'] = False
         self.parser_state['ScienceParser']['current_option'] = None
+        self.parser_state['ScienceParser']['curr_form'] = None
+        self.parser_state['ScienceParser']['good-message'] = False
+        self.parser_state['ScienceParser']['sci_info'] = False
+        self.parser_state['ScienceParser']['curr_sci_info_name'] = None
 
         self.science = {}
+        self.result={}
+        self.science_info = {}
+        self.science_info_labels = ['Total Money', 'Estimated Research Cost', 'Daily Income', 'Books to Allocate']
         self.science_options = {}
         self.selected_option = None
         self.sci_list = ['Alchemy', 'Tools', 'Housing', 'Food', 'Military', 'Crime','Channeling']
-
         for science in self.sci_list:
             self.science[science] = {'points': None, 'effect': None, 'incomming':None}
 
@@ -1090,9 +1097,24 @@ class ScienceParser(UtopiaParser):
         attr = dict(attributes)
         if 'class' in attr and 'selector' == attr['class']:
             self.parser_state['ScienceParser']['rate_selector'] = True
+        if 'class' in attr and 'good message' == attr['class']:
+            self.parser_state['ScienceParser']['good-message'] = True
 
     def end_div(self):
         super(ScienceParser, self).end_div()
+        self.parser_state['ScienceParser']['good-message'] = False
+
+    def start_table(self, attributes):
+        super(ScienceParser, self).start_table(attributes)
+        attr = dict(attributes)
+        self.parser_state['ScienceParser']['table'] = True
+        if 'class' in attr and 'two-column-stats' == attr['class']:
+            self.parser_state['ScienceParser']['sci_info'] = True
+
+    def end_table(self):
+        super(ScienceParser, self).end_table()
+        self.parser_state['ScienceParser']['table'] = False
+        self.parser_state['ScienceParser']['sci_info'] = False
 
     def start_th(self, attributes):
         super(ScienceParser, self).start_th(attributes)
@@ -1114,10 +1136,13 @@ class ScienceParser(UtopiaParser):
 
     def start_form(self, attributes):
         super(ScienceParser, self).start_form(attributes)
+        attr = dict(attributes)
+        self.parser_state['ScienceParser']['curr_form'] = attr
 
     def end_form(self):
         super(ScienceParser, self).end_form()
         self.parser_state['ScienceParser']['sci_form'] = False
+        self.parser_state['ScienceParser']['curr_form'] = None
 
     def start_input(self, attributes):
         super(ScienceParser, self).start_input(attributes)
@@ -1149,6 +1174,34 @@ class ScienceParser(UtopiaParser):
 
     def handle_data(self, data):
         super(ScienceParser, self).handle_data(data)
+        if self.parser_state['ScienceParser']['sci_info']:
+            if self.parser_state['ScienceParser']['th']:
+                if data in self.science_info_labels:
+                    self.parser_state['ScienceParser']['curr_sci_info_name'] = data
+            if self.parser_state['ScienceParser']['td']:
+                if self.parser_state['ScienceParser']['curr_sci_info_name']:
+                    curr_sci_info_name = self.parser_state['ScienceParser']['curr_sci_info_name']
+                    if 'Estimated Research Cost' == curr_sci_info_name :
+                        (cost,_,percent) = data.partition("gc")
+                        cost = cost.replace(',','').strip()
+                        percent = percent.replace('(','').replace(')','').replace('%','').strip()
+                        val = (int(cost), float(percent))
+                    else:
+                        val = int(data.replace(',','').replace('gc','').replace('books',''))
+                    self.science_info[curr_sci_info_name] = val
+
+                self.parser_state['ScienceParser']['curr_sci_info_name'] = None
+
+        if self.parser_state['ScienceParser']['good-message']:
+            log.debug("GOOD MESSAGE")
+            if 'of' in data:
+                (_,_,msg) = data.partition('study')
+                (val,_,msg) = msg.partition('book')
+                (_,_,msg) = msg.partition('of')
+                val = int(val.replace(',','').strip())
+                sci_name = msg.replace('.','').strip().title()
+                self.result[sci_name] = val
+
         if self.parser_state['ScienceParser']['current_option'] is not None:
             curr_opt = self.parser_state['ScienceParser']['current_option']
             log.debug("data: %s" % data)
@@ -1161,12 +1214,14 @@ class ScienceParser(UtopiaParser):
             log.debug("name: %s, books: %s, cost: %s" % (name, books, cost))
             self.science_options[data] = curr_opt['value']
             if 'selected' in curr_opt and 'selected' == curr_opt['selected']:
-                self.selected_option = name
+                self.selected_option = (name, curr_opt['value'])
             self.parser_state['ScienceParser']['current_option'] = None
         if self.parser_state['ScienceParser']['h2']:
             log.debug("H2: %s" % data)
             if "Daily Science Research Rate" in data:
                 self.parser_state['ScienceParser']['sci_form'] = True
+                self.parser_state['ScienceParser']['form'] = self.parser_state['ScienceParser']['curr_form']
+                log.debug("Sci_form: %s" % self.parser_state['ScienceParser']['form'])
         if self.parser_state['ScienceParser']['th']:
             if data in self.sci_list:
                 self.parser_state['ScienceParser']['current_sci'] = data
@@ -1190,10 +1245,17 @@ class ScienceParser(UtopiaParser):
                     self.parser_state['ScienceParser']['current_sci'] = None
 
     def get_science_form(self):
-        return {'inputs': self.parser_state['ScienceParser']['inputs']}
+        return {'form': self.parser_state['ScienceParser']['form'],'inputs': self.parser_state['ScienceParser']['inputs']}
 
     def get_science(self):
         return self.science
 
     def get_learn_rate(self):
         return self.selected_option
+
+    def get_science_result(self):
+        return self.result
+
+    def get_science_info(self):
+        log.debug("get_sience_info(): %s"% self.science_info)
+        return self.science_info

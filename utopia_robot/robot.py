@@ -40,7 +40,7 @@ class UtopiaRobot(object):
         'Mystics': '/wol/game/enchantment',
         'Military': '/wol/game/train_army',
         'Growth': '/wol/game/build',
-        'Science': '/wol/game/science',
+        'Sciences': '/wol/game/science',
         }
 
     advisor_links = {
@@ -292,9 +292,9 @@ class UtopiaRobot(object):
         """Load the Science page (internal function)"""
         log.debug("_get_science()")
         log.debug("nav: %s" % self.nav_links)
-        assert(0 < len(self.nav_links['Science']))
+        assert(0 < len(self.nav_links['Sciences']))
         data = None
-        req = urllib2.Request(URL_BASE + self.nav_links['Science'], data, self.headers)
+        req = urllib2.Request(URL_BASE + self.nav_links['Sciences'], data, self.headers)
         self._simulate_wait()
         res = urllib2.urlopen(req)
         self.result = res.read()
@@ -566,6 +566,67 @@ class UtopiaRobot(object):
             self._get_science()
         assert('PAGE_SCIENCE' == self.parser.current_page)
         return self.parser.get_science()
+
+    def buy_science(self, sci_dict):
+        """Buy a dict of science.
+        Input is expected as a dict with the following structure
+        {
+            "Alchemy": <int to be bounght>
+            "Tools": <int to be bounght>
+            "Housing": <int to be bounght>
+            "Food": <int to be bounght>
+            "Military": <int to be bounght>
+            "Crime": <int to be bounght>
+            "Channeling": <int to be bounght>
+        }
+        Will load the science page (if not already loaded)
+        """
+        log.debug("buy_science( %s )" % sci_dict)
+        if self.parser is None or self.parser.current_page != 'PAGE_SCIENCE':
+            self._get_science()
+        assert('PAGE_SCIENCE' == self.parser.current_page)
+        science_form = self.parser.get_science_form()
+
+        log.debug("science_form['inputs']: %s" % science_form['inputs'])
+
+        for (sci, field) in zip(['Alchemy','Tools','Housing', 'Food', 'Military', 'Crime', 'Channeling'],['quantity_%d'%i for i in range(0,7)]):
+            if sci in sci_dict:
+                science_form['inputs'][field]['value'] = sci_dict[sci]
+            else:
+                science_form['inputs'][field]['value'] = ""
+
+        log.debug("science_form['inputs']: %s" % science_form['inputs'])
+        values = {}
+        for k,v in science_form['inputs'].items():
+            if 'value' in v:
+                values[k] = v['value']
+
+        values['learn_rate'] = self.parser.get_learn_rate()[1]
+        log.debug("values: %s" % values)
+        log.debug("Sci-form: %s"% science_form)
+        data = urllib.urlencode(values)
+        url = URL_BASE + self.nav_links['Sciences'] + science_form['form']['action']
+        log.debug("url: %s" % url)
+        req = urllib2.Request(url, data, self.headers)
+        self._simulate_wait()
+        res = urllib2.urlopen(req)
+        self.result = res.read()
+        #Check the result
+        self.parser = htmlparser.ScienceParser()
+        self.parser.parse(self.result)
+        self.cache_page(self.parser.current_page, self.result)
+        #Return the result
+        return self.parser.get_science_result()
+
+    def get_science_info(self):
+        """Get the science_info.
+        Will load the science page (if not already loaded)
+        """
+        log.debug("get_science_info()")
+        if self.parser is None or self.parser.current_page != 'PAGE_SCIENCE':
+            self._get_science()
+        assert('PAGE_SCIENCE' == self.parser.current_page)
+        return self.parser.get_science_info()
 
 
 if __name__ == "__main__":
