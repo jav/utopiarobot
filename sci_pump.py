@@ -132,20 +132,30 @@ def main():
 
         to_build = {}
         # min 8% farms
-        if 0.07 < buildings['Farms']['total'] / build_info['Total Land']:
+        if 0.08 < buildings['Farms']['total'] / build_info['Total Land']:
             to_build['Farms'] = int((0.07 - (buildings['Farms']['total'] / build_info['Total Land'])) * build_info['Total Land'])
             log.info("To build['Farms'] : %s" % to_build['Farms'])
         if 0.15 < buildings['Guilds']['total'] / build_info['Total Land']:
             to_build['Guilds'] = int((0.15 - (buildings['Guilds']['total'] / build_info['Total Land'])) * build_info['Total Land'])
             log.info("To build['Guilds'] : %s" % to_build['Guilds'])
-        if 0.12 < buildings['Towers']['total'] / build_info['Total Land']:
+        if 0.09 < buildings['Forts']['total'] / build_info['Total Land']:
+            to_build['Forts'] = int((0.12 - (buildings['Forts']['total'] / build_info['Total Land'])) * build_info['Total Land'])
+            log.info("To build['Forts'] : %s" % to_build['Forts'])
+        if 0.25 < buildings['Banks']['total'] / build_info['Total Land']:
+            to_build['Banks'] = int((0.12 - (buildings['Banks']['total'] / build_info['Total Land'])) * build_info['Total Land'])
+            log.info("To build['Banks'] : %s" % to_build['Banks'])
+        if 0.14 < buildings['Towers']['total'] / build_info['Total Land']:
             to_build['Towers'] = int((0.15 - (buildings['Towers']['total'] / build_info['Total Land'])) * build_info['Total Land'])
             log.info("To build['Towers'] : %s" % to_build['Towers'])
-        if 0.12 < buildings['Schools']['total'] / build_info['Total Land']:
+        if 0.2 < buildings['Schools']['total'] / build_info['Total Land']:
             to_build['Schools'] = int((0.12 - (buildings['Schools']['total'] / build_info['Total Land'])) * build_info['Total Land'])
             log.info("To build['Schools'] : %s" % to_build['Schools'])
+        if 0.09 < buildings['Training Grounds']['total'] / build_info['Total Land']:
+            to_build['Training Grounds'] = int((0.12 - (buildings['Training Grounds']['total'] / build_info['Total Land'])) * build_info['Total Land'])
+            log.info("To build['Training Grounds'] : %s" % to_build['Training Grounds'])
 
-        if 0 < len(to_build):
+
+        if 0 <= len(to_build):
             log.info("No need to build anything.")
             break
         player.build(to_build)
@@ -159,6 +169,7 @@ def main():
             while 'Tree of Gold' in available_spells and resources['Runes'] > available_spells['Tree of Gold'][1] and 20 < player.get_mana() and player.cast_spell('Tree of Gold') is not None:
                 resources = player.get_resources()
 
+    player.buy_science({"Alchemy": 99999})
 
     print "DONE"
 
