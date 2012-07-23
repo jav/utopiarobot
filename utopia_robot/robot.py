@@ -80,6 +80,12 @@ class UtopiaRobot(object):
         self.result = res.read()
         self.parser = parser
         self.parser.parse(self.result)
+
+        if self.parser.tick_ongoing:
+            #Tick detected, sleep, retry and abort this instance
+            sleep(random.randrange(30,60))
+            return self._get_page(url, data, headers,parser)
+
         self.cache_page(self.parser.current_page, self.result)
 
         log.debug("Page loaded, self.parser.current_page: %s" % self.parser.current_page)
@@ -87,7 +93,7 @@ class UtopiaRobot(object):
         if 'PAGE_INIT' == self.parser.current_page:
             log.info("Not logged in, -> do_login()")
             self._do_login(self)
-            self._get_page(url,data,headers,parser)
+            return self._get_page(url,data,headers,parser) #Risk of infinite recursion
 
         if self.parser.get_nav_links():
             self.nav_links = self.parser.get_nav_links()
