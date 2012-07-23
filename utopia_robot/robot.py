@@ -72,13 +72,26 @@ class UtopiaRobot(object):
         """Wait rand(seconds). Expected to be used before we load a page."""
         time.sleep(random.randrange(3,20))
 
-    def _get_page(self, url, data, headers):
-        log.debug("get_page( url: %s, data: %s, headers: %s" % (url, data, headers))
+    def _get_page(self, url, data, headers, parser):
+        log.debug("get_page( url: %s, data: %s, headers: %s )" % (url, data, headers))
         req = urllib2.Request(url, data, headers)
         self._simulate_wait()
         res = urllib2.urlopen(req)
         self.result = res.read()
-        return self.result
+        self.parser = parser
+        self.parser.parse(self.result)
+        self.cache_page(self.parser.current_page, self.result)
+
+        log.debug("Page loaded, self.parser.current_page: %s" % self.parser.current_page)
+
+        if 'PAGE_INIT' == self.parser.current_page:
+            log.info("Not logged in, -> do_login()")
+            self._do_login(self)
+            self.parser.parse(self.result)
+
+        if self.parser.get_nav_links():
+            self.nav_links = self.parser.get_nav_links()
+
 
     def _do_login(self, parser):
         """Perform login (from the login page through province selection
@@ -183,21 +196,9 @@ class UtopiaRobot(object):
         log.debug("_get_throne()")
         data = None
         url = URL_BASE + self.nav_links['Throne']
-        self._get_page(url, data, self.headers)
-
-        self.parser = htmlparser.ThroneParser()
-        self.parser.parse(self.result)
-        self.cache_page(self.parser.current_page, self.result)
-
-        if 'PAGE_INIT' == self.parser.current_page:
-            log.info("Not logged in, -> do_login()")
-            self._do_login(self)
-            self.parser = htmlparser.ThroneParser()
-            self.parser.parse(self.result)
+        self._get_page(url, data, self.headers, htmlparser.ThroneParser())
 
         assert('PAGE_THRONE' == self.parser.current_page)
-        if self.parser.get_nav_links():
-            self.nav_links = self.parser.get_nav_links()
 
     def _get_growth(self):
         """Load the Growth page (internal function)"""
@@ -206,21 +207,9 @@ class UtopiaRobot(object):
         assert(0 < len(self.nav_links['Growth']))
         data = None
         url = URL_BASE + self.nav_links['Growth']
-        self._get_page(url, data, self.headers)
-
-        self.parser = htmlparser.GrowthParser()
-        self.parser.parse(self.result)
-        self.cache_page(self.parser.current_page, self.result)
-
-        if 'PAGE_INIT' == self.parser.current_page:
-            log.info("Not logged in, -> do_login()")
-            self._do_login(self)
-            self.parser = htmlparser.GrowthParser()
-            self.parser.parse(self.result)
+        self._get_page(url, data, self.headers, htmlparser.GrowthParser() )
 
         assert('PAGE_GROWTH' == self.parser.current_page)
-        if self.parser.get_nav_links():
-            self.nav_links = self.parser.get_nav_links()
 
     def _get_mystics(self):
         """Load the mystics page (internal function)"""
@@ -228,21 +217,9 @@ class UtopiaRobot(object):
         assert(0 < len(self.nav_links['Mystics']))
         data = None
         url = URL_BASE + self.nav_links['Mystics']
-        self._get_page(url, data, self.headers)
-
-        self.parser = htmlparser.MysticParser()
-        self.parser.parse(self.result)
-        self.cache_page(self.parser.current_page, self.result)
-        log.debug("Page loaded, self.parser.current_page: %s" % self.parser.current_page)
-        if 'PAGE_INIT' == self.parser.current_page:
-            log.info("Not logged in, -> do_login()")
-            self._do_login(self)
-            self.parser = htmlparser.MysticParser()
-            self.parser.parse(self.result)
+        self._get_page(url, data, self.headers, htmlparser.MysticParser() )
 
         assert('PAGE_MYSTIC' == self.parser.current_page)
-        if self.parser.get_nav_links():
-            self.nav_links = self.parser.get_nav_links()
 
     def _get_mystic_advisor(self):
         """Get the mystics council/advisor page (internal function) """
@@ -250,21 +227,9 @@ class UtopiaRobot(object):
         assert(0 < len(self.advisor_links['Mystics']))
         data = None
         url = URL_BASE + self.advisor_links['Mystics']
-        self._get_page(url, data, self.headers)
-
-        self.parser = htmlparser.MysticAdvisorParser()
-        self.parser.parse(self.result)
-        self.cache_page(self.parser.current_page, self.result)
-        log.debug("Page loaded, self.parser.current_page: %s" % self.parser.current_page)
-        if 'PAGE_INIT' == self.parser.current_page:
-            log.info("Not logged in, -> do_login()")
-            self._do_login(self)
-            self.parser = htmlparser.MysticsParser()
-            self.parser.parse(self.result)
+        self._get_page(url, data, self.headers, htmlparser.MysticAdvisorParser() )
 
         assert('PAGE_MYSTIC_ADVISOR' == self.parser.current_page)
-        if self.parser.get_nav_links():
-            self.nav_links = self.parser.get_nav_links()
 
     def _get_military(self):
         """Get the military page (internal function)"""
@@ -272,21 +237,9 @@ class UtopiaRobot(object):
         assert(0 < len(self.nav_links['Military']))
         data = None
         url = URL_BASE + self.nav_links['Military']
-        self._get_page(url, data, self.headers)
-
-        self.parser = htmlparser.MilitaryParser()
-        self.parser.parse(self.result)
-        self.cache_page(self.parser.current_page, self.result)
-        log.debug("Page loaded, self.parser.current_page: %s" % self.parser.current_page)
-        if 'PAGE_INIT' == self.parser.current_page:
-            log.info("Not logged in, -> do_login()")
-            self._do_login(self)
-            self.parser = htmlparser.MilitaryParser()
-            self.parser.parse(self.result)
+        self._get_page(url, data, self.headers, htmlparser.MilitaryParser() )
 
         assert('PAGE_MILITARY' == self.parser.current_page)
-        if self.parser.get_nav_links():
-            self.nav_links = self.parser.get_nav_links()
 
     def _get_science(self):
         """Load the Science page (internal function)"""
@@ -295,21 +248,9 @@ class UtopiaRobot(object):
         assert(0 < len(self.nav_links['Sciences']))
         data = None
         url = URL_BASE + self.nav_links['Sciences']
-        self._get_page(url, data, self.headers)
-
-        self.parser = htmlparser.ScienceParser()
-        self.parser.parse(self.result)
-        self.cache_page(self.parser.current_page, self.result)
-
-        if 'PAGE_INIT' == self.parser.current_page:
-            log.info("Not logged in, -> do_login()")
-            self._do_login(self)
-            self.parser = htmlparser.ScienceParser()
-            self.parser.parse(self.result)
+        self._get_page(url, data, self.headers, htmlparser.ScienceParser() )
 
         assert('PAGE_SCIENCE' == self.parser.current_page)
-        if self.parser.get_nav_links():
-            self.nav_links = self.parser.get_nav_links()
 
     def _check_login(self):
         """Check if we're logged in or not (NOT IMPLEMENTED)"""
@@ -389,11 +330,8 @@ class UtopiaRobot(object):
         log.debug("cast_spell form data: %s" % data)
 
         url = URL_BASE + self.nav_links['Mystics'] + mystic_form['form']['action']
-        self._get_page(url, data, self.headers)
+        self._get_page(url, data, self.headers, htmlparser.MysticParser() )
 
-        self.parser = htmlparser.MysticParser()
-        self.parser.parse(self.result)
-        self.cache_page(self.parser.current_page, self.result)
         #Return the result
         return self.parser.get_spell_result()
 
@@ -479,11 +417,7 @@ class UtopiaRobot(object):
 
         data = urllib.urlencode(values)
         url = URL_BASE + self.nav_links['Military'] + military_form['form']['action']
-        self._get_page(url, data, self.headers)
-        #Check the result
-        self.parser = htmlparser.MilitaryParser()
-        self.parser.parse(self.result)
-        self.cache_page(self.parser.current_page, self.result)
+        self._get_page(url, data, self.headers, htmlparser.MilitaryParser() )
         #Return the result
         return self.parser.get_train_result()
 
@@ -525,12 +459,8 @@ class UtopiaRobot(object):
 
         data = urllib.urlencode(values)
         url = URL_BASE + self.nav_links['Growth'] + growth_form['form']['action']
-        self._get_page(url, data, self.headers)
+        self._get_page(url, data, self.headers, htmlparser.GrowthParser() )
 
-        #Check the result
-        self.parser = htmlparser.GrowthParser()
-        self.parser.parse(self.result)
-        self.cache_page(self.parser.current_page, self.result)
         #Return the result
         return self.parser.get_building_result()
 
@@ -593,12 +523,8 @@ class UtopiaRobot(object):
         log.debug("Sci-form: %s"% science_form)
         data = urllib.urlencode(values)
         url = URL_BASE + self.nav_links['Sciences'] + science_form['form']['action']
-        self._get_page(url, data, self.headers)
+        self._get_page(url, data, self.headers, htmlparser.ScienceParser() )
 
-        #Check the result
-        self.parser = htmlparser.ScienceParser()
-        self.parser.parse(self.result)
-        self.cache_page(self.parser.current_page, self.result)
         #Return the result
         return self.parser.get_science_result()
 
