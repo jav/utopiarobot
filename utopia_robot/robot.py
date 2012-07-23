@@ -87,7 +87,7 @@ class UtopiaRobot(object):
         if 'PAGE_INIT' == self.parser.current_page:
             log.info("Not logged in, -> do_login()")
             self._do_login(self)
-            self.parser.parse(self.result)
+            self._get_page(url,data,headers,parser)
 
         if self.parser.get_nav_links():
             self.nav_links = self.parser.get_nav_links()
