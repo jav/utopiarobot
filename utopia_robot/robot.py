@@ -40,6 +40,7 @@ class UtopiaRobot(object):
         'Mystics': '/wol/game/enchantment',
         'Military': '/wol/game/train_army',
         'Growth': '/wol/game/build',
+        'Sciences': '/wol/game/science',
         }
 
     advisor_links = {
@@ -71,6 +72,13 @@ class UtopiaRobot(object):
         """Wait rand(seconds). Expected to be used before we load a page."""
         time.sleep(random.randrange(3,20))
 
+    def _get_page(self, url, data, headers):
+        log.debug("get_page( url: %s, data: %s, headers: %s" % (url, data, headers))
+        req = urllib2.Request(url, data, headers)
+        self._simulate_wait()
+        res = urllib2.urlopen(req)
+        self.result = res.read()
+        return self.result
 
     def _do_login(self, parser):
         """Perform login (from the login page through province selection
@@ -174,10 +182,8 @@ class UtopiaRobot(object):
         """Load the throne page (internal function)"""
         log.debug("_get_throne()")
         data = None
-        req = urllib2.Request(URL_BASE + self.nav_links['Throne'], data, self.headers)
-        self._simulate_wait()
-        res = urllib2.urlopen(req)
-        self.result = res.read()
+        url = URL_BASE + self.nav_links['Throne']
+        self._get_page(url, data, self.headers)
 
         self.parser = htmlparser.ThroneParser()
         self.parser.parse(self.result)
@@ -199,10 +205,8 @@ class UtopiaRobot(object):
         log.debug("nav: %s" % self.nav_links)
         assert(0 < len(self.nav_links['Growth']))
         data = None
-        req = urllib2.Request(URL_BASE + self.nav_links['Growth'], data, self.headers)
-        self._simulate_wait()
-        res = urllib2.urlopen(req)
-        self.result = res.read()
+        url = URL_BASE + self.nav_links['Growth']
+        self._get_page(url, data, self.headers)
 
         self.parser = htmlparser.GrowthParser()
         self.parser.parse(self.result)
@@ -223,10 +227,9 @@ class UtopiaRobot(object):
         log.debug("_get_mystics()")
         assert(0 < len(self.nav_links['Mystics']))
         data = None
-        req = urllib2.Request(URL_BASE + self.nav_links['Mystics'], data, self.headers)
-        self._simulate_wait()
-        res = urllib2.urlopen(req)
-        self.result = res.read()
+        url = URL_BASE + self.nav_links['Mystics']
+        self._get_page(url, data, self.headers)
+
         self.parser = htmlparser.MysticParser()
         self.parser.parse(self.result)
         self.cache_page(self.parser.current_page, self.result)
@@ -246,10 +249,9 @@ class UtopiaRobot(object):
         log.debug("_get_mystic_advisor()")
         assert(0 < len(self.advisor_links['Mystics']))
         data = None
-        req = urllib2.Request(URL_BASE + self.advisor_links['Mystics'], data, self.headers)
-        self._simulate_wait()
-        res = urllib2.urlopen(req)
-        self.result = res.read()
+        url = URL_BASE + self.advisor_links['Mystics']
+        self._get_page(url, data, self.headers)
+
         self.parser = htmlparser.MysticAdvisorParser()
         self.parser.parse(self.result)
         self.cache_page(self.parser.current_page, self.result)
@@ -269,10 +271,9 @@ class UtopiaRobot(object):
         log.debug("_get_military()")
         assert(0 < len(self.nav_links['Military']))
         data = None
-        req = urllib2.Request(URL_BASE + self.nav_links['Military'], data, self.headers)
-        self._simulate_wait()
-        res = urllib2.urlopen(req)
-        self.result = res.read()
+        url = URL_BASE + self.nav_links['Military']
+        self._get_page(url, data, self.headers)
+
         self.parser = htmlparser.MilitaryParser()
         self.parser.parse(self.result)
         self.cache_page(self.parser.current_page, self.result)
@@ -284,6 +285,29 @@ class UtopiaRobot(object):
             self.parser.parse(self.result)
 
         assert('PAGE_MILITARY' == self.parser.current_page)
+        if self.parser.get_nav_links():
+            self.nav_links = self.parser.get_nav_links()
+
+    def _get_science(self):
+        """Load the Science page (internal function)"""
+        log.debug("_get_science()")
+        log.debug("nav: %s" % self.nav_links)
+        assert(0 < len(self.nav_links['Sciences']))
+        data = None
+        url = URL_BASE + self.nav_links['Sciences']
+        self._get_page(url, data, self.headers)
+
+        self.parser = htmlparser.ScienceParser()
+        self.parser.parse(self.result)
+        self.cache_page(self.parser.current_page, self.result)
+
+        if 'PAGE_INIT' == self.parser.current_page:
+            log.info("Not logged in, -> do_login()")
+            self._do_login(self)
+            self.parser = htmlparser.ScienceParser()
+            self.parser.parse(self.result)
+
+        assert('PAGE_SCIENCE' == self.parser.current_page)
         if self.parser.get_nav_links():
             self.nav_links = self.parser.get_nav_links()
 
@@ -365,12 +389,8 @@ class UtopiaRobot(object):
         log.debug("cast_spell form data: %s" % data)
 
         url = URL_BASE + self.nav_links['Mystics'] + mystic_form['form']['action']
-        log.debug("url: %s" % url)
-        req = urllib2.Request(url, data, self.headers)
-        self._simulate_wait()
-        res = urllib2.urlopen(req)
-        self.result = res.read()
-        #Check the result
+        self._get_page(url, data, self.headers)
+
         self.parser = htmlparser.MysticParser()
         self.parser.parse(self.result)
         self.cache_page(self.parser.current_page, self.result)
@@ -459,11 +479,7 @@ class UtopiaRobot(object):
 
         data = urllib.urlencode(values)
         url = URL_BASE + self.nav_links['Military'] + military_form['form']['action']
-        log.debug("url: %s" % url)
-        req = urllib2.Request(url, data, self.headers)
-        self._simulate_wait()
-        res = urllib2.urlopen(req)
-        self.result = res.read()
+        self._get_page(url, data, self.headers)
         #Check the result
         self.parser = htmlparser.MilitaryParser()
         self.parser.parse(self.result)
@@ -509,11 +525,8 @@ class UtopiaRobot(object):
 
         data = urllib.urlencode(values)
         url = URL_BASE + self.nav_links['Growth'] + growth_form['form']['action']
-        log.debug("url: %s" % url)
-        req = urllib2.Request(url, data, self.headers)
-        self._simulate_wait()
-        res = urllib2.urlopen(req)
-        self.result = res.read()
+        self._get_page(url, data, self.headers)
+
         #Check the result
         self.parser = htmlparser.GrowthParser()
         self.parser.parse(self.result)
@@ -530,6 +543,75 @@ class UtopiaRobot(object):
             self._get_growth()
         assert('PAGE_GROWTH' == self.parser.current_page)
         return self.parser.get_build_info()
+
+    def get_science(self):
+        """Get info from the science page (not the advisor).
+        Will load the science page (if not already loaded)
+        """
+        log.debug("get_science()")
+        if self.parser is None or self.parser.current_page != 'PAGE_SCIENCE':
+            self._get_science()
+        assert('PAGE_SCIENCE' == self.parser.current_page)
+        return self.parser.get_science()
+
+    def buy_science(self, sci_dict):
+        """Buy a dict of science.
+        Input is expected as a dict with the following structure
+        {
+            "Alchemy": <int to be bounght>
+            "Tools": <int to be bounght>
+            "Housing": <int to be bounght>
+            "Food": <int to be bounght>
+            "Military": <int to be bounght>
+            "Crime": <int to be bounght>
+            "Channeling": <int to be bounght>
+        }
+        Will load the science page (if not already loaded)
+        """
+        log.debug("buy_science( %s )" % sci_dict)
+        if self.parser is None or self.parser.current_page != 'PAGE_SCIENCE':
+            self._get_science()
+        assert('PAGE_SCIENCE' == self.parser.current_page)
+        science_form = self.parser.get_science_form()
+
+        log.debug("science_form['inputs']: %s" % science_form['inputs'])
+
+        for (sci, field) in zip(['Alchemy','Tools','Housing', 'Food', 'Military', 'Crime', 'Channeling'],['quantity_%d'%i for i in range(0,7)]):
+            if sci in sci_dict:
+                science_form['inputs'][field]['value'] = sci_dict[sci]
+            else:
+                science_form['inputs'][field]['value'] = ""
+
+        log.debug("science_form['inputs']: %s" % science_form['inputs'])
+        values = {}
+        for k,v in science_form['inputs'].items():
+            if 'value' in v:
+                values[k] = v['value']
+
+        values['learn_rate'] = self.parser.get_learn_rate()[1]
+        log.debug("values: %s" % values)
+        log.debug("Sci-form: %s"% science_form)
+        data = urllib.urlencode(values)
+        url = URL_BASE + self.nav_links['Sciences'] + science_form['form']['action']
+        self._get_page(url, data, self.headers)
+
+        #Check the result
+        self.parser = htmlparser.ScienceParser()
+        self.parser.parse(self.result)
+        self.cache_page(self.parser.current_page, self.result)
+        #Return the result
+        return self.parser.get_science_result()
+
+    def get_science_info(self):
+        """Get the science_info.
+        Will load the science page (if not already loaded)
+        """
+        log.debug("get_science_info()")
+        if self.parser is None or self.parser.current_page != 'PAGE_SCIENCE':
+            self._get_science()
+        assert('PAGE_SCIENCE' == self.parser.current_page)
+        return self.parser.get_science_info()
+
 
 if __name__ == "__main__":
 
