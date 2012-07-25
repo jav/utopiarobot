@@ -2,6 +2,7 @@
 
 import logging
 from optparse import OptionParser
+import random
 import sys
 
 from utopia_robot.robot import UtopiaRobot
@@ -113,12 +114,20 @@ def main():
         troops={'o-spec': min(player.get_soldiers(), player.get_spec_credits())}
         print "spec-credits: train_military(%s): %s" % (troops, player.train_military(troops))
 
+    info_msg = ""
     if 'Paradise' in available_spells:
-        while resources['Runes'] > available_spells['Paradise'][1] and 10 < player.get_mana():
-            result = player.cast_spell('Paradise')
-            log.info("Cast Paradise - Result: %s" % result)
-            resources = player.get_resources()
-    log.info("Cast Paradise: Done")
+        if resources['Runes'] <= available_spells['Paradise']:
+            info_msg = "Not enough runes (have: %s, need: %s)" % (resources['Runes'], available_spells['Paradise'])
+        elif 10 >= player.get_mana():
+            info_msg = "Not enough mana (%s%)" % player.get_mana()
+        else:
+            while resources['Runes'] > available_spells['Paradise'][1] and 10 < player.get_mana():
+                result = player.cast_spell('Paradise')
+                log.info("Cast Paradise - Result: %s" % result)
+                resources = player.get_resources()
+    else:
+        info_msg = "Paradise not available to cast."
+    log.info("Paradise done: %s"% info_msg)
 
     log.info("Prep building.")
     build_info = player.get_build_info()
@@ -158,6 +167,8 @@ def main():
         if 0 <= len(to_build):
             log.info("No need to build anything.")
             break
+
+        log.info("Want to build: %s"% to_build)
         player.build(to_build)
         log.info("build_info: %s" ,player.get_build_info())
         log.info("buildings: %s", player.get_buildings())
@@ -169,7 +180,18 @@ def main():
             while 'Tree of Gold' in available_spells and resources['Runes'] > available_spells['Tree of Gold'][1] and 20 < player.get_mana() and player.cast_spell('Tree of Gold') is not None:
                 resources = player.get_resources()
 
-    player.buy_science({"Alchemy": 99999})
+    available_books = player.get_science_info()['Books to Allocate']
+    if 3 < available_books:
+        buy_sci = {
+            "Alchemy": int(round(available_books/3)),
+            "Tools": int(round(available_books/3)),
+            "Housing": int(round(available_books/3)+random.randrange(4,999))
+            }
+        result = player.buy_science(buy_sci)
+        info_msg="Bought science: %s"%result
+    else:
+        info_msg = "Less than 3 books (have: %s)"%available_books
+    log.info("Buying science DONE: %s", info_msg)
 
     print "DONE"
 

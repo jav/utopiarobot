@@ -258,31 +258,6 @@ class UtopiaRobot(object):
 
         assert('PAGE_SCIENCE' == self.parser.current_page)
 
-    def _get_science(self):
-        """Load the Science page (internal function)"""
-        log.debug("_get_science()")
-        log.debug("nav: %s" % self.nav_links)
-        assert(0 < len(self.nav_links['Sciences']))
-        data = None
-        req = urllib2.Request(URL_BASE + self.nav_links['Sciences'], data, self.headers)
-        self._simulate_wait()
-        res = urllib2.urlopen(req)
-        self.result = res.read()
-
-        self.parser = htmlparser.ScienceParser()
-        self.parser.parse(self.result)
-        self.cache_page(self.parser.current_page, self.result)
-
-        if 'PAGE_INIT' == self.parser.current_page:
-            log.info("Not logged in, -> do_login()")
-            self._do_login(self)
-            self.parser = htmlparser.ScienceParser()
-            self.parser.parse(self.result)
-
-        assert('PAGE_SCIENCE' == self.parser.current_page)
-        if self.parser.get_nav_links():
-            self.nav_links = self.parser.get_nav_links()
-
     def _check_login(self):
         """Check if we're logged in or not (NOT IMPLEMENTED)"""
         log.debug("_check_login()")
@@ -547,11 +522,11 @@ class UtopiaRobot(object):
         values = {}
         for k,v in science_form['inputs'].items():
             if 'value' in v:
-                values[k] = v['value']
+                values[k] = int(v['value']))
 
         values['learn_rate'] = self.parser.get_learn_rate()[1]
         log.debug("values: %s" % values)
-        log.debug("Sci-form: %s"% science_form)
+
         data = urllib.urlencode(values)
         url = URL_BASE + self.nav_links['Sciences'] + science_form['form']['action']
         self._get_page(url, data, self.headers, htmlparser.ScienceParser() )
