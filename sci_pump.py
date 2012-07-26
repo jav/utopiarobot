@@ -49,7 +49,7 @@ def main():
     spells = player.get_active_spells()
     resources = player.get_resources()
 
-    # First and foremost, make sure we have Minor Protection
+    # First and foremost, Make sure we have Minor Protection
     if 'Minor Protection' in available_spells:
         if 'Minor Protection' not in spells:
             spells['Minor Protection'] = 0
@@ -61,6 +61,22 @@ def main():
             resources = player.get_resources()
 
     log.info("Cast Minor Protection: Done")
+    resources = player.get_resources()
+
+    # if we got plague, remove it.
+    # Bug here, will only cast it once.
+    if "Nature's Blessing" in available_spells:
+        if "Nature's Blessing" not in spells:
+            spells["Nature's Blessing"] = 0
+        if not player.got_plague():
+            while spells["Nature's Blessing"] <= 1 and  resources['Runes'] > available_spells["Nature's Blessing"][1] and 10 < player.get_mana():
+                if player.cast_spell("Nature's Blessing") is not None:
+                    log.info("Cast Nature's Blessing: Success")
+                    break
+                log.info("Cast Nature's Blessing: Failed")
+                resources = player.get_resources()
+
+    log.info("Cast Nature's Blessing: Done")
     resources = player.get_resources()
 
     # If we are low on food, make sure we cast Fertile lands.
@@ -96,17 +112,19 @@ def main():
             player.cast_spell("Tree of Gold")
             available_spells = player.get_available_spells()
             resources = player.get_resources()
-            leet_count = resources['Money'] / 500
-
-        if 1 > leet_count:
+            #leet_count = resources['Money'] / 500
             spec_count = resources['Money'] / 350
-            troops={'o-spec': spec_count}
-            if 1 > spec_count:
-                break
-        else:
-            troops={'elite': leet_count}
+            troops={'o-spec': sec_count}
+            trained_troops = player.train_military(troops)
+        # if 1 > leet_count:
+        #     troops={'o-spec': spec_count}
+        #     if 1 > spec_count:
+        #         break
+        # else:
+        #     troops={'elite': leet_count}
 
-        log.info("train_military(%s): %s" % (troops, player.train_military(troops)))
+        #Bug here: Will only print the train-result from the last loop
+        log.info("train_military(%s): %s" % (troops, trained_troops))
 
     # If we reach this point, and we're out of money. Let's try to spend our spec-credits
     resources = player.get_resources()
