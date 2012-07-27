@@ -440,3 +440,15 @@ class explore_parser_tests(object):
         def test_page_enum(self):
                 print self.parser.current_page
                 assert("PAGE_EXPLORE" == self.parser.current_page)
+
+        def test_get_explore_info(self):
+                explore_info = self.parser.get_explore_info()
+                print "Explore_info:", explore_info
+                assert(   50 == explore_info['Exploration Costs (Soldiers)'])
+                assert(   50 == explore_info['soldiers'])
+                assert(23264 == explore_info['Exploration Costs (Gold)'])
+                assert(23264 == explore_info['gold'])
+                assert( 8080 == explore_info['Available Uncharted Acres'])
+                assert( 8080 == explore_info['available'])
+                assert(    0 == explore_info['Currently Exploring'])
+                assert(    5 == explore_info['Maximum Explorable Now'])

@@ -1268,10 +1268,71 @@ class ExploreParser(UtopiaParser):
         super(ExploreParser, self).__init__(verbose)
         self.last_page="PAGE_NONE"
 
-        self.parser_state['ScienceParser'] = {}
+        self.parser_state['ExploreParser'] = {}
+        self.parser_state['ExploreParser']['table'] = False
+        self.parser_state['ExploreParser']['th'] = False
+        self.parser_state['ExploreParser']['td'] = False
 
+        self.parser_state['ExploreParser']['explore_info'] = None
+        self.parser_state['ExploreParser']['curr_info'] = None
+
+        self.explore_info = {}
 
     def parse(self, s):
         super(ExploreParser, self).parse(s)
         self.feed(s)
         self.close()
+
+    def start_table(self, attributes):
+        super(ExploreParser, self).start_table(attributes)
+        attr = dict(attributes)
+        self.parser_state['ExploreParser']['table'] = True
+        if 'class' in attr and 'two-column-stats' == attr['class']:
+            self.parser_state['ExploreParser']['explore_info'] = True
+
+    def end_table(self):
+        super(ExploreParser, self).end_table()
+        self.parser_state['ExploreParser']['table'] = False
+        self.parser_state['ExploreParser']['explore_info'] = False
+
+    def start_th(self, attributes):
+        super(ExploreParser, self).start_th(attributes)
+        self.parser_state['ExploreParser']['th'] = True
+
+    def end_th(self):
+        super(ExploreParser, self).end_th()
+        self.parser_state['ExploreParser']['th'] = False
+
+    def start_td(self, attributes):
+        super(ExploreParser, self).start_td(attributes)
+        self.parser_state['ExploreParser']['td'] = True
+
+    def end_td(self):
+        super(ExploreParser, self).end_td()
+        self.parser_state['ExploreParser']['td'] = False
+
+    def handle_data(self, data):
+        super(ExploreParser, self).handle_data(data)
+        if self.parser_state['ExploreParser']['explore_info']:
+            if self.parser_state['ExploreParser']['th']:
+                self.parser_state['ExploreParser']['curr_info'] = data
+            elif self.parser_state['ExploreParser']['td'] and self.parser_state['ExploreParser']['curr_info'] is not None:
+                curr_info = self.parser_state['ExploreParser']['curr_info']
+                (value,_,_) = data.partition(' ')
+                print data
+                self.explore_info[curr_info] = int(value.replace(',','').replace('gc',''))
+                # self.parser_state['ExploreParser']['explore_info'] = None
+                # self.parser_state['ExploreParser']['curr_info'] = None
+                log.debug("self.explore_info: %s" % self.explore_info)
+
+    def get_explore_info(self):
+        log.debug("get_explore_info(): %s" % self.explore_info)
+        self.explore_info.update({'soldiers': self.explore_info['Exploration Costs (Soldiers)']})
+        self.explore_info.update({'gold': self.explore_info['Exploration Costs (Gold)']})
+        self.explore_info.update({'available': self.explore_info['Available Uncharted Acres']})
+        return self.explore_info
+
+    
+# csrfmiddlewaretoken:88e2dabb2a8b615561e743d05668d47d
+# num_acres:1
+# explore:Send Expedition
