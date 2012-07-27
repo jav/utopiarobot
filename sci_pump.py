@@ -64,17 +64,16 @@ def main():
     resources = player.get_resources()
 
     # if we got plague, remove it.
-    # Bug here, will only cast it once.
+    # Because we still don't detect plague-removal, we reload the throne page on each iteraton
     if "Nature's Blessing" in available_spells:
         if "Nature's Blessing" not in spells:
             spells["Nature's Blessing"] = 0
-        if not player.got_plague():
-            while spells["Nature's Blessing"] <= 1 and  resources['Runes'] > available_spells["Nature's Blessing"][1] and 10 < player.get_mana():
-                if player.cast_spell("Nature's Blessing") is not None:
-                    log.info("Cast Nature's Blessing: Success")
-                    break
-                log.info("Cast Nature's Blessing: Failed")
-                resources = player.get_resources()
+        while player.get_plague() and spells["Nature's Blessing"] <= 1 and  resources['Runes'] > available_spells["Nature's Blessing"][1] and 10 < player.get_mana():
+            if player.cast_spell("Nature's Blessing") is not None:
+                log.info("Cast Nature's Blessing: Success")
+                break
+            log.info("Cast Nature's Blessing: Failed")
+            resources = player.get_resources()
 
     log.info("Cast Nature's Blessing: Done")
     resources = player.get_resources()
