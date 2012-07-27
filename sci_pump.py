@@ -203,9 +203,13 @@ def main():
     available_books = player.get_science_info()['Books to Allocate']
     if 3 < available_books:
         buy_sci = {
-            "Alchemy": int(round(available_books/3)),
-            "Tools": int(round(available_books/3)),
-            "Housing": int(round(available_books/3)+random.randrange(4,999))
+            "Alchemy": int(round(available_books/4)),
+            "Tools": int(round(available_books/4)),
+            "Housing": int(round(available_books/4)+random.randrange(0,10),
+            "Food": int(round(available_books/16)),
+            "Military": int(round(available_books/16)),
+            "Crime": int(round(available_books/16)),
+            "Channeling": int(round(available_books/16)),
             }
         result = player.buy_science(buy_sci)
         info_msg="Bought science: %s"%result
