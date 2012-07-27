@@ -206,7 +206,7 @@ def main():
         buy_sci = {
             "Alchemy": int(round(available_books/4)),
             "Tools": int(round(available_books/4)),
-            "Housing": int(round(available_books/4)+random.randrange(0,10),
+            "Housing": int(round(available_books/4)+random.randrange(0,10)),
             "Food": int(round(available_books/16)),
             "Military": int(round(available_books/16)),
             "Crime": int(round(available_books/16)),
