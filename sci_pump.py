@@ -127,9 +127,10 @@ def main():
 
     # If we reach this point, and we're out of money. Let's try to spend our spec-credits
     resources = player.get_resources()
-    if 350 > resources['Money'] and 0 < player.get_soldiers() and 0 < player.get_spec_credits():
+    if (0 < player.get_spec_credits() or 350 > resources['Money']) and 0 < player.get_soldiers():
         troops={'o-spec': min(player.get_soldiers(), player.get_spec_credits())}
-        print "spec-credits: train_military(%s): %s" % (troops, player.train_military(troops))
+        trained_military = player.train_military(troops)
+        log.debug("spec-credits: train_military(%s): %s" % (troops, trained_military))
 
     info_msg = ""
     if 'Paradise' in available_spells:
