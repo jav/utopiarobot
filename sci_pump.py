@@ -151,8 +151,9 @@ def main():
     buildings = player.get_buildings()
     resources = player.get_resources()
 
-
-    while 0 < build_info['Total Undeveloped land'] and build_info['Construction Cost'] < resources['Money']:
+    iterations_counter = 0
+    while 6 < iterations_counter and 0 < build_info['Total Undeveloped land'] and build_info['Construction Cost'] < resources['Money']:
+        iterations_counter += 1
         for k,v in buildings.items():
             buildings[k]['total'] = v['built'] + v['incoming']
 
@@ -197,6 +198,8 @@ def main():
             while 'Tree of Gold' in available_spells and resources['Runes'] > available_spells['Tree of Gold'][1] and 20 < player.get_mana() and player.cast_spell('Tree of Gold') is not None:
                 resources = player.get_resources()
 
+
+    # SCIENCE!!!
     available_books = player.get_science_info()['Books to Allocate']
     if 3 < available_books:
         buy_sci = {
