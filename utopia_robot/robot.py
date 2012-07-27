@@ -522,7 +522,7 @@ class UtopiaRobot(object):
         values = {}
         for k,v in science_form['inputs'].items():
             if 'value' in v:
-                values[k] = int(v['value']))
+                values[k] = int(v['value'])
 
         values['learn_rate'] = self.parser.get_learn_rate()[1]
         log.debug("values: %s" % values)
