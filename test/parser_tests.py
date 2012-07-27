@@ -424,3 +424,19 @@ class science_parser_tests(object):
                 assert((3794, 5) == info['Estimated Research Cost'])
                 assert(69514 == info['Daily Income'])
                 assert(0 == info['Books to Allocate'])
+
+
+
+class explore_parser_tests(object):
+        def setup(self):
+                self.parser = htmlparser.ExploreParser()
+                in_file = "test/explore_page.html"
+                try:
+                        with open(in_file) as page:
+                                self.parser.parse(page.read())
+                except IOError as e:
+                        print "CANNOT OPEN FILE %s. For this test to work, you need a copy of the tested page at %s" % (in_file, in_file)
+
+        def test_page_enum(self):
+                print self.parser.current_page
+                assert("PAGE_EXPLORE" == self.parser.current_page)

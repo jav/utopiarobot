@@ -223,6 +223,8 @@ class UtopiaParser(sgmllib.SGMLParser, object):
                     self.current_page="PAGE_GROWTH"
                 if "Science Research" in self.title:
                     self.current_page="PAGE_SCIENCE"
+                if "Explore Page" in self.title:
+                    self.current_page="PAGE_EXPLORE"
                 log.debug("DETECTED PAGE: %s" % self.current_page)
         if 'h2' in self.parser_state and self.parser_state['h2']:
             if 'The game is currently ticking. Please wait a few moments' in  data:
@@ -1259,3 +1261,17 @@ class ScienceParser(UtopiaParser):
     def get_science_info(self):
         log.debug("get_sience_info(): %s"% self.science_info)
         return self.science_info
+
+
+class ExploreParser(UtopiaParser):
+    def __init__(self, verbose=0):
+        super(ExploreParser, self).__init__(verbose)
+        self.last_page="PAGE_NONE"
+
+        self.parser_state['ScienceParser'] = {}
+
+
+    def parse(self, s):
+        super(ExploreParser, self).parse(s)
+        self.feed(s)
+        self.close()
