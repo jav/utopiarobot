@@ -1187,7 +1187,7 @@ class ScienceParser(UtopiaParser):
                         percent = percent.replace('(','').replace(')','').replace('%','').strip()
                         val = (int(cost), float(percent))
                     else:
-                        val = int(data.replace(',','').replace('gc','').replace('books',''))
+                        val = int(data.replace(',','').replace('gc','').replace('book','').replace('s','')
                     self.science_info[curr_sci_info_name] = val
 
                 self.parser_state['ScienceParser']['curr_sci_info_name'] = None
