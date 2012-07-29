@@ -111,9 +111,10 @@ def main():
             player.cast_spell("Tree of Gold")
             available_spells = player.get_available_spells()
             resources = player.get_resources()
-            #leet_count = resources['Money'] / 500
-            spec_count = resources['Money'] / 350
-            troops={'o-spec': sec_count}
+            leet_count = resources['Money'] / 500
+            #spec_count = resources['Money'] / 350
+            #troops={'o-spec': spec_count}
+            troops={'elite': leet_count}
             trained_troops = player.train_military(troops)
         # if 1 > leet_count:
         #     troops={'o-spec': spec_count}
@@ -122,8 +123,7 @@ def main():
         # else:
         #     troops={'elite': leet_count}
 
-        #Bug here: Will only print the train-result from the last loop
-        log.info("train_military(%s): %s" % (troops, trained_troops))
+            log.info("train_military(%s): %s" % (troops, trained_troops))
 
     # If we reach this point, and we're out of money. Let's try to spend our spec-credits
     resources = player.get_resources()
@@ -134,12 +134,12 @@ def main():
 
     info_msg = ""
     if 'Paradise' in available_spells:
-        if resources['Runes'] <= available_spells['Paradise']:
+        if resources['Runes'] > available_spells['Paradise']:
             info_msg = "Not enough runes (have: %s, need: %s)" % (resources['Runes'], available_spells['Paradise'])
         elif 10 >= player.get_mana():
             info_msg = "Not enough mana (%s%)" % player.get_mana()
         else:
-            while resources['Runes'] > available_spells['Paradise'][1] and 10 < player.get_mana():
+            while resources['Runes'] > available_spells['Paradise'][1] and 20 < player.get_mana():
                 result = player.cast_spell('Paradise')
                 log.info("Cast Paradise - Result: %s" % result)
                 resources = player.get_resources()

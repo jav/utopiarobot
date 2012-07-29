@@ -83,7 +83,7 @@ class UtopiaRobot(object):
 
         if self.parser.tick_ongoing:
             #Tick detected, sleep, retry and abort this instance
-            sleep(random.randrange(30,60))
+            time.sleep(random.randrange(30,60))
             return self._get_page(url, data, headers,parser)
 
         self.cache_page(self.parser.current_page, self.result)
@@ -521,7 +521,9 @@ class UtopiaRobot(object):
         log.debug("science_form['inputs']: %s" % science_form['inputs'])
         values = {}
         for k,v in science_form['inputs'].items():
-            if 'value' in v:
+            if 'name' in v and 'csrfmiddlewaretoken' == v['name']:
+                values[k] = v['value']
+            elif 'value' in v:
                 values[k] = int(v['value'])
 
         values['learn_rate'] = self.parser.get_learn_rate()[1]
