@@ -568,6 +568,32 @@ class UtopiaRobot(object):
         assert('PAGE_EXPLORE' == self.parser.current_page)
         return self.parser.get_explore_info()
 
+    def explore(self, num_acres):
+        """Explore an int of acres.
+        Will load the explore page (if not already loaded)
+        """
+        log.debug("explore( %s )" % num_acres)
+        if self.parser is None or self.parser.current_page != 'PAGE_EXPLORE':
+            self._get_explore()
+        assert('PAGE_EXPLORE' == self.parser.current_page)
+        explore_form = self.parser.get_explore_form()
+
+        log.debug("explore_form['inputs']: %s" % explore_form['inputs'])
+
+        explore_form['inputs']['num_acres'] = int(num_acres)
+        log.debug("explore_form['inputs']: %s" % explore_form['inputs'])
+
+        values = {}
+        for k,v in explore_form['inputs'].items():
+                values[k] = v['value']
+
+        data = urllib.urlencode(values)
+        url = URL_BASE + self.nav_links['Explore'] + explore_form['form']['action']
+        self._get_page(url, data, self.headers, htmlparser.ExploreParser() )
+
+        #Return the result
+        return self.parser.get_explore_result()
+
 if __name__ == "__main__":
 
         parser = OptionParser()

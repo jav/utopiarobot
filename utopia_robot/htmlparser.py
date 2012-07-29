@@ -1365,3 +1365,8 @@ class ExploreParser(UtopiaParser):
     def get_explore_form(self):
         log.debug("get_explore_form(): %s", self.explore_form)
         return self.explore_form
+
+    def get_explore_results(self):
+        log.debug("get_explore_results(): NaN")
+        #not yet implemented
+        return -1
