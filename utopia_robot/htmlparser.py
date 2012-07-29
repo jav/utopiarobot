@@ -1272,11 +1272,16 @@ class ExploreParser(UtopiaParser):
         self.parser_state['ExploreParser']['table'] = False
         self.parser_state['ExploreParser']['th'] = False
         self.parser_state['ExploreParser']['td'] = False
+        self.parser_state['ExploreParser']['expl_form'] = False
+        self.parser_state['ExploreParser']['input'] = False
+        self.parser_state['ExploreParser']['inputs'] = {}
+        self.parser_state['ExploreParser']['other_inputs'] = []
 
         self.parser_state['ExploreParser']['explore_info'] = None
         self.parser_state['ExploreParser']['curr_info'] = None
 
         self.explore_info = {}
+        self.explore_form = {'form':{}, 'inputs':{}, 'other_inputs':[]}
 
     def parse(self, s):
         super(ExploreParser, self).parse(s)
@@ -1311,6 +1316,26 @@ class ExploreParser(UtopiaParser):
         super(ExploreParser, self).end_td()
         self.parser_state['ExploreParser']['td'] = False
 
+    def start_form(self, attributes):
+        super(ExploreParser, self).start_form(attributes)
+        attr = dict(attributes)
+        if 'action' in attr and "" == attr['action']:
+            self.parser_state['ExploreParser']['expl_form'] = True
+            self.explore_form['form'] = self.parser_state['ExploreParser']['expl_form'] = attr
+
+    def end_form(self):
+        super(ExploreParser, self).end_form()
+        self.parser_state['ExploreParser']['expl_form'] = False
+
+    def start_input(self, attributes):
+        super(ExploreParser, self).start_input(attributes)
+        attr = dict(attributes)
+        if self.parser_state['ExploreParser']['expl_form']:
+            if 'name' in attr:
+                self.explore_form['inputs'][attr['name']] = attr
+            else:
+                self.explore_form['other_inputs'].append(attr)
+
     def handle_data(self, data):
         super(ExploreParser, self).handle_data(data)
         if self.parser_state['ExploreParser']['explore_info']:
@@ -1336,3 +1361,7 @@ class ExploreParser(UtopiaParser):
 # csrfmiddlewaretoken:88e2dabb2a8b615561e743d05668d47d
 # num_acres:1
 # explore:Send Expedition
+
+    def get_explore_form(self):
+        log.debug("get_explore_form(): %s", self.explore_form)
+        return self.explore_form

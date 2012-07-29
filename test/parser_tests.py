@@ -452,3 +452,9 @@ class explore_parser_tests(object):
                 assert( 8080 == explore_info['available'])
                 assert(    0 == explore_info['Currently Exploring'])
                 assert(    5 == explore_info['Maximum Explorable Now'])
+
+        def test_get_form_fields(self):
+                explore_form = self.parser.get_explore_form()
+                print "explore_form:", explore_form
+                assert('88e2dabb2a8b615561e743d05668d47d' == explore_form['inputs']['csrfmiddlewaretoken']['value'])
+                assert('num_acres' in explore_form['inputs'] )
