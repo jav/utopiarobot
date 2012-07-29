@@ -521,3 +521,26 @@ class player_tests(object):
         assert((23369, 15) == info['Estimated Research Cost'])
         assert(152553 == info['Daily Income'])
         assert(2276 == info['Books to Allocate'])
+
+    @mock.patch('urllib2.urlopen')
+    @mock.patch('urllib2.Request')
+    @mock.patch.object(UtopiaRobot,'cache_page')
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_explore_info(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
+        mock_urlopen.return_value = mock_request
+        mock_request.read.return_value = open('test/explore_page.html').read()
+        mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
+
+        explore_info = self.player.get_explore_info()
+        print "Explore info: %s" % explore:info
+        assert(   50 == explore_info['Exploration Costs (Soldiers)'])
+        assert(   50 == explore_info['soldiers'])
+        assert(23264 == explore_info['Exploration Costs (Gold)'])
+        assert(23264 == explore_info['gold'])
+        assert( 8080 == explore_info['Available Uncharted Acres'])
+        assert( 8080 == explore_info['available'])
+        assert(    0 == explore_info['Currently Exploring'])
+        assert(    5 == explore_info['Maximum Explorable Now'])
+
+
