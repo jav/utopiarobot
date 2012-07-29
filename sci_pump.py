@@ -43,9 +43,6 @@ def main():
 
     log.info("Log in player (%s)...", player.username)
 
-    player.explore(1)
-    log.info("Exploring 1 acre...")
-
     mana = player.get_mana()
     available_spells = player.get_available_spells()
     log.debug("available_spells: %s" % available_spells)
