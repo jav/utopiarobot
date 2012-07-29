@@ -41,6 +41,7 @@ class UtopiaRobot(object):
         'Military': '/wol/game/train_army',
         'Growth': '/wol/game/build',
         'Sciences': '/wol/game/science',
+        'Explore': '/wol/game/explore',
         }
 
     advisor_links = {
@@ -257,6 +258,17 @@ class UtopiaRobot(object):
         self._get_page(url, data, self.headers, htmlparser.ScienceParser() )
 
         assert('PAGE_SCIENCE' == self.parser.current_page)
+
+    def _get_explore(self):
+        """Load the Explore page (internal function)"""
+        log.debug("_get_explore()")
+        log.debug("nav: %s" % self.nav_links)
+        assert(0 < len(self.nav_links['Explore']))
+        data = None
+        url = URL_BASE + self.nav_links['Explore']
+        self._get_page(url, data, self.headers, htmlparser.ExploreParser() )
+
+        assert('PAGE_EXPLORE' == self.parser.current_page)
 
     def _check_login(self):
         """Check if we're logged in or not (NOT IMPLEMENTED)"""
@@ -546,6 +558,15 @@ class UtopiaRobot(object):
         assert('PAGE_SCIENCE' == self.parser.current_page)
         return self.parser.get_science_info()
 
+    def get_explore_info(self):
+        """Get the explore_info.
+        Will load the explore page (if not already loaded)
+        """
+        log.debug("get_explore_info()")
+        if self.parser is None or self.parser.current_page != 'PAGE_EXPLORE':
+            self._get_explore()
+        assert('PAGE_EXPLORE' == self.parser.current_page)
+        return self.parser.get_explore_info()
 
 if __name__ == "__main__":
 

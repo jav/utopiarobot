@@ -533,7 +533,7 @@ class player_tests(object):
         mock_simulate_wait.return_value = True
 
         explore_info = self.player.get_explore_info()
-        print "Explore info: %s" % explore:info
+        print "Explore info: %s" % explore_info
         assert(   50 == explore_info['Exploration Costs (Soldiers)'])
         assert(   50 == explore_info['soldiers'])
         assert(23264 == explore_info['Exploration Costs (Gold)'])
@@ -542,5 +542,4 @@ class player_tests(object):
         assert( 8080 == explore_info['available'])
         assert(    0 == explore_info['Currently Exploring'])
         assert(    5 == explore_info['Maximum Explorable Now'])
-
 
