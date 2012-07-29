@@ -1332,6 +1332,8 @@ class ExploreParser(UtopiaParser):
         attr = dict(attributes)
         if self.parser_state['ExploreParser']['expl_form']:
             if 'name' in attr:
+                if 'value' not in attr:
+                    attr['value'] = ""
                 self.explore_form['inputs'][attr['name']] = attr
             else:
                 self.explore_form['other_inputs'].append(attr)
@@ -1366,7 +1368,7 @@ class ExploreParser(UtopiaParser):
         log.debug("get_explore_form(): %s", self.explore_form)
         return self.explore_form
 
-    def get_explore_results(self):
+    def get_explore_result(self):
         log.debug("get_explore_results(): NaN")
         #not yet implemented
         return -1

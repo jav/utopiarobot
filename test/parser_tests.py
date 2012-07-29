@@ -459,6 +459,6 @@ class explore_parser_tests(object):
                 assert('88e2dabb2a8b615561e743d05668d47d' == explore_form['inputs']['csrfmiddlewaretoken']['value'])
                 assert('num_acres' in explore_form['inputs'] )
 
-        def test_get_explore_results(self):
+        def test_get_explore_result(self):
                 #Not implemented
                 pass

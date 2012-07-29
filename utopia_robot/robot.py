@@ -578,14 +578,11 @@ class UtopiaRobot(object):
         assert('PAGE_EXPLORE' == self.parser.current_page)
         explore_form = self.parser.get_explore_form()
 
-        log.debug("explore_form['inputs']: %s" % explore_form['inputs'])
-
-        explore_form['inputs']['num_acres'] = int(num_acres)
-        log.debug("explore_form['inputs']: %s" % explore_form['inputs'])
-
         values = {}
+
         for k,v in explore_form['inputs'].items():
                 values[k] = v['value']
+        values['num_acres'] = int(num_acres)
 
         data = urllib.urlencode(values)
         url = URL_BASE + self.nav_links['Explore'] + explore_form['form']['action']
