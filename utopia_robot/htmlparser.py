@@ -1386,13 +1386,20 @@ class KingdomParser(UtopiaParser):
         self.parser_state['KingdomParser']['td'] = False
         self.parser_state['KingdomParser']['kd_form'] = False
         self.parser_state['KingdomParser']['kd_info'] = False
+        self.parser_state['KingdomParser']['kd_data'] = False
+        self.parser_state['KingdomParser']['kd_data_index'] = 0
+        self.parser_state['KingdomParser']['curr_prov'] = {}
         self.parser_state['KingdomParser']['curr_info'] = None
         self.parser_state['KingdomParser']['input'] = False
         self.parser_state['KingdomParser']['inputs'] = {}
         self.parser_state['KingdomParser']['other_inputs'] = []
+        self.parser_state['KingdomParser']['collected_data'] = ""
 
         self.kd_form = {'form':{}, 'inputs':{}, 'other_inputs':[]}
         self.kd_info = {}
+        self.kd_info['provinces'] = {}
+        self.kd_prov_headers = []
+
 
     def parse(self, s):
         super(KingdomParser, self).parse(s)
@@ -1405,28 +1412,64 @@ class KingdomParser(UtopiaParser):
         self.parser_state['KingdomParser']['table'] = True
         if 'class' in attr and 'two-column-stats' == attr['class']:
             self.parser_state['KingdomParser']['kd_info'] = True
-
+        elif 'class' in attr and 'tablesorter' == attr['class']:
+            self.parser_state['KingdomParser']['kd_data'] = True
 
     def end_table(self):
         super(KingdomParser, self).end_table()
         self.parser_state['KingdomParser']['table'] = False
         self.parser_state['KingdomParser']['kd_info'] = False
+        self.parser_state['KingdomParser']['kd_data'] = False
+
+    def start_tr(self, attributes):
+        super(KingdomParser, self).start_tr(attributes)
+        self.parser_state['KingdomParser']['tr'] = True
+        self.parser_state['KingdomParser']['kd_data_index'] = 0
+
+    def end_tr(self):
+        super(KingdomParser, self).end_tr()
+        self.parser_state['KingdomParser']['tr'] = False
+        curr_prov = self.parser_state['KingdomParser']['curr_prov']
+        if 0 < len(curr_prov):
+            self.kd_info['provinces'][curr_prov['Province']] = curr_prov
+            self.parser_state['KingdomParser']['curr_prov'] = {}
 
     def start_th(self, attributes):
         super(KingdomParser, self).start_th(attributes)
         self.parser_state['KingdomParser']['th'] = True
+        self.parser_state['KingdomParser']['collected_data'] = ""
 
     def end_th(self):
         super(KingdomParser, self).end_th()
         self.parser_state['KingdomParser']['th'] = False
+        if self.parser_state['KingdomParser']['kd_data']:
+            data = self.parser_state['KingdomParser']['collected_data']
+            self.kd_prov_headers.append(data.strip())
 
     def start_td(self, attributes):
         super(KingdomParser, self).start_td(attributes)
         self.parser_state['KingdomParser']['td'] = True
+        self.parser_state['KingdomParser']['collected_data'] = ""
 
     def end_td(self):
         super(KingdomParser, self).end_td()
         self.parser_state['KingdomParser']['td'] = False
+        if self.parser_state['KingdomParser']['kd_data']:
+            data = self.parser_state['KingdomParser']['collected_data'].strip()
+            index = self.parser_state['KingdomParser']['kd_data_index']
+            header = self.kd_prov_headers[index]
+            if 'Province' == header:
+                self.parser_state['KingdomParser']['curr_prov']['online'] = True if '*' in data else False
+                self.parser_state['KingdomParser']['curr_prov']['protected'] = True if '^' in data else False
+                self.parser_state['KingdomParser']['curr_prov']['monarch'] = True if '(M)' in data else False
+
+            data = data.replace('^','').replace('*','').replace('(M)','').replace('gc','').replace('acres','').replace(',','')
+            if '-' == data or header not in ['Slot', 'Land', 'Net Worth', 'Net Worth/Acre']:
+                self.parser_state['KingdomParser']['curr_prov'][header] = data.strip()
+            else:
+                self.parser_state['KingdomParser']['curr_prov'][header] = int(data.strip())
+
+            self.parser_state['KingdomParser']['kd_data_index'] += 1
 
     def start_form(self, attributes):
         super(KingdomParser, self).start_form(attributes)
@@ -1445,6 +1488,8 @@ class KingdomParser(UtopiaParser):
 
     def handle_data(self, data):
         super(KingdomParser, self).handle_data(data)
+        if self.parser_state['KingdomParser']['kd_data']:
+            self.parser_state['KingdomParser']['collected_data'] += data
         if self.parser_state['KingdomParser']['kd_info']:
             if self.parser_state['KingdomParser']['th']:
                 if self.parser_state['KingdomParser']['curr_info'] is None:
