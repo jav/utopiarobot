@@ -225,6 +225,8 @@ class UtopiaParser(sgmllib.SGMLParser, object):
                     self.current_page="PAGE_SCIENCE"
                 if "Explore Page" in self.title:
                     self.current_page="PAGE_EXPLORE"
+                if "Kingdom Details" in self.title:
+                    self.current_page="PAGE_KINGDOM"
                 log.debug("DETECTED PAGE: %s" % self.current_page)
         if 'h2' in self.parser_state and self.parser_state['h2']:
             if 'The game is currently ticking. Please wait a few moments' in  data:
@@ -1372,3 +1374,110 @@ class ExploreParser(UtopiaParser):
         log.debug("get_explore_results(): NaN")
         #not yet implemented
         return -1
+
+class KingdomParser(UtopiaParser):
+    def __init__(self, verbose=0):
+        super(KingdomParser, self).__init__(verbose)
+        self.last_page="PAGE_NONE"
+
+        self.parser_state['KingdomParser'] = {}
+        self.parser_state['KingdomParser']['table'] = False
+        self.parser_state['KingdomParser']['th'] = False
+        self.parser_state['KingdomParser']['td'] = False
+        self.parser_state['KingdomParser']['kd_form'] = False
+        self.parser_state['KingdomParser']['kd_info'] = False
+        self.parser_state['KingdomParser']['curr_info'] = None
+        self.parser_state['KingdomParser']['input'] = False
+        self.parser_state['KingdomParser']['inputs'] = {}
+        self.parser_state['KingdomParser']['other_inputs'] = []
+
+        self.kd_form = {'form':{}, 'inputs':{}, 'other_inputs':[]}
+        self.kd_info = {}
+
+    def parse(self, s):
+        super(KingdomParser, self).parse(s)
+        self.feed(s)
+        self.close()
+
+    def start_table(self, attributes):
+        super(KingdomParser, self).start_table(attributes)
+        attr = dict(attributes)
+        self.parser_state['KingdomParser']['table'] = True
+        if 'class' in attr and 'two-column-stats' == attr['class']:
+            self.parser_state['KingdomParser']['kd_info'] = True
+
+
+    def end_table(self):
+        super(KingdomParser, self).end_table()
+        self.parser_state['KingdomParser']['table'] = False
+        self.parser_state['KingdomParser']['kd_info'] = False
+
+    def start_th(self, attributes):
+        super(KingdomParser, self).start_th(attributes)
+        self.parser_state['KingdomParser']['th'] = True
+
+    def end_th(self):
+        super(KingdomParser, self).end_th()
+        self.parser_state['KingdomParser']['th'] = False
+
+    def start_td(self, attributes):
+        super(KingdomParser, self).start_td(attributes)
+        self.parser_state['KingdomParser']['td'] = True
+
+    def end_td(self):
+        super(KingdomParser, self).end_td()
+        self.parser_state['KingdomParser']['td'] = False
+
+    def start_form(self, attributes):
+        super(KingdomParser, self).start_form(attributes)
+        attr = dict(attributes)
+        if 'class' in attr and "change-kingdom" == attr['class']:
+            self.parser_state['KingdomParser']['kd_form'] = True
+            self.kd_form['form'] = self.parser_state['KingdomParser']['kd_form'] = attr
+
+    def end_form(self):
+        super(KingdomParser, self).end_form()
+        self.parser_state['KingdomParser']['kd_form'] = False
+
+    def start_input(self, attributes):
+        super(KingdomParser, self).start_input(attributes)
+        attr = dict(attributes)
+
+    def handle_data(self, data):
+        super(KingdomParser, self).handle_data(data)
+        if self.parser_state['KingdomParser']['kd_info']:
+            if self.parser_state['KingdomParser']['th']:
+                if self.parser_state['KingdomParser']['curr_info'] is None:
+                    self.parser_state['KingdomParser']['curr_info'] = data
+                else:
+                    self.parser_state['KingdomParser']['curr_info'] += data
+            if self.parser_state['KingdomParser']['td']:
+                name = self.parser_state['KingdomParser']['curr_info']
+                if name in ['Stance', 'Their Attitude To Us', 'Our Attitude To Them']:
+                    self.kd_info[name] = data.strip().lower()
+                elif 'Wars Won / Concluded Wars' == name:
+                    (won,_,concluded) = data.partition('/')
+                    self.kd_info['Wars Won'] = int(won.strip())
+                    self.kd_info['Concluded Wars'] = int(concluded.strip())
+                elif name in ['Total Land', 'Total Networth']:
+                    total_str = name
+                    avg_str = name.replace('Total', 'Average')
+                    data = data.replace('gc','').replace(',','').replace('acres','').replace('avg:','')
+                    (total,_,avg) = data.partition("(")
+                    self.kd_info[total_str] = int(total.strip())
+                    avg = avg.replace(')','')
+                    self.kd_info[avg_str] = int(avg.strip())
+                elif 'Total Provinces' == name:
+                    self.kd_info[name] = int(data.strip())
+                elif 'Average Opponent Relative Size' == name:
+                    self.kd_info[name] = int(data.replace('%','').strip())
+
+                self.parser_state['KingdomParser']['curr_info'] = None
+
+    def get_kd_form(self):
+        log.debug("get_kd_form(): %s", self.kd_form)
+        return self.kd_form
+
+    def get_kd_info(self):
+        log.debug("get_kd_info(): %s", self.kd_info)
+        return self.kd_info
