@@ -25,6 +25,7 @@ class player_tests(object):
         assert(78481 == resources['Food'])
         assert(13244 == resources['Runes'])
         assert(213924 == resources['Net Worth'])
+        assert(1398 == resources['Land'])
         assert(153.021 == resources['Net Worth/Acre'])
 
     @mock.patch('urllib2.urlopen')
