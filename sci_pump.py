@@ -107,7 +107,7 @@ def main():
         resources = player.get_resources()
         leet_count = resources['Money'] / 500
 
-        while 1 > leet_count and player.get_mana >= 20:
+        while 1 > leet_count and player.get_mana() >= 20:
             player.cast_spell("Tree of Gold")
             available_spells = player.get_available_spells()
             resources = player.get_resources()
