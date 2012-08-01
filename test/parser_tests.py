@@ -462,3 +462,51 @@ class explore_parser_tests(object):
         def test_get_explore_result(self):
                 #Not implemented
                 pass
+
+class kingdom_parser_tests(object):
+        def setup(self):
+                self.parser = htmlparser.KingdomParser()
+                in_file = "test/kingdom_page.html"
+                try:
+                        with open(in_file) as page:
+                                self.parser.parse(page.read())
+                except IOError as e:
+                        print "CANNOT OPEN FILE %s. For this test to work, you need a copy of the tested page at %s" % (in_file, in_file)
+
+        def test_page_enum(self):
+                print self.parser.current_page
+                assert("PAGE_KINGDOM" == self.parser.current_page)
+
+        def test_get_kd_info(self):
+                kd = self.parser.get_kd_info()
+                print "kd:", kd
+                assert(20 == kd['Total Provinces'])
+                assert('normal' == kd['Stance'])
+                assert(3077180 == kd['Total Networth'])
+                assert(153859 == kd['Average Networth'])
+                assert(0 == kd['Wars Won'])
+                assert(2 == kd['Concluded Wars'])
+                assert(18629 == kd['Total Land'])
+                assert(103 == kd['Average Opponent Relative Size'])
+                assert('normal' == kd['Their Attitude To Us'])
+                assert('normal' == kd['Our Attitude To Them'])
+
+                assert(True == kd['provinces']['house 1']['protected'])
+                assert(False == kd['provinces']['house 1']['online'])
+                assert(False == kd['provinces']['house 1']['monarch'])
+                assert(1 == kd['provinces']['house 1']['Slot'])
+                assert('house 1' == kd['provinces']['house 1']['Province'])
+                assert('Avian' == kd['provinces']['house 1']['Race'])
+                assert(354 == kd['provinces']['house 1']['Land'])
+                assert(19272 == kd['provinces']['house 1']['Net Worth'])
+                assert(54== kd['provinces']['house 1']['Net Worth/Acre'])
+                assert('Lord' == kd['provinces']['house 1']['Nobility'])
+
+                assert(True == kd['provinces']['house 1']['protected'])
+                assert(1 == kd['provinces']['house 1']['Slot'])
+                assert('house 1' == kd['provinces']['house 1']['Province'])
+                assert('Avian' == kd['provinces']['house 1']['Race'])
+                assert(354 == kd['provinces']['house 1']['Land'])
+                assert(19272 == kd['provinces']['house 1']['Net Worth'])
+                assert(54== kd['provinces']['house 1']['Net Worth/Acre'])
+                assert('Lord' == kd['provinces']['house 1']['Nobility'])
