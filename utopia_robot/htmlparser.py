@@ -1485,9 +1485,21 @@ class KingdomParser(UtopiaParser):
     def start_input(self, attributes):
         super(KingdomParser, self).start_input(attributes)
         attr = dict(attributes)
+        self.parser_state['KingdomParser']['input'] = True
+        self.parser_state['KingdomParser']['curr_input'] = attr
+
+    def end_input(self):
+        super(KingdomParser, self).end_input()
+        self.parser_state['KingdomParser']['input'] = False
 
     def handle_data(self, data):
         super(KingdomParser, self).handle_data(data)
+        if self.parser_state['KingdomParser']['input']:
+            curr_input = self.parser_state['KingdomParser']['curr_input']
+            if 'name' in curr_input:
+                self.kd_form['inputs'][curr_input['name']] = curr_input
+            else:
+                self.kd_form['other_inputs'].append(curr_input)
         if self.parser_state['KingdomParser']['kd_data']:
             self.parser_state['KingdomParser']['collected_data'] += data
         if self.parser_state['KingdomParser']['kd_info']:
@@ -1525,4 +1537,5 @@ class KingdomParser(UtopiaParser):
 
     def get_kd_info(self):
         log.debug("get_kd_info(): %s", self.kd_info)
+        self.kd_info.update({'kd': int(self.kd_form['inputs']['kingdom']['value']), 'island': int(self.kd_form['inputs']['island']['value'])})
         return self.kd_info

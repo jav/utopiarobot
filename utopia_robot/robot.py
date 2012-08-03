@@ -42,6 +42,7 @@ class UtopiaRobot(object):
         'Growth': '/wol/game/build',
         'Sciences': '/wol/game/science',
         'Explore': '/wol/game/explore',
+        'Kingdom': '/wol/game/kingdom_details',
         }
 
     advisor_links = {
@@ -590,6 +591,19 @@ class UtopiaRobot(object):
 
         #Return the result
         return self.parser.get_explore_result()
+
+    def get_kd_info(self, kd, island):
+        """Fetch a kd-page
+        Will always load the kingdom page
+        """
+        log.debug("kd_info( %d:%d )" % (kd, island))
+
+        data = None
+        url = URL_BASE + self.nav_links['Kingdom'] + "/%d/%d"%(kd,island)
+        self._get_page(url, data, self.headers, htmlparser.KingdomParser() )
+
+        #Return the result
+        return self.parser.get_kd_info()
 
 if __name__ == "__main__":
 

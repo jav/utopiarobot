@@ -544,3 +544,48 @@ class player_tests(object):
         assert(    0 == explore_info['Currently Exploring'])
         assert(    5 == explore_info['Maximum Explorable Now'])
 
+    @mock.patch('urllib2.urlopen')
+    @mock.patch('urllib2.Request')
+    @mock.patch.object(UtopiaRobot,'cache_page')
+    @mock.patch.object(UtopiaRobot,'_simulate_wait')
+    def test_kingdom_info(self, mock_simulate_wait, mock_cache_page, mock_request, mock_urlopen):
+        mock_urlopen.return_value = mock_request
+        mock_request.read.return_value = open('test/kingdom_page.html').read()
+        mock_cache_page.return_value = True
+        mock_simulate_wait.return_value = True
+
+        kd = self.player.get_kd_info(1,17)
+        print "kd: %s" % kd
+
+        assert(1 == kd['kd'])
+        assert(17 == kd['island'])
+        assert(20 == kd['Total Provinces'])
+        assert('normal' == kd['Stance'])
+        assert(3077180 == kd['Total Networth'])
+        assert(153859 == kd['Average Networth'])
+        assert(0 == kd['Wars Won'])
+        assert(2 == kd['Concluded Wars'])
+        assert(18629 == kd['Total Land'])
+        assert(103 == kd['Average Opponent Relative Size'])
+        assert('normal' == kd['Their Attitude To Us'])
+        assert('normal' == kd['Our Attitude To Them'])
+
+        assert(True == kd['provinces']['house 1']['protected'])
+        assert(False == kd['provinces']['house 1']['online'])
+        assert(False == kd['provinces']['house 1']['monarch'])
+        assert(1 == kd['provinces']['house 1']['Slot'])
+        assert('house 1' == kd['provinces']['house 1']['Province'])
+        assert('Avian' == kd['provinces']['house 1']['Race'])
+        assert(354 == kd['provinces']['house 1']['Land'])
+        assert(19272 == kd['provinces']['house 1']['Net Worth'])
+        assert(54== kd['provinces']['house 1']['Net Worth/Acre'])
+        assert('Lord' == kd['provinces']['house 1']['Nobility'])
+
+        assert(True == kd['provinces']['house 1']['protected'])
+        assert(1 == kd['provinces']['house 1']['Slot'])
+        assert('house 1' == kd['provinces']['house 1']['Province'])
+        assert('Avian' == kd['provinces']['house 1']['Race'])
+        assert(354 == kd['provinces']['house 1']['Land'])
+        assert(19272 == kd['provinces']['house 1']['Net Worth'])
+        assert(54== kd['provinces']['house 1']['Net Worth/Acre'])
+        assert('Lord' == kd['provinces']['house 1']['Nobility'])

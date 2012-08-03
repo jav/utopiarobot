@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import json
 import logging
 from optparse import OptionParser
 import random
@@ -42,6 +43,16 @@ def main():
     log.info("set password = %s (masked)" % "".join(["*" for c in player.password]))
 
     log.info("Log in player (%s)...", player.username)
+
+    log.info("Get three random kds")
+    for _ in range(3):
+        kd = random.randrange(1,10)
+        island = random.randint(1,40)
+        log.info("Fetching kd:%d, island:%d" % (kd, island))
+        kd_info = player.get_kd_info(kd,island)
+
+        with open("%d-%d.txt"%(kd,island),'w') as f:
+            f.write(json.dumps(kd_info))
 
     mana = player.get_mana()
     available_spells = player.get_available_spells()
@@ -102,12 +113,20 @@ def main():
             resources = player.get_resources()
     log.info("Cast Fontain of Knowledge: Done")
 
+    counter = 0
     resources = player.get_resources()
     while 20 < player.get_mana() and player.get_soldiers() > 0:
+        counter +=1
+        if counter > 7:
+            break
         resources = player.get_resources()
         leet_count = resources['Money'] / 500
 
-        while 1 > leet_count and player.get_mana() >= 20:
+        while 1 > leet_count and player.get_mana() >= 20 and player.get_soldiers() > 0:
+            counter += 1
+            if counter > 7:
+                break
+
             player.cast_spell("Tree of Gold")
             available_spells = player.get_available_spells()
             resources = player.get_resources()
