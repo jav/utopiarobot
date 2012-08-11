@@ -1394,6 +1394,7 @@ class KingdomParser(UtopiaParser):
         self.parser_state['KingdomParser']['inputs'] = {}
         self.parser_state['KingdomParser']['other_inputs'] = []
         self.parser_state['KingdomParser']['collected_data'] = ""
+        self.parser_state['KingdomParser']['kingdom-label'] = False
 
         self.kd_form = {'form':{}, 'inputs':{}, 'other_inputs':[]}
         self.kd_info = {}
@@ -1436,8 +1437,11 @@ class KingdomParser(UtopiaParser):
 
     def start_th(self, attributes):
         super(KingdomParser, self).start_th(attributes)
+        attr = dict(attributes)
         self.parser_state['KingdomParser']['th'] = True
         self.parser_state['KingdomParser']['collected_data'] = ""
+        if 'class' in attr and 'kingdom-label' == attr['class']:
+            self.parser_state['KingdomParser']['kingdom-label'] = True
 
     def end_th(self):
         super(KingdomParser, self).end_th()
@@ -1445,6 +1449,11 @@ class KingdomParser(UtopiaParser):
         if self.parser_state['KingdomParser']['kd_data']:
             data = self.parser_state['KingdomParser']['collected_data']
             self.kd_prov_headers.append(data.strip())
+        if self.parser_state['KingdomParser']['kingdom-label']:
+            data = self.parser_state['KingdomParser']['collected_data']
+            data = data[:data.index("(")]
+            self.kd_info['Name'] = data.strip()
+        self.parser_state['KingdomParser']['kingdom-label'] = False
 
     def start_td(self, attributes):
         super(KingdomParser, self).start_td(attributes)
@@ -1494,6 +1503,8 @@ class KingdomParser(UtopiaParser):
 
     def handle_data(self, data):
         super(KingdomParser, self).handle_data(data)
+        if self.parser_state['KingdomParser']['kingdom-label']:
+            self.parser_state['KingdomParser']['collected_data'] += data
         if self.parser_state['KingdomParser']['input']:
             curr_input = self.parser_state['KingdomParser']['curr_input']
             if 'name' in curr_input:

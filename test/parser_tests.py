@@ -480,6 +480,7 @@ class kingdom_parser_tests(object):
         def test_get_kd_info(self):
                 kd = self.parser.get_kd_info()
                 print "kd:", kd
+                assert('nothing to see here' == kd['Name'])
                 assert(1 == kd['kd'])
                 assert(17 == kd['island'])
                 assert(20 == kd['Total Provinces'])
