@@ -48,26 +48,34 @@ def main():
 
     available_spells = player.get_available_spells()
     log.debug("available_spells: %s" % available_spells)
-    spells = player.get_active_spells()
+    active_spells = player.get_active_spells()
     resources = player.get_resources()
 
-    if 'Patriotism' in available_spells:
-        if 'Patriotism' not in spells:
-            spells['Patriotism'] = 0
-        while spells['Patriotism'] <= 1 and  resources['Runes'] > available_spells['Patriotism'][1] and 20 < player.get_mana():
-            if player.cast_spell('Patriotism') is not None:
-                log.info("Cast Patriotism: Success")
-                break
-            log.info("Cast Patriotism: Failed")
+    def ensure_spells_are_cast(spells, active_spells):
+        log.debug("ensure_spells_are_cast: {0}".format(spells))
+        for spell in spells:
+            log.info("Trying to cast {0}.".format(spell))
+            if spell in available_spells:
+                if spell not in active_spells:
+                    active_spells[spell] = 0
+                while active_spells[spell] <= 1 and  resources['Runes'] > available_spells[spell][1] and 20 < player.get_mana():
+                    if player.cast_spell(spell) is not None:
+                        log.info("Cast {0}: Success".format(spell))
+                        break
+                    log.info("Cast {0}: Failed".format(spell))
+                    resources = player.get_resources()
+
+            log.info("Cast {0}: Done".format(spell))
             resources = player.get_resources()
 
-    log.info("Cast Patriotism: Done")
-    resources = player.get_resources()
+
+    spells = ['Minor Protection', 'Patriotism', 'Inspire Army']
+    ensure_spells_are_cast(spells, active_spells)
 
     if 'Fertile Lands' in available_spells:
-        if 'Fertile Lands' not in spells:
-            spells['Fertile Lands'] = 0
-        while spells['Fertile Lands'] <= 1 and resources['Food'] < 20000 and resources['Runes'] > available_spells['Fertile Lands'][1] and 20 < player.get_mana():
+        if 'Fertile Lands' not in active_spells:
+            active_spells['Fertile Lands'] = 0
+        while active_spells['Fertile Lands'] <= 1 and resources['Food'] < 20000 and resources['Runes'] > available_spells['Fertile Lands'][1] and 20 < player.get_mana():
             if player.cast_spell('Fertile Lands') is not None:
                 log.info("Cast Fertile Lands: Success")
                 break
@@ -77,18 +85,28 @@ def main():
     log.info("Cast Fertile Lands: Done")
     resources = player.get_resources()
 
-    if 'Love and Peace' in available_spells:
-        if 'Love and Peace' not in spells:
-            spells['Love and Peace'] = 0
-        while spells['Love and Peace'] <= 1 and resources['Runes'] > available_spells['Love and Peace'][1] and 20 < player.get_mana():
-            if player.cast_spell('Love and Peace') is not None:
-                log.info("Cast Love and Peace: Success")
-                break
-            log.info("Cast Love and Peace: Failed")
-            resources = player.get_resources()
-
-    log.info("Cast Love and Peace: Done")
+    counter = 0
     resources = player.get_resources()
+    troops_home = player.get_troops()
+    thief_tot = troops_home['thief']['home'] + troops_home['thief']['training']
+    thief_target = resources['Land'] * 0.8
+    if thief_target > thief_tot:
+        player.train_military({'thief': thief_target-thief_tot})
+
+    resources = player.get_resources()
+    while resources['Money'] > 250 and player.get_soldiers() > 0:
+        counter +=1
+        if counter > 4:
+            break
+        spec_count = min(player.get_soldiers(), resources['Money'] / 250)
+
+        troops={'d-spec': 2*(spec_count/5), 'o-spec': 3*(spec_count/5)}
+
+        trained_troops = player.train_military(troops)
+
+        log.info("train_military(%s): %s" % (troops, trained_troops))
+
+
 
     # SCIENCE!!!
     available_books = player.get_science_info()['Books to Allocate']
@@ -96,7 +114,7 @@ def main():
         buy_sci = {
             "Alchemy": int(round(available_books/4)),
             "Tools": int(round(available_books/4)),
-            "Housing": int(round(available_books/4),
+            "Housing": int(round(available_books/4)),
             "Food": int(round(available_books/16)),
             "Military": int(round(available_books/16)),
             "Crime": int(round(available_books/16)),
