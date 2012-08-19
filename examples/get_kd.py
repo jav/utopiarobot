@@ -5,6 +5,7 @@ import logging
 from optparse import OptionParser
 import random
 import sys
+import time
 import urllib
 import urllib2
 
@@ -48,23 +49,29 @@ def main():
 
     log.info("Get five random kds")
 
-    for _ in range(5):
-        kd = random.randint(1,10)
-        island = random.randint(1,40)
-        log.info("Fetching kd:%d, island:%d" % (kd, island))
-        kd_info = player.get_kd_info(kd,island)
-        kd_json = json.dumps(kd_info).replace("'",'"')
 
-        with open("%d-%d.txt"%(kd,island),'w') as f:
-            f.write(kd_json)
-        # post to db
-        values={"textarea": kd_json}
-        data = urllib.urlencode(values)
-        headers={}
-        log.debug("Posting %s to 127.0.0.1.", kd_json)
-        req = urllib2.Request("http://127.0.0.1:5001/post_kd/", data, headers)
-        urllib2.urlopen(req)
-        time.sleep(random.randint(4,10))
+    islandlist=[]
+    island=random.randint(0,41)
+    for _ in range(1,10):
+        log.info(islandlist)
+        while island in islandlist:
+            island = random.randint(1,41)
+        islandlist.append(island)
+        for kd in range(1,10):
+            log.info("Fetching kd:%d, island:%d" % (kd, island))
+            kd_info = player.get_kd_info(kd,island)
+            kd_json = json.dumps(kd_info).replace("'",'"')
+
+            with open("%d-%d.txt"%(kd,island),'w') as f:
+                f.write(kd_json)
+            # post to db
+            values={"textarea": kd_json}
+            data = urllib.urlencode(values)
+            headers={}
+            log.debug("Posting %s to 127.0.0.1.", kd_json)
+            req = urllib2.Request("http://127.0.0.1:5006/post_kd/", data, headers)
+            urllib2.urlopen(req)
+            time.sleep(random.randint(4,10))
 
     print "DONE"
 
