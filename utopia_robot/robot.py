@@ -399,7 +399,7 @@ class UtopiaRobot(object):
         return self.parser.get_draft_rate()
 
 
-    def train_military(self, troops_dict):
+    def train_military(self, troops_dict, draft_rate=None):
         """Trains a set of troops.
         Input is expected as a dict with the following structure
         {
@@ -431,7 +431,7 @@ class UtopiaRobot(object):
             if 'value' in v:
                 values[k] = v['value']
 
-        values['draft_rate'] = self.parser.get_draft_rate()[1]
+        values['draft_rate'] = draft_rate if draft_rate is not None else self.parser.get_draft_rate()[1]
         log.debug("values: %s" % values)
 
         data = urllib.urlencode(values)

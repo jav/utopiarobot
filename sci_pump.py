@@ -5,6 +5,8 @@ import logging
 from optparse import OptionParser
 import random
 import sys
+import urllib
+import urllib2
 
 from utopia_robot.robot import UtopiaRobot
 
@@ -44,15 +46,21 @@ def main():
 
     log.info("Log in player (%s)...", player.username)
 
-    log.info("Get three random kds")
-    for _ in range(3):
-        kd = random.randrange(1,10)
+    log.info("Get five random kds")
+    for _ in range(5):
+        kd = random.randint(1,10)
         island = random.randint(1,40)
         log.info("Fetching kd:%d, island:%d" % (kd, island))
         kd_info = player.get_kd_info(kd,island)
+        kd_json = json.dumps(kd_info).replace("'",'"')
 
         with open("%d-%d.txt"%(kd,island),'w') as f:
-            f.write(json.dumps(kd_info))
+            f.write(kd_json)
+        # post to db
+        values={"textarea": kd_json}
+        data = urllib.urlencode(values)
+        headers={}
+        req = urllib2.Request("127.0.0.1:5001/post_kd/", data, headers)
 
     mana = player.get_mana()
     available_spells = player.get_available_spells()

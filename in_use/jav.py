@@ -51,8 +51,9 @@ def main():
     active_spells = player.get_active_spells()
     resources = player.get_resources()
 
-    def ensure_spells_are_cast(spells, active_spells):
+    def ensure_spells_are_cast(spells, active_spells, player):
         log.debug("ensure_spells_are_cast: {0}".format(spells))
+        resources = player.get_resources()
         for spell in spells:
             log.info("Trying to cast {0}.".format(spell))
             if spell in available_spells:
@@ -70,7 +71,7 @@ def main():
 
 
     spells = ['Minor Protection', 'Patriotism', 'Inspire Army']
-    ensure_spells_are_cast(spells, active_spells)
+    ensure_spells_are_cast(spells, active_spells, player)
 
     if 'Fertile Lands' in available_spells:
         if 'Fertile Lands' not in active_spells:
@@ -89,7 +90,7 @@ def main():
     resources = player.get_resources()
     troops_home = player.get_troops()
     thief_tot = troops_home['thief']['home'] + troops_home['thief']['training']
-    thief_target = resources['Land'] * 0.8
+    thief_target = resources['Land'] * 1.1
     if thief_target > thief_tot:
         player.train_military({'thief': thief_target-thief_tot})
 
@@ -100,7 +101,7 @@ def main():
             break
         spec_count = min(player.get_soldiers(), resources['Money'] / 250)
 
-        troops={'d-spec': 2*(spec_count/5), 'o-spec': 3*(spec_count/5)}
+        troops={'d-spec': (spec_count/2), 'o-spec': (spec_count/2)}
 
         trained_troops = player.train_military(troops)
 
