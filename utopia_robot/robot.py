@@ -537,7 +537,10 @@ class UtopiaRobot(object):
             if 'name' in v and 'csrfmiddlewaretoken' == v['name']:
                 values[k] = v['value']
             elif 'value' in v:
-                values[k] = int(v['value'])
+                try:
+                    values[k] = int(v['value'])
+                except Exception as ex:
+                    log.error("Exception: %s, value: %s" % (ex, v['value']))
 
         values['learn_rate'] = self.parser.get_learn_rate()[1]
         log.debug("values: %s" % values)
