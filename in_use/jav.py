@@ -5,6 +5,7 @@ import logging
 from optparse import OptionParser
 import random
 import sys
+import time
 import urllib
 import urllib2
 
@@ -70,7 +71,7 @@ def main():
             resources = player.get_resources()
 
 
-    spells = ['Minor Protection', 'Patriotism', 'Inspire Army']
+    spells = ['Minor Protection', 'Patriotism' ]
     ensure_spells_are_cast(spells, active_spells, player)
 
     if 'Fertile Lands' in available_spells:
@@ -90,18 +91,18 @@ def main():
     resources = player.get_resources()
     troops_home = player.get_troops()
     thief_tot = troops_home['thief']['home'] + troops_home['thief']['training']
-    thief_target = resources['Land'] * 1.1
+    thief_target = resources['Land'] * 2
     if thief_target > thief_tot:
         player.train_military({'thief': thief_target-thief_tot})
 
     resources = player.get_resources()
-    while resources['Money'] > 250 and player.get_soldiers() > 0:
+    while resources['Money'] > 500 and player.get_soldiers() > 0:
         counter +=1
         if counter > 4:
             break
-        spec_count = min(player.get_soldiers(), resources['Money'] / 250)
+        spec_count = min(player.get_soldiers(), resources['Money'] / 500)
 
-        troops={'d-spec': (spec_count/2), 'o-spec': (spec_count/2)}
+        troops={'elite': (spec_count) }
 
         trained_troops = player.train_military(troops)
 
@@ -113,13 +114,13 @@ def main():
     available_books = player.get_science_info()['Books to Allocate']
     if 3 < available_books:
         buy_sci = {
-            #"Alchemy": int(round(available_books/3)),
-            #"Tools": int(round(available_books/3)),
-            #"Housing": int(round(available_books/3)),
-            "Food": int(round(available_books/2)),
-            #"Military": int(round(available_books/16)),
-            #"Crime": int(round(available_books/16)),
-            "Channeling": int(round(available_books/2)),
+            "Alchemy": int(round(available_books/2)),
+            "Tools": int(round(available_books/3)),
+            "Housing": int(round(available_books/3)),
+            #"Food": int(round(available_books/2)),
+            "Military": int(round(available_books/3/2)),
+            "Crime": int(round(available_books/3/2)),
+            #"Channeling": int(round(available_books/2)),
             }
         result = player.buy_science(buy_sci)
         info_msg="Bought science: %s"%result
@@ -128,6 +129,45 @@ def main():
     log.info("Buying science DONE: %s", info_msg)
 
     print "DONE"
+
+    # Dice cost *2 gives enough margin to cast all spels next cycle.
+    # So, if we have dice cost *3, spend one dice
+    if 'Paradise' in available_spells:
+        while resources['Runes'] > available_spells['Paradise'][1]*3 and 20 < player.get_mana():
+            if player.cast_spell('Paradise') is not None:
+                log.info("Cast Paradise: Success")
+                break
+            log.info("Cast Paradise: Failed")
+            resources = player.get_resources()
+
+    log.info("Cast Paradise: Done")
+
+    #everything is looking good.
+    # Lets fetch a few KDs and we 'target search'
+
+    islandlist=[]
+    island=random.randint(0,41)
+    iterations = random.randint(3,10)
+    for _ in range(iterations+1):
+        log.info("Islandlist: %s" % islandlist)
+        while island in islandlist:
+            island = random.randint(1,41)
+        islandlist.append(island)
+        for kd in range(1,10):
+            log.info("Fetching kd:%d, island:%d" % (kd, island))
+            kd_info = player.get_kd_info(kd,island)
+            kd_json = json.dumps(kd_info).replace("'",'"')
+
+            with open("%d-%d.txt"%(kd,island),'w') as f:
+                f.write(kd_json)
+            # post to db
+            values={"textarea": kd_json}
+            data = urllib.urlencode(values)
+            headers={}
+            log.debug("Posting %s to 127.0.0.1.", kd_json)
+            req = urllib2.Request("http://127.0.0.1:5006/post_kd/", data, headers)
+            urllib2.urlopen(req)
+            time.sleep(random.randint(4,10))
 
 if __name__ == "__main__":
     main()
