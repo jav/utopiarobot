@@ -71,8 +71,17 @@ def main():
             resources = player.get_resources()
 
 
-    spells = ['Minor Protection', 'Patriotism' ]
+    spells = ['Minor Protection']
     ensure_spells_are_cast(spells, active_spells, player)
+
+    if "Nature's Blessing" in available_spells:
+        while player.get_plague() and resources['Runes'] > available_spells["Nature's Blessing"][1] and 15 < player.get_mana():
+            if player.cast_spell("Nature's Blessing") is not None:
+                log.info("Cast Fertile Lands: Success")
+                break
+            log.info("Cast Fertile Lands: Failed")
+            resources = player.get_resources()
+
 
     if 'Fertile Lands' in available_spells:
         if 'Fertile Lands' not in active_spells:
@@ -115,11 +124,11 @@ def main():
     if 3 < available_books:
         buy_sci = {
             "Alchemy": int(round(available_books/2)),
-            "Tools": int(round(available_books/3)),
-            "Housing": int(round(available_books/3)),
+            #"Tools": int(round(available_books/2/3)),
+            "Housing": int(round(available_books/2)),
             #"Food": int(round(available_books/2)),
-            "Military": int(round(available_books/3/2)),
-            "Crime": int(round(available_books/3/2)),
+            #"Military": int(round(available_books/2/3/2)),
+            #"Crime": int(round(available_books/2/3)),
             #"Channeling": int(round(available_books/2)),
             }
         result = player.buy_science(buy_sci)
