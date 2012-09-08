@@ -71,7 +71,7 @@ def main():
             resources = player.get_resources()
 
 
-    spells = ['Minor Protection']
+    spells = ['Minor Protection', 'Fertile Lands', 'Love and Peace', "Patriotism"]
     ensure_spells_are_cast(spells, active_spells, player)
 
     if "Nature's Blessing" in available_spells:
@@ -96,26 +96,26 @@ def main():
     log.info("Cast Fertile Lands: Done")
     resources = player.get_resources()
 
-    counter = 0
-    resources = player.get_resources()
-    troops_home = player.get_troops()
-    thief_tot = troops_home['thief']['home'] + troops_home['thief']['training']
-    thief_target = resources['Land'] * 2
-    if thief_target > thief_tot:
-        player.train_military({'thief': thief_target-thief_tot})
+#    counter = 0
+#    resources = player.get_resources()
+#    troops_home = player.get_troops()
+    # thief_tot = troops_home['thief']['home'] + troops_home['thief']['training']
+    # thief_target = resources['Land'] * 2
+    # if thief_target > thief_tot:
+    #     player.train_military({'thief': thief_target-thief_tot})
 
-    resources = player.get_resources()
-    while resources['Money'] > 500 and player.get_soldiers() > 0:
-        counter +=1
-        if counter > 4:
-            break
-        spec_count = min(player.get_soldiers(), resources['Money'] / 500)
+    # resources = player.get_resources()
+    # while resources['Money'] > 500 and player.get_soldiers() > 0:
+    #     counter +=1
+    #     if counter > 4:
+    #         break
+    #     spec_count = min(player.get_soldiers(), resources['Money'] / 500)
 
-        troops={'elite': (spec_count) }
+    #     troops={'elite': (spec_count) }
 
-        trained_troops = player.train_military(troops)
+    #     trained_troops = player.train_military(troops)
 
-        log.info("train_military(%s): %s" % (troops, trained_troops))
+    #     log.info("train_military(%s): %s" % (troops, trained_troops))
 
 
 
@@ -123,13 +123,13 @@ def main():
     available_books = player.get_science_info()['Books to Allocate']
     if 3 < available_books:
         buy_sci = {
-            "Alchemy": int(round(available_books/2)),
-            #"Tools": int(round(available_books/2/3)),
-            "Housing": int(round(available_books/2)),
-            #"Food": int(round(available_books/2)),
-            #"Military": int(round(available_books/2/3/2)),
-            #"Crime": int(round(available_books/2/3)),
-            #"Channeling": int(round(available_books/2)),
+	    "Alchemy": int(round(available_books)),
+            #"Tools": int(round(available_books/7)),
+            #"Housing": int(round(available_books/7)),
+            #"Food": int(round(available_books/7)),
+            #"Military": int(round(available_books/7)),
+            #"Crime": int(round(available_books/7)),
+            #"Channeling": int(round(available_books/7)),
             }
         result = player.buy_science(buy_sci)
         info_msg="Bought science: %s"%result
